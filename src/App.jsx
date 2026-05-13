@@ -1643,3 +1643,23 @@ async function insertPayoutDirect(payload) {
   const rows = text ? JSON.parse(text) : [];
   return Array.isArray(rows) ? rows[0] : rows;
 }
+
+
+async function getSupabaseAuthHeaders() {
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+  let accessToken = key;
+
+  try {
+    const { data } = await supabase.auth.getSession();
+    accessToken = data?.session?.access_token || key;
+  } catch (err) {
+    console.warn("Could not get Supabase session token. Falling back to publishable key.", err);
+  }
+
+  return {
+    apikey: key,
+    Authorization: `Bearer ${accessToken}`,
+    "Content-Type": "application/json",
+    Prefer: "return=representation"
+  };
+}

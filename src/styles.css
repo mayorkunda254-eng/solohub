@@ -1113,3 +1113,42 @@ td small { display: block; color: var(--muted); }
   }
 }
 
+
+/* ============================
+   Phase 10 View Verification UI
+   ============================ */
+
+.wide-table {
+  overflow-x: auto;
+}
+
+.wide-table table {
+  min-width: 1250px;
+}
+
+.mini-input,
+.mini-select,
+.mini-textarea {
+  width: 100%;
+  min-width: 90px;
+  border: 1px solid #e4d6ff;
+  border-radius: 14px;
+  padding: 10px 11px;
+  font-weight: 800;
+  color: #21152f;
+  background: #fff;
+  box-sizing: border-box;
+}
+
+.mini-textarea {
+  min-width: 170px;
+  min-height: 58px;
+  resize: vertical;
+  font-size: 13px;
+}
+
+.mini-stack {
+  display: grid;
+  gap: 8px;
+  min-width: 120px;
+}
