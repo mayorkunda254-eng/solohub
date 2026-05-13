@@ -173,7 +173,7 @@ function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode
         <div className="logo">S</div>
         <div>
           <strong>SoloHub</strong>
-          <span>{cloudMode ? (user ? `${displayRole} � ${user.email}` : 'Supabase connected') : 'Local demo mode'}</span>
+          <span>{cloudMode ? (user ? `${displayRole} - ${user.email}` : 'Supabase connected') : 'Local demo mode'}</span>
         </div>
       </button>
 
@@ -1055,6 +1055,7 @@ function App() {
   const createCampaign = async (campaign) => {
     const cleanCampaign = {
       ...campaign,
+      creator_user_id: user?.id || null,
       title: String(campaign.title || '').trim(),
       creator: String(campaign.creator || 'SoloHub Creator').trim(),
       category: String(campaign.category || 'General').trim(),
