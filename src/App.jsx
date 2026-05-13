@@ -154,26 +154,40 @@ function StatCard({ icon: Icon, label, value, helper }) {
 function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout }) {
   const displayRole = profile?.role ? cleanRole(profile.role) : cleanRole(role);
 
-  const goDashboard = () => {
-    setRole(displayRole);
-    setPage(defaultPageForRole(displayRole));
+  const goDashboard = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+
+    const targetRole = profile?.role ? cleanRole(profile.role) : cleanRole(role);
+    setRole(targetRole);
+    setPage(defaultPageForRole(targetRole));
+
+    setTimeout(() => {
+      window.scrollTo({ top: 0, behavior: 'smooth' });
+    }, 50);
   };
 
-  const goLogin = () => {
+  const goLogin = (e) => {
+    e?.preventDefault?.();
+    e?.stopPropagation?.();
+
     setPage('home');
+
     setTimeout(() => {
       const authPanel = document.querySelector('.auth-panel');
       if (authPanel) {
         authPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      } else {
+        window.scrollTo({ top: 0, behavior: 'smooth' });
       }
-    }, 100);
+    }, 150);
   };
 
   return (
     <header className="topbar">
       <button className="icon-btn mobile-only" onClick={() => setSidebarOpen(!sidebarOpen)}><Menu size={22} /></button>
 
-      <button className="brand" onClick={() => setPage('home')}>
+      <button type="button" className="brand" onClick={goLogin}>
         <div className="logo">S</div>
         <div>
           <strong>SoloHub</strong>
@@ -184,11 +198,11 @@ function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode
       <div className="topbar-right">
         {user ? (
           <>
-            <Button variant="ghost" className="small" onClick={goDashboard}><LayoutDashboard size={15} /> Dashboard</Button>
+            <Button type="button" variant="ghost" className="small" onClick={goDashboard}><LayoutDashboard size={15} /> Dashboard</Button>
             <Button variant="ghost" className="small" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onLogout?.(); }}><LogOut size={15} /> Logout</Button>
           </>
         ) : (
-          <Button className="small" onClick={goLogin}><UserRound size={15} /> Login</Button>
+          <Button type="button" className="small" onClick={goLogin}><UserRound size={15} /> Login</Button>
         )}
       </div>
     </header>

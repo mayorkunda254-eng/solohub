@@ -1567,3 +1567,4 @@ async function insertPayoutDirect(payload) {
   const rows = text ? JSON.parse(text) : [];
   return Array.isArray(rows) ? rows[0] : rows;
 }
+

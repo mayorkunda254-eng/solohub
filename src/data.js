@@ -145,3 +145,4 @@ export const academyLessons = [
   'Why clips get rejected',
   'How payouts are calculated'
 ];
+
