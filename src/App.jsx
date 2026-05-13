@@ -1111,12 +1111,40 @@ function App() {
   };
 
   const campaignStatus = async (id, status) => {
-    if (cloudMode) {
-      const { error } = await supabase.from('campaigns').update({ status }).eq('id', id);
-      if (error) return setNotice(error.message);
+    try {
+      if (!id) {
+        alert("Missing campaign ID.");
+        return;
+      }
+
+      if (cloudMode) {
+        const data = await updateCampaignDirect(id, { status });
+
+        if (!data) {
+          alert("Campaign update failed: no data returned.");
+          return;
+        }
+
+        setCampaigns((prev) =>
+          prev.map((campaign) => campaign.id === id ? toCampaign(data) : campaign)
+        );
+
+        setNotice(`Campaign marked as ${status}.`);
+        alert(`Campaign marked as ${status}.`);
+        return;
+      }
+
+      setCampaigns((prev) =>
+        prev.map((campaign) => campaign.id === id ? { ...campaign, status } : campaign)
+      );
+
+      setNotice(`Campaign marked as ${status}.`);
+      alert(`Campaign marked as ${status}.`);
+    } catch (err) {
+      console.error("Campaign approval failed:", err);
+      alert("Campaign approval failed: " + (err?.message || err));
+      setNotice("Campaign approval failed: " + (err?.message || err));
     }
-    setCampaigns((prev) => prev.map((c) => c.id === id ? { ...c, status } : c));
-    setNotice(`Campaign marked ${status}.`);
   };
 
   const submitClip = async (submission) => {
@@ -1199,3 +1227,29 @@ function App() {
 }
 
 export default App;
+
+
+async function updateCampaignDirect(id, patch) {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  const response = await fetch(`${url}/rest/v1/campaigns?id=eq.${encodeURIComponent(id)}&select=*`, {
+    method: "PATCH",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation"
+    },
+    body: JSON.stringify(patch)
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(text || `Campaign update failed with status ${response.status}`);
+  }
+
+  const rows = text ? JSON.parse(text) : [];
+  return Array.isArray(rows) ? rows[0] : rows;
+}
