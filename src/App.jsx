@@ -28,7 +28,10 @@ const money = (value) => `KES ${Number(value || 0).toLocaleString()}`;
 const today = new Date().toISOString().slice(0, 10);
 
 const defaultPageForRole = (nextRole) => nextRole === 'clipper' ? 'discover' : nextRole === 'creator' ? 'creatorDashboard' : 'adminOverview';
-const cleanRole = (value) => ['clipper', 'creator', 'admin'].includes(value) ? value : 'clipper';
+const cleanRole = (value) => {
+  const role = String(value || '').toLowerCase().trim();
+  return ['clipper', 'creator', 'admin'].includes(role) ? role : 'clipper';
+};
 
 
 function useLocalState(key, fallback) {
@@ -149,6 +152,8 @@ function StatCard({ icon: Icon, label, value, helper }) {
 }
 
 function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout }) {
+  const displayRole = profile?.role ? cleanRole(profile.role) : cleanRole(role);
+
   const changeRole = (nextRole) => {
     const currentProfileRole = profile?.role ? cleanRole(profile.role) : null;
 
@@ -168,7 +173,7 @@ function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode
         <div className="logo">S</div>
         <div>
           <strong>SoloHub</strong>
-          <span>{cloudMode ? (user ? `${profile?.role || 'user'} • ${user.email}` : 'Supabase connected') : 'Local demo mode'}</span>
+          <span>{cloudMode ? (user ? `${displayRole} � ${user.email}` : 'Supabase connected') : 'Local demo mode'}</span>
         </div>
       </button>
 
@@ -183,6 +188,8 @@ function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode
     </header>
   );
 }
+
+
 
 const navs = {
   clipper: [
@@ -887,6 +894,14 @@ function App() {
   const loadProfile = async (currentUser, preferredRole = 'clipper', fullName = '') => {
     if (!cloudMode || !currentUser) return null;
 
+    const fallbackRole = cleanRole(
+      preferredRole ||
+      currentUser.user_metadata?.role ||
+      profile?.role ||
+      role ||
+      'clipper'
+    );
+
     const { data: existing, error: selectError } = await supabase
       .from('profiles')
       .select('*')
@@ -894,41 +909,51 @@ function App() {
       .maybeSingle();
 
     if (selectError) {
+      console.error('Profile load failed:', selectError);
       setNotice(`Profile load failed: ${selectError.message}`);
       return null;
     }
 
     if (existing) {
-      const nextRole = cleanRole(existing.role);
-      setProfile(existing);
-      setRole(nextRole);
-      setPage(defaultPageForRole(nextRole));
-      return existing;
+      const fixedProfile = {
+        ...existing,
+        role: cleanRole(existing.role || fallbackRole)
+      };
+
+      setProfile(fixedProfile);
+      setRole(fixedProfile.role);
+      setPage(defaultPageForRole(fixedProfile.role));
+      return fixedProfile;
     }
 
-    const newProfile = {
+    const profilePayload = {
       id: currentUser.id,
       email: currentUser.email,
       full_name: fullName || currentUser.user_metadata?.full_name || currentUser.email,
-      role: cleanRole(preferredRole)
+      role: fallbackRole,
+      updated_at: new Date().toISOString()
     };
 
     const { data, error } = await supabase
       .from('profiles')
-      .insert([newProfile])
+      .upsert(profilePayload, { onConflict: 'id' })
       .select('*')
       .single();
 
     if (error) {
-      setNotice(`Profile create failed: ${error.message}`);
+      console.error('Profile upsert failed:', error);
+      setNotice(`Profile upsert failed: ${error.message}`);
       return null;
     }
 
-    setProfile(data);
-    setRole(data.role);
-    setPage(defaultPageForRole(data.role));
-    return data;
+    const fixedProfile = { ...data, role: cleanRole(data.role) };
+    setProfile(fixedProfile);
+    setRole(fixedProfile.role);
+    setPage(defaultPageForRole(fixedProfile.role));
+    return fixedProfile;
   };
+
+
 
   const handleAuthUser = async (currentUser, preferredRole, fullName) => {
     setUser(currentUser);
@@ -964,12 +989,15 @@ function App() {
       return;
     }
 
-    setProfile(data);
-    setRole(cleanRole(data.role));
-    setPage(defaultPageForRole(cleanRole(data.role)));
-    setNotice(`Profile role updated to ${data.role}.`);
-    alert(`Role updated to ${data.role}.`);
+    const fixedProfile = { ...data, role: cleanRole(data.role) };
+    setProfile(fixedProfile);
+    setRole(fixedProfile.role);
+    setPage(defaultPageForRole(fixedProfile.role));
+    setNotice(`Profile role updated to ${fixedProfile.role}.`);
+    alert(`Role updated to ${fixedProfile.role}.`);
   };
+
+
 
   const logout = async () => {
     if (cloudMode) await supabase.auth.signOut();
@@ -1160,7 +1188,7 @@ function App() {
         <Sidebar role={role} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} />
         <main>
           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
-          {cloudMode && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : user ? `Logged in as ${profile?.role || 'user'}` : 'Supabase mode active. Login on Home for role profiles.'}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
+          {cloudMode && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : user ? `Logged in as ${profile?.role || role || 'user'}` : 'Supabase mode active. Login on Home for role profiles.'}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
           {cloudMode && !user && page !== 'home' ? <AuthBox user={user} profile={profile} onAuthUser={handleAuthUser} onLogout={logout} onRoleChange={updateProfileRole} /> : content}
         </main>
         <CampaignModal campaign={selectedCampaign && page !== 'submit' ? selectedCampaign : null} onClose={() => setSelectedCampaign(null)} />
