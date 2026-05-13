@@ -1152,3 +1152,426 @@ td small { display: block; color: var(--muted); }
   gap: 8px;
   min-width: 120px;
 }
+
+/* =========================================================
+   SoloHub Premium Money Theme v1
+   Dark luxury + emerald + gold + purple
+   ========================================================= */
+
+:root {
+  --premium-bg: #070b10;
+  --premium-bg-2: #0b1118;
+  --premium-card: rgba(13, 20, 28, 0.88);
+  --premium-card-2: rgba(16, 24, 34, 0.78);
+  --premium-border: rgba(255, 255, 255, 0.09);
+  --premium-border-strong: rgba(245, 196, 83, 0.28);
+  --premium-text: #f8fafc;
+  --premium-muted: #9aa6b2;
+  --premium-green: #23d18b;
+  --premium-green-soft: rgba(35, 209, 139, 0.18);
+  --premium-gold: #f5c453;
+  --premium-gold-2: #d99b2b;
+  --premium-purple: #8b5cf6;
+  --premium-purple-soft: rgba(139, 92, 246, 0.18);
+  --premium-shadow: 0 24px 80px rgba(0, 0, 0, 0.45);
+  --premium-glow-green: 0 0 32px rgba(35, 209, 139, 0.22);
+  --premium-glow-gold: 0 0 38px rgba(245, 196, 83, 0.20);
+}
+
+* {
+  transition:
+    background-color 220ms ease,
+    border-color 220ms ease,
+    box-shadow 220ms ease,
+    transform 220ms ease,
+    color 220ms ease;
+}
+
+body {
+  background:
+    radial-gradient(circle at top left, rgba(35, 209, 139, 0.12), transparent 28%),
+    radial-gradient(circle at top right, rgba(245, 196, 83, 0.11), transparent 28%),
+    radial-gradient(circle at bottom right, rgba(139, 92, 246, 0.10), transparent 32%),
+    linear-gradient(135deg, #05070b 0%, #071018 50%, #05070b 100%) !important;
+  color: var(--premium-text) !important;
+}
+
+body::before {
+  content: "";
+  position: fixed;
+  inset: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(rgba(255,255,255,0.025) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,0.025) 1px, transparent 1px);
+  background-size: 42px 42px;
+  mask-image: radial-gradient(circle at center, black, transparent 75%);
+  opacity: 0.35;
+  z-index: 0;
+}
+
+#root,
+.app,
+.layout,
+main {
+  position: relative;
+  z-index: 1;
+}
+
+.topbar {
+  background: rgba(7, 11, 16, 0.86) !important;
+  backdrop-filter: blur(22px);
+  border-bottom: 1px solid var(--premium-border) !important;
+  box-shadow: 0 10px 40px rgba(0,0,0,0.25);
+}
+
+.brand {
+  color: var(--premium-text) !important;
+}
+
+.logo {
+  background:
+    linear-gradient(145deg, #f8d477 0%, #be7a18 42%, #30210b 100%) !important;
+  color: #071018 !important;
+  box-shadow: var(--premium-glow-gold);
+  border: 1px solid rgba(255, 221, 128, 0.55);
+}
+
+.brand span,
+.topbar span,
+.side-note,
+.form-note,
+p {
+  color: var(--premium-muted) !important;
+}
+
+.sidebar {
+  background:
+    linear-gradient(180deg, rgba(10, 16, 23, 0.94), rgba(7, 11, 16, 0.92)) !important;
+  border: 1px solid var(--premium-border) !important;
+  box-shadow: var(--premium-shadow);
+  backdrop-filter: blur(24px);
+}
+
+.side-title {
+  color: rgba(255, 255, 255, 0.56) !important;
+  letter-spacing: 0.15em !important;
+}
+
+.sidebar button {
+  color: rgba(248, 250, 252, 0.82) !important;
+  border: 1px solid transparent !important;
+}
+
+.sidebar button:hover {
+  background: rgba(35, 209, 139, 0.08) !important;
+  border-color: rgba(35, 209, 139, 0.20) !important;
+  color: #ffffff !important;
+  transform: translateX(3px);
+}
+
+.sidebar button.active {
+  background:
+    linear-gradient(135deg, rgba(35, 209, 139, 0.22), rgba(35, 209, 139, 0.06)) !important;
+  border: 1px solid rgba(35, 209, 139, 0.55) !important;
+  color: #ffffff !important;
+  box-shadow: var(--premium-glow-green);
+}
+
+.side-note {
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid var(--premium-border) !important;
+}
+
+.panel,
+.card,
+.auth-panel,
+.table-wrap,
+.section-card,
+.stat-card {
+  background:
+    linear-gradient(145deg, rgba(14, 22, 31, 0.91), rgba(8, 13, 19, 0.88)) !important;
+  border: 1px solid var(--premium-border) !important;
+  box-shadow: var(--premium-shadow);
+  backdrop-filter: blur(22px);
+  color: var(--premium-text) !important;
+}
+
+.panel:hover,
+.card:hover,
+.stat-card:hover {
+  border-color: rgba(245, 196, 83, 0.24) !important;
+  box-shadow:
+    var(--premium-shadow),
+    0 0 42px rgba(245, 196, 83, 0.08);
+}
+
+.hero,
+.hero-card,
+.home-hero {
+  background:
+    radial-gradient(circle at 75% 35%, rgba(245, 196, 83, 0.18), transparent 28%),
+    radial-gradient(circle at 28% 25%, rgba(35, 209, 139, 0.14), transparent 25%),
+    linear-gradient(135deg, rgba(9, 20, 17, 0.96), rgba(10, 12, 18, 0.96)) !important;
+  border: 1px solid rgba(245, 196, 83, 0.20) !important;
+  box-shadow:
+    var(--premium-shadow),
+    inset 0 1px 0 rgba(255,255,255,0.08);
+}
+
+h1,
+h2,
+h3,
+strong,
+th {
+  color: var(--premium-text) !important;
+}
+
+h1,
+.hero h1,
+.panel h1 {
+  letter-spacing: -0.055em;
+}
+
+h1 span,
+.gold-text,
+.highlight {
+  background: linear-gradient(135deg, #fff4bf 0%, var(--premium-gold) 45%, #b87318 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+button,
+.btn,
+.button {
+  border-radius: 18px !important;
+}
+
+button:not(.brand):not(.icon-btn):not(.sidebar button),
+.btn,
+.button {
+  font-weight: 900 !important;
+}
+
+button[class*="primary"],
+.btn-primary,
+button[type="submit"],
+.topbar-right button:first-child,
+.auth-form button,
+.row-actions button:first-child {
+  background:
+    linear-gradient(135deg, #18c77c 0%, #0f8f5c 48%, #0a4c39 100%) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(84, 255, 180, 0.36) !important;
+  box-shadow:
+    0 14px 38px rgba(35, 209, 139, 0.20),
+    inset 0 1px 0 rgba(255,255,255,0.18) !important;
+}
+
+button[class*="primary"]:hover,
+.btn-primary:hover,
+button[type="submit"]:hover,
+.topbar-right button:first-child:hover,
+.auth-form button:hover,
+.row-actions button:first-child:hover {
+  transform: translateY(-2px);
+  box-shadow:
+    0 20px 48px rgba(35, 209, 139, 0.30),
+    inset 0 1px 0 rgba(255,255,255,0.20) !important;
+}
+
+button[class*="ghost"],
+.btn-ghost,
+.row-actions button:last-child {
+  background: rgba(255, 255, 255, 0.035) !important;
+  color: var(--premium-text) !important;
+  border: 1px solid var(--premium-border) !important;
+}
+
+button[class*="ghost"]:hover,
+.btn-ghost:hover,
+.row-actions button:last-child:hover {
+  border-color: rgba(245, 196, 83, 0.35) !important;
+  color: var(--premium-gold) !important;
+  transform: translateY(-2px);
+}
+
+input,
+select,
+textarea {
+  background: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  color: var(--premium-text) !important;
+  box-shadow: inset 0 1px 0 rgba(255,255,255,0.04);
+}
+
+input:focus,
+select:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: rgba(35, 209, 139, 0.62) !important;
+  box-shadow:
+    0 0 0 4px rgba(35, 209, 139, 0.12),
+    inset 0 1px 0 rgba(255,255,255,0.06) !important;
+}
+
+input::placeholder,
+textarea::placeholder {
+  color: rgba(248, 250, 252, 0.48) !important;
+}
+
+.auth-tabs {
+  background: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid var(--premium-border) !important;
+}
+
+.auth-tabs button {
+  color: rgba(248, 250, 252, 0.72) !important;
+}
+
+.auth-tabs button.active {
+  background:
+    linear-gradient(135deg, rgba(245, 196, 83, 0.18), rgba(35, 209, 139, 0.12)) !important;
+  color: #ffffff !important;
+  box-shadow: var(--premium-glow-gold);
+}
+
+.pill,
+[class*="pill"] {
+  border: 1px solid rgba(35, 209, 139, 0.28) !important;
+  background: rgba(35, 209, 139, 0.12) !important;
+  color: #9fffd1 !important;
+}
+
+table {
+  color: var(--premium-text) !important;
+}
+
+thead,
+th {
+  background: rgba(255, 255, 255, 0.035) !important;
+  color: rgba(248, 250, 252, 0.72) !important;
+}
+
+td,
+th {
+  border-color: rgba(255, 255, 255, 0.07) !important;
+}
+
+tr:hover td {
+  background: rgba(35, 209, 139, 0.045) !important;
+}
+
+a {
+  color: #8fffd0 !important;
+}
+
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+::-webkit-scrollbar-track {
+  background: rgba(255,255,255,0.04);
+}
+
+::-webkit-scrollbar-thumb {
+  background: linear-gradient(180deg, rgba(245,196,83,0.65), rgba(35,209,139,0.55));
+  border-radius: 999px;
+}
+
+@keyframes premiumFadeUp {
+  from {
+    opacity: 0;
+    transform: translateY(14px) scale(0.985);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0) scale(1);
+  }
+}
+
+.panel,
+.sidebar,
+.topbar,
+.auth-panel,
+.table-wrap {
+  animation: premiumFadeUp 420ms ease both;
+}
+
+@media (max-width: 850px) {
+  .sidebar {
+    background: rgba(7, 11, 16, 0.96) !important;
+  }
+
+  .panel,
+  .auth-panel {
+    border-radius: 26px !important;
+  }
+}
+
+/* =========================================================
+   Premium Discover Card Contrast Fix
+   ========================================================= */
+
+.discover-grid .card,
+.campaign-card,
+[class*='campaign-card'],
+.panel .card {
+  background:
+    radial-gradient(circle at top right, rgba(245, 196, 83, 0.10), transparent 34%),
+    linear-gradient(145deg, rgba(13, 20, 28, 0.96), rgba(7, 11, 16, 0.96)) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(245, 196, 83, 0.18) !important;
+  box-shadow:
+    0 24px 80px rgba(0, 0, 0, 0.42),
+    inset 0 1px 0 rgba(255, 255, 255, 0.06) !important;
+}
+
+.discover-grid .card *,
+.campaign-card *,
+[class*='campaign-card'] * {
+  color: inherit;
+}
+
+.discover-grid .card h3,
+.campaign-card h3,
+[class*='campaign-card'] h3 {
+  color: #ffffff !important;
+}
+
+.discover-grid .card p,
+.campaign-card p,
+[class*='campaign-card'] p {
+  color: #aeb9c5 !important;
+}
+
+.discover-grid .card .muted,
+.campaign-card .muted,
+[class*='campaign-card'] .muted {
+  color: #93a4b5 !important;
+}
+
+.discover-grid .card .pill,
+.campaign-card .pill,
+[class*='campaign-card'] .pill {
+  background: rgba(35, 209, 139, 0.12) !important;
+  border-color: rgba(35, 209, 139, 0.32) !important;
+  color: #9fffd1 !important;
+}
+
+.discover-grid .card button,
+.campaign-card button,
+[class*='campaign-card'] button {
+  background: linear-gradient(135deg, #20d68e, #08734d) !important;
+  color: #ffffff !important;
+  border: 1px solid rgba(129, 255, 197, 0.38) !important;
+}
+
+.discover-grid .card button:hover,
+.campaign-card button:hover,
+[class*='campaign-card'] button:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 18px 42px rgba(35, 209, 139, 0.24) !important;
+}
