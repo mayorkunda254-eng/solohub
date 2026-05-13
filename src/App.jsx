@@ -1148,20 +1148,61 @@ function App() {
   };
 
   const submitClip = async (submission) => {
-    const localSubmission = { ...submission, id: crypto.randomUUID ? crypto.randomUUID() : Date.now() };
-    if (cloudMode) {
-      const { data, error } = await supabase.from('submissions').insert(toSubmissionDb(localSubmission)).select().single();
-      if (error) return setNotice(error.message);
-      setSubmissions((prev) => [toSubmission(data), ...prev]);
-      setNotice('Clip submitted to Supabase for review.');
-    } else {
-      setSubmissions((prev) => [localSubmission, ...prev]);
+    try {
+      const cleanSubmission = {
+        ...submission,
+        clipper_user_id: user?.id || null,
+        status: 'Pending Review',
+        submitted_views: Number(submission.submitted_views || submission.submittedViews || 0),
+        approved_views: 0,
+        estimated_payout: Number(submission.estimated_payout || submission.estimatedPayout || 0),
+        approved_payout: 0
+      };
+
+      if (!cleanSubmission.post_url && !cleanSubmission.postUrl && !cleanSubmission.link) {
+        alert('Please add the posted video link.');
+        return false;
+      }
+
+      if (!cleanSubmission.campaign_id && !cleanSubmission.campaignId) {
+        alert('Missing campaign. Please choose a campaign first.');
+        return false;
+      }
+
+      if (cloudMode) {
+        const payload = toSubmissionDb(cleanSubmission);
+        console.log('Saving submission payload:', payload);
+
+        const data = await insertSubmissionDirect(payload);
+
+        if (!data) {
+          alert('Submission failed: no data returned.');
+          return false;
+        }
+
+        setSubmissions((prev) => [toSubmission(data), ...prev]);
+        setNotice('Clip submitted to Supabase for review.');
+        alert('Clip submitted successfully for review.');
+        setRole('admin');
+        setPage('adminSubmissions');
+        return true;
+      }
+
+      setSubmissions((prev) => [cleanSubmission, ...prev]);
       setNotice('Clip submitted locally for review.');
+      alert('Clip submitted successfully for review.');
+      setRole('admin');
+      setPage('adminSubmissions');
+      return true;
+    } catch (err) {
+      console.error('Clip submission failed:', err);
+      alert('Clip submission failed: ' + (err?.message || err));
+      setNotice('Clip submission failed: ' + (err?.message || err));
+      return false;
     }
-    setPage('submissions');
   };
 
-  const reviewSubmission = async (id, changes) => {
+const reviewSubmission = async (id, changes) => {
     if (cloudMode) {
       const { error } = await supabase.from('submissions').update({
         status: changes.status,
@@ -1248,6 +1289,32 @@ async function updateCampaignDirect(id, patch) {
 
   if (!response.ok) {
     throw new Error(text || `Campaign update failed with status ${response.status}`);
+  }
+
+  const rows = text ? JSON.parse(text) : [];
+  return Array.isArray(rows) ? rows[0] : rows;
+}
+
+
+async function insertSubmissionDirect(payload) {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  const response = await fetch(`${url}/rest/v1/submissions?select=*`, {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation"
+    },
+    body: JSON.stringify(payload)
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(text || `Submission insert failed with status ${response.status}`);
   }
 
   const rows = text ? JSON.parse(text) : [];
