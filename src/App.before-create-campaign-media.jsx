@@ -799,8 +799,8 @@ function CreatorDashboard({ campaigns, submissions }) {
 }
 
 function CreateCampaignPage({ onCreateCampaign }) {
+  const [step, setStep] = useState(1);
   const [submittingCampaign, setSubmittingCampaign] = useState(false);
-
   const [form, setForm] = useState({
     title: '',
     creator: 'Demo Creator',
@@ -809,238 +809,182 @@ function CreateCampaignPage({ onCreateCampaign }) {
     management: 'SoloHub Managed',
     payPerThousand: 80,
     budget: 10000,
-    remaining: 10000,
     minimumViews: 1000,
     maxPayout: 1500,
     platforms: 'TikTok, Instagram Reels, YouTube Shorts',
-    deadline: '',
+    deadline: '2026-06-30',
     description: '',
-    rules: 'Use approved content only.',
-    hashtags: '#SoloHub',
-    imageUrl: '',
-    resourceUrl: '',
-    contentRequirements: ''
+    rules: 'Use approved content only.\nPost must remain public.\nFollow campaign hashtags.',
+    hashtags: '#SoloHub, #KenyaCreators'
   });
 
-  const update = (key, value) => {
-    setForm((prev) => ({ ...prev, [key]: value }));
+  const update = (key, value) => setForm((prev) => ({ ...prev, [key]: value }));
+  const payoutPool = Math.max(Number(form.budget || 0) * 0.85, 0);
+  const platformFee = Math.max(Number(form.budget || 0) * 0.15, 0);
+  const estimatedViews = Number(form.payPerThousand || 0) > 0 ? Math.floor((payoutPool / Number(form.payPerThousand || 1)) * 1000) : 0;
+
+  const steps = [
+    { id: 1, title: 'Basics', helper: 'Campaign identity' },
+    { id: 2, title: 'Budget', helper: 'Payout rules' },
+    { id: 3, title: 'Rules', helper: 'Platforms & instructions' },
+    { id: 4, title: 'Review', helper: 'Confirm and submit' }
+  ];
+
+  const canGoNext = () => {
+    if (step === 1) return form.title.trim() && form.creator.trim() && form.category.trim();
+    if (step === 2) return Number(form.budget) > 0 && Number(form.payPerThousand) > 0;
+    if (step === 3) return form.platforms.trim() && form.description.trim();
+    return true;
   };
 
-  const submit = async () => {
-    if (submittingCampaign) return;
+  const next = () => {
+    if (!canGoNext()) return;
+    setStep((current) => Math.min(current + 1, 4));
+  };
 
-    if (!form.title.trim()) {
-      alert('Please add a campaign title.');
-      return;
-    }
+  const back = () => setStep((current) => Math.max(current - 1, 1));
 
-    if (!form.description.trim()) {
-      alert('Please add a campaign description.');
-      return;
-    }
+  const submit = async (e) => {
+    e.preventDefault();
+    if (step !== 4) return;
+    if (!form.title.trim() || !form.description.trim()) return;
 
     setSubmittingCampaign(true);
 
-    try {
-      const campaign = {
-        ...form,
-        payPerThousand: Number(form.payPerThousand || 0),
-        budget: Number(form.budget || 0),
-        remaining: Number(form.remaining || form.budget || 0),
-        minimumViews: Number(form.minimumViews || 0),
-        maxPayout: Number(form.maxPayout || 0),
-        platforms: String(form.platforms)
-          .split(',')
-          .map((item) => item.trim())
-          .filter(Boolean),
-        rules: String(form.rules)
-          .split('\n')
-          .map((item) => item.trim())
-          .filter(Boolean),
-        hashtags: String(form.hashtags)
-          .split(',')
-          .map((item) => item.trim())
-          .filter(Boolean),
-        assets: form.resourceUrl ? [form.resourceUrl] : [],
-        imageUrl: form.imageUrl,
-        image_url: form.imageUrl,
-        resourceUrl: form.resourceUrl,
-        resource_url: form.resourceUrl,
-        contentRequirements: form.contentRequirements,
-        content_requirements: form.contentRequirements,
-        status: 'Pending Approval',
-        beginnerFriendly: true,
-        verified: false,
-        score: 70
-      };
+    const success = await onCreateCampaign({
+      ...form,
+      id: crypto.randomUUID ? crypto.randomUUID() : Date.now(),
+      remaining: Math.max(Number(form.budget || 0) * 0.85, 0),
+      beginnerFriendly: true,
+      verified: false,
+      score: 70,
+      status: 'Pending Approval',
+      platforms: form.platforms.split(',').map((x) => x.trim()).filter(Boolean),
+      rules: form.rules.split('\n').map((x) => x.trim()).filter(Boolean),
+      hashtags: form.hashtags.split(',').map((x) => x.trim()).filter(Boolean),
+      assets: ['Source link/assets to be added']
+    });
 
-      await onCreateCampaign(campaign);
-    } finally {
-      setSubmittingCampaign(false);
-    }
+    setSubmittingCampaign(false);
+    if (!success) return;
   };
 
   return (
-    <section className="create-premium">
-      <div className="create-head">
-        <Pill tone="purple">Creator Studio</Pill>
-        <h2>Create a campaign for admin approval.</h2>
-        <p>Add campaign details, payout rules, a premium image, resource folder, and content requirements.</p>
+    <section className="panel campaign-wizard-panel">
+      <div className="wizard-hero">
+        <div>
+          <Pill tone="purple"><Plus size={14} /> Create Campaign</Pill>
+          <h2>Create a campaign for admin approval.</h2>
+          <p>Build the campaign step by step so creators and clippers get clear instructions.</p>
+        </div>
+        <div className="wizard-summary-card">
+          <span>Estimated clipper pool</span>
+          <strong>{money(payoutPool)}</strong>
+          <small>Platform fee: {money(platformFee)}</small>
+        </div>
       </div>
 
-      <div className="create-grid">
-        <div className="create-form-card">
-          <h3>Campaign details</h3>
+      <div className="wizard-steps">
+        {steps.map((item) => (
+          <button
+            type="button"
+            key={item.id}
+            className={`wizard-step ${step === item.id ? 'active' : ''} ${step > item.id ? 'done' : ''}`}
+            onClick={() => setStep(item.id)}
+          >
+            <span>{step > item.id ? '✓' : item.id}</span>
+            <div>
+              <strong>{item.title}</strong>
+              <small>{item.helper}</small>
+            </div>
+          </button>
+        ))}
+      </div>
 
-          <div className="form-grid">
-            <label>
-              Campaign title
-              <input value={form.title} onChange={(e) => update('title', e.target.value)} placeholder="e.g. MarkTradesFX Gold Clips" />
-            </label>
-
-            <label>
-              Creator / brand
-              <input value={form.creator} onChange={(e) => update('creator', e.target.value)} />
-            </label>
-
-            <label>
-              Category
-              <input value={form.category} onChange={(e) => update('category', e.target.value)} placeholder="Forex Education, Food & Bakery..." />
-            </label>
-
-            <label>
-              Campaign type
-              <select value={form.type} onChange={(e) => update('type', e.target.value)}>
-                <option>Clipping</option>
-                <option>UGC</option>
-                <option>Influencer</option>
-              </select>
-            </label>
-
-            <label>
-              Management
-              <select value={form.management} onChange={(e) => update('management', e.target.value)}>
-                <option>SoloHub Managed</option>
-                <option>Self Managed</option>
-              </select>
-            </label>
-
-            <label>
-              Pay per 1,000 views
-              <input type="number" value={form.payPerThousand} onChange={(e) => update('payPerThousand', e.target.value)} />
-            </label>
-
-            <label>
-              Total budget
-              <input type="number" value={form.budget} onChange={(e) => { update('budget', e.target.value); update('remaining', e.target.value); }} />
-            </label>
-
-            <label>
-              Minimum views
-              <input type="number" value={form.minimumViews} onChange={(e) => update('minimumViews', e.target.value)} />
-            </label>
-
-            <label>
-              Max payout per clip
-              <input type="number" value={form.maxPayout} onChange={(e) => update('maxPayout', e.target.value)} />
-            </label>
-
-            <label>
-              Deadline
-              <input type="date" value={form.deadline} onChange={(e) => update('deadline', e.target.value)} />
-            </label>
+      <form className="wizard-form" onSubmit={submit}>
+        {step === 1 && (
+          <div className="wizard-card">
+            <div className="wizard-card-head">
+              <h3>Campaign basics</h3>
+              <p>Name the campaign clearly so clippers understand the opportunity quickly.</p>
+            </div>
+            <div className="form-grid clean-grid">
+              <label className="wide">Campaign title<input placeholder="MarkTradesFX Gold Clips" value={form.title} onChange={(e) => update('title', e.target.value)} required /></label>
+              <label>Creator / brand<input value={form.creator} onChange={(e) => update('creator', e.target.value)} required /></label>
+              <label>Category<input value={form.category} onChange={(e) => update('category', e.target.value)} /></label>
+              <label>Campaign type<select value={form.type} onChange={(e) => update('type', e.target.value)}><option>Clipping</option><option>UGC</option></select></label>
+              <label>Management<select value={form.management} onChange={(e) => update('management', e.target.value)}><option>SoloHub Managed</option><option>Self Managed</option></select></label>
+            </div>
           </div>
+        )}
 
-          <label>
-            Platforms
-            <input value={form.platforms} onChange={(e) => update('platforms', e.target.value)} placeholder="TikTok, Instagram Reels, YouTube Shorts" />
-          </label>
-
-          <label>
-            Campaign image URL
-            <input value={form.imageUrl} onChange={(e) => update('imageUrl', e.target.value)} placeholder="https://example.com/banner.jpg" />
-          </label>
-
-          <label>
-            Resource folder URL
-            <input value={form.resourceUrl} onChange={(e) => update('resourceUrl', e.target.value)} placeholder="Google Drive / Dropbox / source folder" />
-          </label>
-
-          <label>
-            Description
-            <textarea value={form.description} onChange={(e) => update('description', e.target.value)} placeholder="Explain what clippers should create." />
-          </label>
-
-          <label>
-            Content requirements
-            <textarea value={form.contentRequirements} onChange={(e) => update('contentRequirements', e.target.value)} placeholder="Mention approved clips, captions, hashtags, do's and don'ts." />
-          </label>
-
-          <label>
-            Rules
-            <textarea value={form.rules} onChange={(e) => update('rules', e.target.value)} />
-          </label>
-
-          <label>
-            Hashtags
-            <input value={form.hashtags} onChange={(e) => update('hashtags', e.target.value)} placeholder="#SoloHub, #KenyaCreators" />
-          </label>
-
-          <Button type="button" onClick={submit} disabled={submittingCampaign}>
-            {submittingCampaign ? 'Submitting...' : 'Submit campaign for approval'}
-          </Button>
-        </div>
-
-        <div className="campaign-preview-card">
-          <h3>Live preview</h3>
-
-          <div className="whop-campaign-card preview">
-            <div className="whop-card-top">
-              <div className="whop-thumb">
-                {form.imageUrl ? (
-                  <img src={form.imageUrl} alt="Campaign preview" />
-                ) : (
-                  <div className="whop-thumb-fallback">S</div>
-                )}
-              </div>
-
-              <div className="whop-tags">
-                <span>Clipping</span>
-                <span>{form.category || 'Category'}</span>
-              </div>
+        {step === 2 && (
+          <div className="wizard-card">
+            <div className="wizard-card-head">
+              <h3>Budget and payout</h3>
+              <p>Set how much the creator funds and how clippers will be rewarded.</p>
             </div>
-
-            <h3>{form.title || 'Campaign title'}</h3>
-
-            <div className="whop-creator-row">
-              <span>{form.creator || 'Creator brand'}</span>
-              <strong>?</strong>
+            <div className="finance-strip">
+              <div><span>Total budget</span><strong>{money(form.budget)}</strong></div>
+              <div><span>SoloHub fee</span><strong>{money(platformFee)}</strong></div>
+              <div><span>Clipper pool</span><strong>{money(payoutPool)}</strong></div>
+              <div><span>Estimated views</span><strong>{estimatedViews.toLocaleString()}</strong></div>
             </div>
-
-            <div className="whop-meta-row">
-              <div>
-                <small>Budget</small>
-                <strong>{money(form.budget || 0)}</strong>
-              </div>
-
-              <div>
-                <small>CPM</small>
-                <strong>{money(form.payPerThousand || 0)} <span>/ 1k</span></strong>
-              </div>
+            <div className="form-grid clean-grid">
+              <label>Pay per 1,000 views<input type="number" value={form.payPerThousand} onChange={(e) => update('payPerThousand', e.target.value)} /></label>
+              <label>Total budget<input type="number" value={form.budget} onChange={(e) => update('budget', e.target.value)} /></label>
+              <label>Minimum views<input type="number" value={form.minimumViews} onChange={(e) => update('minimumViews', e.target.value)} /></label>
+              <label>Max payout per clip<input type="number" value={form.maxPayout} onChange={(e) => update('maxPayout', e.target.value)} /></label>
+              <label>Deadline<input type="date" value={form.deadline} onChange={(e) => update('deadline', e.target.value)} /></label>
             </div>
-
-            <p>{form.description || 'Campaign description will appear here.'}</p>
-
-            <button type="button" className="whop-submit-btn">Submit clip</button>
           </div>
+        )}
 
-          {form.imageUrl && (
-            <div className="image-preview-large">
-              <img src={form.imageUrl} alt="Campaign image preview" />
+        {step === 3 && (
+          <div className="wizard-card">
+            <div className="wizard-card-head">
+              <h3>Platforms, description, and rules</h3>
+              <p>Tell clippers exactly what to post, where to post, and what to avoid.</p>
             </div>
+            <div className="form-grid clean-grid">
+              <label className="full">Platforms<input value={form.platforms} onChange={(e) => update('platforms', e.target.value)} /></label>
+              <label className="full">Description<textarea placeholder="Create short educational clips from approved videos..." value={form.description} onChange={(e) => update('description', e.target.value)} required /></label>
+              <label className="full">Rules<textarea value={form.rules} onChange={(e) => update('rules', e.target.value)} /></label>
+              <label className="full">Hashtags<input value={form.hashtags} onChange={(e) => update('hashtags', e.target.value)} /></label>
+            </div>
+          </div>
+        )}
+
+        {step === 4 && (
+          <div className="wizard-card review-card">
+            <div className="wizard-card-head">
+              <h3>Review campaign</h3>
+              <p>Confirm the campaign before sending it to admin approval.</p>
+            </div>
+            <div className="review-grid">
+              <div><span>Campaign</span><strong>{form.title || 'Untitled campaign'}</strong></div>
+              <div><span>Creator</span><strong>{form.creator}</strong></div>
+              <div><span>Category</span><strong>{form.category}</strong></div>
+              <div><span>Management</span><strong>{form.management}</strong></div>
+              <div><span>Budget</span><strong>{money(form.budget)}</strong></div>
+              <div><span>Pay / 1,000 views</span><strong>{money(form.payPerThousand)}</strong></div>
+              <div><span>Minimum views</span><strong>{Number(form.minimumViews || 0).toLocaleString()}</strong></div>
+              <div><span>Max payout</span><strong>{money(form.maxPayout)}</strong></div>
+              <div className="full"><span>Platforms</span><strong>{form.platforms}</strong></div>
+              <div className="full"><span>Description</span><p>{form.description || 'No description added yet.'}</p></div>
+            </div>
+          </div>
+        )}
+
+        <div className="wizard-actions">
+          {step > 1 ? <Button type="button" variant="ghost" onClick={back}>Back</Button> : <span />}
+          {step < 4 ? (
+            <Button type="button" onClick={next} disabled={!canGoNext()}>Continue</Button>
+          ) : (
+            <Button type="submit" disabled={submittingCampaign || !form.title.trim() || !form.description.trim()}><CheckCircle2 size={18} /> {submittingCampaign ? 'Submitting...' : 'Submit campaign for approval'}</Button>
           )}
         </div>
-      </div>
+      </form>
     </section>
   );
 }

@@ -1575,3 +1575,452 @@ a {
   transform: translateY(-2px);
   box-shadow: 0 18px 42px rgba(35, 209, 139, 0.24) !important;
 }
+
+/* =========================================================
+   Phase 15 Whop-Inspired Campaign Experience
+   ========================================================= */
+
+.whop-page {
+  display: grid;
+  gap: 24px;
+}
+
+.whop-page-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  gap: 20px;
+}
+
+.whop-page-head h2 {
+  font-size: clamp(34px, 4vw, 58px);
+  margin: 12px 0 8px;
+}
+
+.whop-search {
+  min-width: 260px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(245,196,83,0.18);
+  color: #9aa6b2;
+}
+
+.whop-campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(280px, 1fr));
+  gap: 18px;
+}
+
+.whop-campaign-card {
+  position: relative;
+  overflow: hidden;
+  border-radius: 24px;
+  padding: 20px;
+  background:
+    radial-gradient(circle at top right, rgba(245,196,83,0.13), transparent 32%),
+    linear-gradient(145deg, rgba(25,25,25,0.98), rgba(11,11,12,0.98)) !important;
+  border: 1px solid rgba(245,196,83,0.20);
+  color: #fff;
+  cursor: pointer;
+  box-shadow: 0 24px 70px rgba(0,0,0,0.36);
+}
+
+.whop-campaign-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(245,196,83,0.44);
+  box-shadow:
+    0 32px 90px rgba(0,0,0,0.48),
+    0 0 44px rgba(245,196,83,0.10);
+}
+
+.whop-card-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 14px;
+}
+
+.whop-thumb {
+  width: 92px;
+  height: 60px;
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(135deg, rgba(245,196,83,0.28), rgba(139,92,246,0.22));
+  border: 1px solid rgba(255,255,255,0.10);
+  flex-shrink: 0;
+}
+
+.whop-thumb img,
+.campaign-detail-image img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.whop-thumb-fallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 28px;
+  font-weight: 900;
+  color: #f5c453;
+}
+
+.whop-tags {
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: end;
+  gap: 8px;
+}
+
+.whop-tags span,
+.campaign-detail-tags span {
+  background: linear-gradient(135deg, #d400ca, #8b2cf5);
+  color: white;
+  border-radius: 999px;
+  padding: 7px 10px;
+  font-size: 12px;
+  font-weight: 900;
+}
+
+.whop-campaign-card h3 {
+  margin: 18px 0 8px;
+  font-size: 20px;
+  line-height: 1.2;
+}
+
+.whop-creator-row {
+  color: #c6ccd5;
+  font-weight: 800;
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+
+.whop-creator-row strong {
+  color: #23d18b !important;
+}
+
+.whop-meta-row,
+.whop-card-bottom {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 14px;
+  margin-top: 22px;
+}
+
+.whop-meta-row small,
+.whop-card-bottom small {
+  color: #9aa6b2;
+  display: block;
+  margin-bottom: 4px;
+}
+
+.whop-meta-row strong,
+.whop-card-bottom strong {
+  font-size: 20px;
+}
+
+.whop-meta-row span {
+  color: #9aa6b2;
+  font-size: 13px;
+}
+
+.whop-progress {
+  height: 5px;
+  border-radius: 999px;
+  background: rgba(255,255,255,0.13);
+  margin-top: 14px;
+  overflow: hidden;
+}
+
+.whop-progress i {
+  display: block;
+  height: 100%;
+  border-radius: inherit;
+  background: linear-gradient(90deg, #f5c453, #23d18b);
+}
+
+.whop-progress.large {
+  height: 7px;
+}
+
+.whop-submit-btn {
+  width: 100%;
+  margin-top: 22px;
+  padding: 14px 18px;
+  border-radius: 16px;
+  border: 1px solid rgba(245,196,83,0.35);
+  background: linear-gradient(135deg, rgba(245,196,83,0.38), rgba(126,84,17,0.88)) !important;
+  color: white !important;
+  font-weight: 900;
+}
+
+.campaign-detail {
+  display: grid;
+  gap: 22px;
+}
+
+.campaign-detail-hero {
+  display: grid;
+  grid-template-columns: 1fr minmax(300px, 520px);
+  gap: 28px;
+  align-items: center;
+  padding: 28px;
+  border-radius: 28px;
+  background: linear-gradient(145deg, rgba(20,20,20,0.98), rgba(10,10,11,0.98));
+  border: 1px solid rgba(245,196,83,0.20);
+}
+
+.campaign-detail-hero h1 {
+  font-size: clamp(36px, 5vw, 64px);
+  line-height: 1.05;
+  margin: 14px 0;
+}
+
+.campaign-detail-tags {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+  margin-top: 18px;
+}
+
+.campaign-detail-image {
+  height: 320px;
+  border-radius: 22px;
+  overflow: hidden;
+  background: radial-gradient(circle, rgba(245,196,83,0.20), rgba(0,0,0,0.8));
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.campaign-detail-fallback {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 44px;
+  color: #f5c453;
+  font-weight: 900;
+}
+
+.campaign-budget-card,
+.campaign-info-table,
+.submit-video-box,
+.campaign-requirements,
+.create-form-card,
+.campaign-preview-card {
+  padding: 24px;
+  border-radius: 24px;
+  background: rgba(20,20,20,0.92);
+  border: 1px solid rgba(255,255,255,0.10);
+}
+
+.budget-line {
+  display: flex;
+  justify-content: space-between;
+  gap: 20px;
+}
+
+.campaign-info-table {
+  display: grid;
+}
+
+.campaign-info-table div {
+  display: flex;
+  justify-content: space-between;
+  padding: 18px 0;
+  border-bottom: 1px solid rgba(255,255,255,0.08);
+}
+
+.submit-grid,
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px;
+}
+
+.submit-grid input:nth-child(2) {
+  grid-column: span 2;
+}
+
+.resource-card {
+  display: grid;
+  gap: 6px;
+  max-width: 540px;
+  margin-top: 16px;
+  padding: 20px;
+  border-radius: 18px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(245,196,83,0.18);
+  text-decoration: none;
+}
+
+.earnings-cards {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.earning-card {
+  min-width: 210px;
+  padding: 18px;
+  border-radius: 18px;
+  background: linear-gradient(145deg, rgba(255,255,255,0.08), rgba(255,255,255,0.035));
+  border: 1px solid rgba(255,255,255,0.10);
+  display: grid;
+  gap: 8px;
+}
+
+.create-premium {
+  display: grid;
+  gap: 24px;
+}
+
+.create-head h2 {
+  font-size: clamp(34px, 4vw, 56px);
+  margin: 12px 0;
+}
+
+.create-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.4fr) minmax(300px, 0.8fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.create-form-card label {
+  display: grid;
+  gap: 8px;
+  color: #cbd5e1;
+  font-weight: 900;
+  margin-bottom: 14px;
+}
+
+.create-form-card textarea {
+  min-height: 110px;
+}
+
+.campaign-preview-card {
+  position: sticky;
+  top: 90px;
+}
+
+.whop-campaign-card.preview {
+  cursor: default;
+}
+
+@media (max-width: 1050px) {
+  .whop-campaign-grid,
+  .campaign-detail-hero,
+  .create-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .campaign-preview-card {
+    position: static;
+  }
+}
+
+@media (max-width: 650px) {
+  .submit-grid,
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .submit-grid input:nth-child(2) {
+    grid-column: auto;
+  }
+
+  .whop-page-head {
+    display: grid;
+  }
+}
+
+/* =========================================================
+   Phase 16 Creator Campaign Media Fields
+   ========================================================= */
+
+.create-premium {
+  display: grid;
+  gap: 24px;
+}
+
+.create-head h2 {
+  font-size: clamp(34px, 4vw, 56px);
+  margin: 12px 0;
+}
+
+.create-grid {
+  display: grid;
+  grid-template-columns: minmax(0, 1.35fr) minmax(300px, 0.8fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.create-form-card,
+.campaign-preview-card {
+  padding: 24px;
+  border-radius: 24px;
+  background: linear-gradient(145deg, rgba(20,20,20,0.96), rgba(8,10,12,0.96));
+  border: 1px solid rgba(245,196,83,0.18);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.38);
+}
+
+.create-form-card label {
+  display: grid;
+  gap: 8px;
+  color: #cbd5e1;
+  font-weight: 900;
+  margin-bottom: 14px;
+}
+
+.form-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0,1fr));
+  gap: 14px;
+}
+
+.create-form-card textarea {
+  min-height: 110px;
+}
+
+.campaign-preview-card {
+  position: sticky;
+  top: 90px;
+}
+
+.whop-campaign-card.preview {
+  cursor: default;
+}
+
+.image-preview-large {
+  margin-top: 18px;
+  border-radius: 20px;
+  overflow: hidden;
+  border: 1px solid rgba(245,196,83,0.20);
+  background: rgba(255,255,255,0.04);
+}
+
+.image-preview-large img {
+  width: 100%;
+  display: block;
+  object-fit: cover;
+  max-height: 260px;
+}
+
+@media (max-width: 1050px) {
+  .create-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .campaign-preview-card {
+    position: static;
+  }
+}
+
+@media (max-width: 650px) {
+  .form-grid {
+    grid-template-columns: 1fr;
+  }
+}
