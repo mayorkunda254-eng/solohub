@@ -1200,23 +1200,51 @@ function App() {
       setNotice('Clip submission failed: ' + (err?.message || err));
       return false;
     }
-  };
+  };const reviewSubmission = async (id, changes) => {
+    try {
+      if (!id) {
+        alert('Missing submission ID.');
+        return;
+      }
 
-const reviewSubmission = async (id, changes) => {
-    if (cloudMode) {
-      const { error } = await supabase.from('submissions').update({
+      const patch = {
         status: changes.status,
-        approved_views: changes.approvedViews,
-        payout: changes.payout,
-        notes: changes.notes
-      }).eq('id', id);
-      if (error) return setNotice(error.message);
+        approved_views: Number(changes.approvedViews || changes.approved_views || 0),
+        payout: Number(changes.payout || 0),
+        notes: changes.notes || ''
+      };
+
+      if (cloudMode) {
+        const data = await updateSubmissionDirect(id, patch);
+
+        if (!data) {
+          alert('Submission update failed: no data returned.');
+          return;
+        }
+
+        setSubmissions((prev) =>
+          prev.map((s) => s.id === id ? toSubmission(data) : s)
+        );
+
+        setNotice(`Submission marked ${changes.status}.`);
+        alert(`Submission marked as ${changes.status}.`);
+        return;
+      }
+
+      setSubmissions((prev) =>
+        prev.map((s) => s.id === id ? { ...s, ...changes } : s)
+      );
+
+      setNotice(`Submission marked ${changes.status}.`);
+      alert(`Submission marked as ${changes.status}.`);
+    } catch (err) {
+      console.error('Submission review failed:', err);
+      alert('Submission review failed: ' + (err?.message || err));
+      setNotice('Submission review failed: ' + (err?.message || err));
     }
-    setSubmissions((prev) => prev.map((s) => s.id === id ? { ...s, ...changes } : s));
-    setNotice(`Submission marked ${changes.status}.`);
   };
 
-  const markPaid = async (submission) => {
+const markPaid = async (submission) => {
     if (cloudMode) {
       const update = await supabase.from('submissions').update({ status: 'Paid' }).eq('id', submission.id);
       if (update.error) return setNotice(update.error.message);
@@ -1315,6 +1343,32 @@ async function insertSubmissionDirect(payload) {
 
   if (!response.ok) {
     throw new Error(text || `Submission insert failed with status ${response.status}`);
+  }
+
+  const rows = text ? JSON.parse(text) : [];
+  return Array.isArray(rows) ? rows[0] : rows;
+}
+
+
+async function updateSubmissionDirect(id, patch) {
+  const url = import.meta.env.VITE_SUPABASE_URL;
+  const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+
+  const response = await fetch(`${url}/rest/v1/submissions?id=eq.${encodeURIComponent(id)}&select=*`, {
+    method: "PATCH",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation"
+    },
+    body: JSON.stringify(patch)
+  });
+
+  const text = await response.text();
+
+  if (!response.ok) {
+    throw new Error(text || `Submission update failed with status ${response.status}`);
   }
 
   const rows = text ? JSON.parse(text) : [];
