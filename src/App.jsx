@@ -154,36 +154,42 @@ function StatCard({ icon: Icon, label, value, helper }) {
 function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout }) {
   const displayRole = profile?.role ? cleanRole(profile.role) : cleanRole(role);
 
-  const changeRole = (nextRole) => {
-    const currentProfileRole = profile?.role ? cleanRole(profile.role) : null;
+  const goDashboard = () => {
+    setRole(displayRole);
+    setPage(defaultPageForRole(displayRole));
+  };
 
-    if (cloudMode && user && currentProfileRole && currentProfileRole !== 'admin' && nextRole !== currentProfileRole) {
-      alert(`This account is registered as ${currentProfileRole}. Admin accounts can switch views for testing.`);
-      return;
-    }
-
-    setRole(nextRole);
-    setPage(defaultPageForRole(nextRole));
+  const goLogin = () => {
+    setPage('home');
+    setTimeout(() => {
+      const authPanel = document.querySelector('.auth-panel');
+      if (authPanel) {
+        authPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      }
+    }, 100);
   };
 
   return (
     <header className="topbar">
       <button className="icon-btn mobile-only" onClick={() => setSidebarOpen(!sidebarOpen)}><Menu size={22} /></button>
+
       <button className="brand" onClick={() => setPage('home')}>
         <div className="logo">S</div>
         <div>
           <strong>SoloHub</strong>
-          <span>{cloudMode ? (user ? `${displayRole} - ${user.email}` : 'Supabase connected') : 'Local demo mode'}</span>
+          <span>{cloudMode ? (user ? `${displayRole} - ${user.email}` : 'Content rewards platform') : 'Local demo mode'}</span>
         </div>
       </button>
 
       <div className="topbar-right">
-        <nav className="role-switcher">
-          {['clipper', 'creator', 'admin'].map((item) => (
-            <button key={item} className={role === item ? 'active' : ''} onClick={() => changeRole(item)}>{item}</button>
-          ))}
-        </nav>
-        {user && <Button variant="ghost" className="small" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onLogout?.(); }}><LogOut size={15} /> Logout</Button>}
+        {user ? (
+          <>
+            <Button variant="ghost" className="small" onClick={goDashboard}><LayoutDashboard size={15} /> Dashboard</Button>
+            <Button variant="ghost" className="small" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onLogout?.(); }}><LogOut size={15} /> Logout</Button>
+          </>
+        ) : (
+          <Button className="small" onClick={goLogin}><UserRound size={15} /> Login</Button>
+        )}
       </div>
     </header>
   );
@@ -231,97 +237,153 @@ function Sidebar({ role, page, setPage, open, setOpen, cloudMode }) {
   );
 }
 
-function AuthBox({ user, profile, onAuthUser, onLogout, onRoleChange }) {
+function AuthBox({ user, profile, onAuthUser, onLogout }) {
+  const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [accountRole, setAccountRole] = useState(profile?.role || 'clipper');
+  const [accountRole, setAccountRole] = useState('clipper');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    if (profile?.role) setAccountRole(profile.role);
-  }, [profile?.role]);
+  const canSubmit = email.trim() && password.trim() && (mode === 'login' || fullName.trim());
 
-  const signIn = async () => {
+  const signIn = async (e) => {
+    e?.preventDefault?.();
     setMessage('');
     setBusy(true);
-    const { data, error } = await supabase.auth.signInWithPassword({ email, password });
+
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password
+    });
+
     setBusy(false);
-    if (error) return setMessage(error.message);
+
+    if (error) {
+      console.error('Auth error:', error);
+      alert(error.message);
+      setMessage(error.message);
+      return;
+    }
+
     if (data?.user) await onAuthUser(data.user, accountRole, fullName);
     setMessage('Logged in successfully.');
   };
 
-  const signUp = async () => {
+  const signUp = async (e) => {
+    e?.preventDefault?.();
     setMessage('');
     setBusy(true);
+
+    const safeRole = accountRole === 'creator' ? 'creator' : 'clipper';
+
     const { data, error } = await supabase.auth.signUp({
-      email,
+      email: email.trim(),
       password,
-      options: { data: { full_name: fullName, role: accountRole } }
+      options: {
+        data: {
+          full_name: fullName.trim(),
+          role: safeRole
+        }
+      }
     });
+
     setBusy(false);
-    if (error) return setMessage(error.message);
-    if (data?.user) await onAuthUser(data.user, accountRole, fullName);
-    setMessage(data?.session ? 'Account created and logged in.' : 'Account created. If Supabase asks for email confirmation, confirm your email or disable email confirmation for local testing.');
+
+    if (error) {
+      setMessage(error.message);
+      return;
+    }
+
+    if (data?.user) await onAuthUser(data.user, safeRole, fullName.trim());
+
+    setMessage(data?.session
+      ? 'Account created and logged in.'
+      : 'Account created. Confirm your email if Supabase requires confirmation.'
+    );
   };
 
   if (!isSupabaseConfigured) {
     return (
-      <section className="panel auth-panel">
+      <section className="panel auth-panel clean-auth">
         <div>
           <Pill tone="yellow"><UserRound size={14} /> Backend not connected</Pill>
-          <h2>Supabase login will appear after you add your .env keys.</h2>
-          <p>For now, the app still works using local browser storage.</p>
+          <h2>Connect Supabase to enable real accounts.</h2>
+          <p>Add your Supabase URL and publishable key in your .env file.</p>
         </div>
       </section>
     );
   }
 
   if (user) {
+    const currentRole = profile?.role ? cleanRole(profile.role) : 'clipper';
+
     return (
-      <section className="panel auth-panel">
+      <section className="panel auth-panel clean-auth logged-in-card">
         <div>
           <Pill tone="green"><UserRound size={14} /> Logged in</Pill>
           <h2>{profile?.full_name || user.email}</h2>
           <p><strong>Email:</strong> {user.email}</p>
-          <p><strong>Role:</strong> {profile?.role || 'Not set'}</p>
-          <p className="form-note">For development only, you can change your profile role below. Before launch, admin role changes should be locked.</p>
+          <p><strong>Account type:</strong> {currentRole}</p>
+          <p className="form-note">Your dashboard and menu are based on your saved SoloHub role.</p>
         </div>
-        <div className="auth-form role-admin-form">
-          <select value={accountRole} onChange={(e) => setAccountRole(e.target.value)}>
-            <option value="clipper">Clipper</option>
-            <option value="creator">Creator</option>
-            <option value="admin">Admin</option>
-          </select>
-          <Button onClick={() => onRoleChange(accountRole)}>Update role</Button>
+
+        <div className="auth-form auth-actions-clean">
+          <Button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><LayoutDashboard size={16} /> Continue</Button>
           <Button variant="ghost" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onLogout?.(); }}><LogOut size={16} /> Logout</Button>
         </div>
+
         {message && <p className="form-note">{message}</p>}
       </section>
     );
   }
 
   return (
-    <section className="panel auth-panel">
-      <div>
-        <Pill tone="green"><UserRound size={14} /> Phase 5 Auth</Pill>
-        <h2>Create or login to a SoloHub account.</h2>
-        <p>Choose the account type so SoloHub can send you to the correct dashboard.</p>
+    <section className="panel auth-panel clean-auth">
+      <div className="auth-copy">
+        <Pill tone="green"><UserRound size={14} /> SoloHub Account</Pill>
+        <h2>{mode === 'signup' ? 'Create your SoloHub account.' : 'Login to SoloHub.'}</h2>
+        <p>
+          {mode === 'signup'
+            ? 'Join as a clipper to earn from campaigns, or as a creator to launch campaigns.'
+            : 'Access your campaigns, submissions, approvals, and payouts.'}
+        </p>
       </div>
-      <div className="auth-form auth-form-wide">
-        <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name or brand name" />
+
+      <form className="auth-form auth-form-wide" onSubmit={mode === 'signup' ? signUp : signIn}>
+        <div className="auth-tabs">
+          <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>Login</button>
+          <button type="button" className={mode === 'signup' ? 'active' : ''} onClick={() => setMode('signup')}>Sign up</button>
+        </div>
+
+        {mode === 'signup' && (
+          <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name or brand name" />
+        )}
+
         <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
         <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
-        <select value={accountRole} onChange={(e) => setAccountRole(e.target.value)}>
-          <option value="clipper">Join as Clipper</option>
-          <option value="creator">Join as Creator</option>
-          <option value="admin">Admin test account</option>
-        </select>
-        <Button onClick={signUp} disabled={busy || !email || !password}>{busy ? 'Please wait...' : 'Sign up'}</Button>
-        <Button variant="ghost" onClick={signIn} disabled={busy || !email || !password}>Login</Button>
-      </div>
+
+        {mode === 'signup' && (
+          <select value={accountRole} onChange={(e) => setAccountRole(e.target.value)}>
+            <option value="clipper">Join as Clipper</option>
+            <option value="creator">Join as Creator</option>
+          </select>
+        )}
+
+        <Button
+          type="button"
+          disabled={busy || !canSubmit}
+          onClick={mode === 'signup' ? signUp : signIn}
+        >
+          {busy ? 'Please wait...' : mode === 'signup' ? 'Create account' : 'Login'}
+        </Button>
+
+        <p className="form-note">
+          Admin accounts are assigned by the platform owner from Supabase, not public signup.
+        </p>
+      </form>
+
       {message && <p className="form-note">{message}</p>}
     </section>
   );
@@ -331,9 +393,9 @@ function Hero({ setRole, setPage, cloudMode }) {
   return (
     <section className="hero-grid">
       <div className="hero-card big">
-        <Pill tone="purple"><Sparkles size={14} /> Phase 3 backend-ready MVP</Pill>
-        <h1>SoloHub now supports Supabase data saving.</h1>
-        <p>Create campaigns, submit clips, approve submissions, and save them to Supabase when connected. Without Supabase keys, it still runs locally.</p>
+        <Pill tone="purple"><Sparkles size={14} /> SoloHub MVP</Pill>
+        <h1>Run content reward campaigns with creators and clippers.</h1>
+        <p>Creators fund campaigns. Clippers submit short-form posts. Admin approves performance and payouts.</p>
         <div className="hero-actions">
           <Button onClick={() => { setRole('clipper'); setPage('discover'); }}>Start as Clipper</Button>
           <Button variant="ghost" onClick={() => { setRole('creator'); setPage('createCampaign'); }}>Create Campaign</Button>
@@ -359,7 +421,7 @@ function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, p
   return (
     <>
       <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} />
-      <AuthBox user={user} profile={profile} onAuthUser={onAuthUser} onLogout={onLogout} onRoleChange={onRoleChange} />
+      <AuthBox user={user} profile={profile} onAuthUser={onAuthUser} onLogout={onLogout} />
       <section className="panel">
         <div className="section-head">
           <div>

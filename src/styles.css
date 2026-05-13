@@ -932,3 +932,183 @@ td small { display: block; color: var(--muted); }
   .campaign-wizard-panel .wizard-actions { flex-direction: column !important; }
   .campaign-wizard-panel .wizard-actions .btn { width: 100% !important; }
 }
+
+/* ============================
+   Phase 8 Clean Auth UI
+   ============================ */
+
+.clean-auth {
+  display: grid;
+  grid-template-columns: 1fr minmax(320px, 430px);
+  gap: 28px;
+  align-items: center;
+}
+
+.auth-copy h2,
+.clean-auth h2 {
+  margin-bottom: 10px;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 6px;
+  background: #f3ecff;
+  border: 1px solid #e4d6ff;
+  border-radius: 18px;
+}
+
+.auth-tabs button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 900;
+  cursor: pointer;
+  background: transparent;
+  color: #5b21b6;
+}
+
+.auth-tabs button.active {
+  background: #ffffff;
+  color: #4c1d95;
+  box-shadow: 0 10px 25px rgba(76, 29, 149, 0.10);
+}
+
+.auth-actions-clean {
+  align-self: stretch;
+}
+
+.logged-in-card {
+  grid-template-columns: 1fr auto;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 850px) {
+  .clean-auth,
+  .logged-in-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================
+   Phase 8 Clean Auth UI
+   ============================ */
+
+.clean-auth {
+  display: grid;
+  grid-template-columns: 1fr minmax(320px, 430px);
+  gap: 28px;
+  align-items: center;
+}
+
+.auth-copy h2,
+.clean-auth h2 {
+  margin-bottom: 10px;
+}
+
+.auth-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 8px;
+  padding: 6px;
+  background: #f3ecff;
+  border: 1px solid #e4d6ff;
+  border-radius: 18px;
+}
+
+.auth-tabs button {
+  border: 0;
+  border-radius: 14px;
+  padding: 12px 14px;
+  font-weight: 900;
+  cursor: pointer;
+  background: transparent;
+  color: #5b21b6;
+}
+
+.auth-tabs button.active {
+  background: #ffffff;
+  color: #4c1d95;
+  box-shadow: 0 10px 25px rgba(76, 29, 149, 0.10);
+}
+
+.auth-actions-clean {
+  align-self: stretch;
+}
+
+.logged-in-card {
+  grid-template-columns: 1fr auto;
+}
+
+.topbar-right {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+@media (max-width: 850px) {
+  .clean-auth,
+  .logged-in-card {
+    grid-template-columns: 1fr;
+  }
+}
+
+/* ============================
+   Final Auth Form Fix
+   ============================ */
+
+.auth-panel.clean-auth {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) 420px !important;
+  gap: 30px !important;
+  overflow: hidden !important;
+}
+
+.auth-panel.clean-auth > * {
+  min-width: 0 !important;
+}
+
+.auth-form.auth-form-wide {
+  width: 100% !important;
+  max-width: 420px !important;
+  min-width: 0 !important;
+  display: flex !important;
+  flex-direction: column !important;
+  gap: 14px !important;
+}
+
+.auth-form.auth-form-wide input,
+.auth-form.auth-form-wide select,
+.auth-form.auth-form-wide button {
+  width: 100% !important;
+  max-width: 100% !important;
+  min-width: 0 !important;
+  box-sizing: border-box !important;
+}
+
+.auth-form.auth-form-wide .auth-tabs {
+  width: 100% !important;
+  max-width: 100% !important;
+}
+
+.auth-form.auth-form-wide .form-note {
+  width: 100% !important;
+  max-width: 100% !important;
+  overflow-wrap: break-word !important;
+}
+
+@media (max-width: 1000px) {
+  .auth-panel.clean-auth {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-form.auth-form-wide {
+    max-width: 100% !important;
+  }
+}
