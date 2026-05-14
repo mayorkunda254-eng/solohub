@@ -450,25 +450,6 @@ function StatCard({ icon: Icon, label, value, helper }) {
   );
 }
 
-
-const SAVED_CAMPAIGNS_STORAGE_KEY = 'solohub_saved_campaigns';
-
-function getSavedCampaignIds() {
-  try {
-    const raw = localStorage.getItem(SAVED_CAMPAIGNS_STORAGE_KEY);
-    const parsed = raw ? JSON.parse(raw) : [];
-    return Array.isArray(parsed) ? parsed : [];
-  } catch {
-    return [];
-  }
-}
-
-function saveCampaignIds(ids = []) {
-  const cleanIds = Array.from(new Set(ids.filter(Boolean).map(String)));
-  localStorage.setItem(SAVED_CAMPAIGNS_STORAGE_KEY, JSON.stringify(cleanIds));
-  return cleanIds;
-}
-
 function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout, activityCount = 0 }) {
   const displayRole = roleForUser(user, profile, role);
 
@@ -553,7 +534,6 @@ const navs = {
     ['activity', ShieldCheck, 'Activity'],
     ['onboarding', CheckCircle2, 'Getting Started'],
     ['discover', Search, 'Discover'],
-    ['savedCampaigns', BookOpen, 'Saved Campaigns'],
     ['submissions', FileVideo, 'My Submissions'],
     ['earnings', Wallet, 'Earnings'],
     ['academy', BookOpen, 'Academy']
@@ -941,89 +921,7 @@ function CampaignCard({ campaign, onOpen, onSubmit }) {
   );
 }
 
-function SavedCampaignsPage({ campaigns, savedCampaignIds = [], onToggleSaved, setSelectedCampaign, setPage }) {
-  const savedCampaigns = campaigns.filter((campaign) =>
-    savedCampaignIds.includes(String(campaign.id))
-  );
-
-  const openCampaign = (campaign) => {
-    setSelectedCampaign(campaign);
-    setPage('submit');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  return (
-    <section className="saved-campaigns-page">
-      <div className="section-head">
-        <div>
-          <Pill tone="green"><BookOpen size={14} /> Saved Campaigns</Pill>
-          <h2>Your saved campaign shortlist.</h2>
-          <p>Keep campaigns here while you prepare content, download resources, or compare payouts.</p>
-        </div>
-      </div>
-
-      <div className="stats-grid">
-        <StatCard icon={BookOpen} label="Saved" value={savedCampaigns.length} helper="Your shortlist" />
-        <StatCard icon={Megaphone} label="Live campaigns" value={campaigns.filter((c) => c.status === 'Live').length} helper="Available now" />
-        <StatCard icon={Wallet} label="Best payout" value={money(Math.max(0, ...savedCampaigns.map((c) => Number(c.payPerThousand || 0))))} helper="Among saved" />
-      </div>
-
-      <div className="saved-campaign-grid">
-        {savedCampaigns.map((campaign) => {
-          const imageUrl = campaign.imageUrl || campaign.image_url || '';
-          const platformsList = Array.isArray(campaign.platforms) ? campaign.platforms : [];
-
-          return (
-            <article key={campaign.id} className="saved-campaign-card">
-              <div className="saved-campaign-thumb">
-                {imageUrl ? <img src={imageUrl} alt={campaign.title} /> : <div>S</div>}
-              </div>
-
-              <div className="saved-campaign-info">
-                <div>
-                  <h3>{campaign.title}</h3>
-                  <p>{campaign.creator || 'SoloHub Creator'} � {campaign.category || 'Campaign'}</p>
-                </div>
-
-                <div className="saved-campaign-metrics">
-                  <span>Pay: <strong>{money(campaign.payPerThousand || 0)} / 1k views</strong></span>
-                  <span>Budget: <strong>{money(campaign.budget || 0)}</strong></span>
-                </div>
-
-                <div className="premium-platforms">
-                  {platformsList.slice(0, 4).map((item) => <span key={item}>{item}</span>)}
-                </div>
-
-                <div className="saved-campaign-actions">
-                  <button type="button" className="affiliate-action-btn" onClick={() => openCampaign(campaign)}>
-                    Submit clip
-                  </button>
-
-                  <button type="button" className="mini-action ghost" onClick={() => onToggleSaved?.(campaign.id)}>
-                    Remove
-                  </button>
-                </div>
-              </div>
-            </article>
-          );
-        })}
-
-        {!savedCampaigns.length && (
-          <div className="panel empty-saved">
-            <Pill tone="yellow">No saved campaigns</Pill>
-            <h3>You have not saved any campaigns yet.</h3>
-            <p>Go to Discover and save campaigns you want to submit clips for later.</p>
-            <button type="button" className="affiliate-action-btn" onClick={() => setPage('discover')}>
-              Open Discover
-            </button>
-          </div>
-        )}
-      </div>
-    </section>
-  );
-}
-
-function DiscoverPage({ campaigns, setSelectedCampaign, setPage, savedCampaignIds = [], onToggleSaved }) {
+function DiscoverPage({ campaigns, setSelectedCampaign, setPage }) {
   const [search, setSearch] = useState('');
   const [platform, setPlatform] = useState('All');
   const [category, setCategory] = useState('All');
@@ -1129,7 +1027,6 @@ function DiscoverPage({ campaigns, setSelectedCampaign, setPage, savedCampaignId
           const budget = Number(campaign.budget || 0);
           const paidOut = Number(campaign.paidOut || campaign.paid_out || 0);
           const progress = budget > 0 ? Math.min(100, Math.round((paidOut / budget) * 100)) : 0;
-          const isSaved = savedCampaignIds.includes(String(campaign.id));
 
           return (
             <article key={campaign.id} className="premium-campaign-card">
@@ -1195,10 +1092,6 @@ function DiscoverPage({ campaigns, setSelectedCampaign, setPage, savedCampaignId
                 <div className="premium-card-actions">
                   <button type="button" className="mini-action ghost" onClick={() => openCampaign(campaign)}>
                     View details
-                  </button>
-
-                  <button type="button" className={isSaved ? "mini-action saved" : "mini-action"} onClick={() => onToggleSaved?.(campaign.id)}>
-                    {isSaved ? 'Saved' : 'Save'}
                   </button>
 
                   <button type="button" className="affiliate-action-btn" onClick={() => openCampaign(campaign)}>
@@ -4121,8 +4014,7 @@ function App() {
   const [notice, setNotice] = useState('');
   const [referralCode, setReferralCode] = useState(() => captureReferralCodeFromUrl());
   const [inviteRole, setInviteRole] = useState(() => captureInviteRoleFromUrl());
-  const [paymentSettingsTick, setPaymentSettingsTick] = useState(0);
-  const [savedCampaignIds, setSavedCampaignIds] = useState(() => getSavedCampaignIds());  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
+  const [paymentSettingsTick, setPaymentSettingsTick] = useState(0);  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
     if (!cloudMode || !currentUser) return null;
 
     const ownerAdmin = isOwnerEmail(currentUser.email);
@@ -4840,18 +4732,6 @@ const updateProfileRole = async (nextRole) => {
     }
   };
 
-  const toggleSavedCampaign = (campaignId) => {
-    setSavedCampaignIds((prev) => {
-      const id = String(campaignId);
-      const next = prev.includes(id)
-        ? prev.filter((item) => item !== id)
-        : [id, ...prev];
-
-      saveCampaignIds(next);
-      return next;
-    });
-  };
-
 const content = useMemo(() => {
     const currentRole = roleForUser(user, profile, role);
     const currentUserId = user?.id || null;
@@ -4915,20 +4795,8 @@ const content = useMemo(() => {
       return <ActivityCenter role={currentRole} campaigns={activityCampaigns} submissions={activitySubmissions} />;
     }
 
-    if (page === 'savedCampaigns') {
-      return (
-        <SavedCampaignsPage
-          campaigns={campaigns}
-          savedCampaignIds={savedCampaignIds}
-          onToggleSaved={toggleSavedCampaign}
-          setSelectedCampaign={setSelectedCampaign}
-          setPage={setPage}
-        />
-      );
-    }
-
     if (page === 'discover') {
-      return <DiscoverPage campaigns={campaigns} setSelectedCampaign={setSelectedCampaign} setPage={setPage} savedCampaignIds={savedCampaignIds} onToggleSaved={toggleSavedCampaign} />;
+      return <DiscoverPage campaigns={campaigns} setSelectedCampaign={setSelectedCampaign} setPage={setPage} />;
     }
 
     if (page === 'submit') {
