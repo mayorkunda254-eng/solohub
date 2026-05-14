@@ -1319,302 +1319,126 @@ function SubmitPage({ selectedCampaign, campaigns, onSubmitClip }) {
   const campaign = selectedCampaign || firstLive;
 
   const [form, setForm] = useState({
+    platform: 'TikTok',
     postUrl: '',
-    platform: '',
-    submittedViews: '',
-    notes: ''
+    submittedViews: ''
   });
 
-  const [checks, setChecks] = useState({
-    publicPost: false,
-    officialResources: false,
-    realViews: false,
-    noReusedContent: false
-  });
+  if (!campaign) {
+    return (
+      <section className="panel">
+        <h2>No campaign selected.</h2>
+        <p>Go to Discover and choose a live campaign first.</p>
+      </section>
+    );
+  }
 
-  const detectPlatform = (url) => {
-    const lower = String(url || '').toLowerCase();
-
-    if (lower.includes('tiktok.com')) return 'TikTok';
-    if (lower.includes('instagram.com') || lower.includes('reel')) return 'Instagram Reels';
-    if (lower.includes('youtube.com') || lower.includes('youtu.be') || lower.includes('shorts')) return 'YouTube Shorts';
-    if (lower.includes('facebook.com')) return 'Facebook Reels';
-
-    return '';
-  };
-
-  const updatePostUrl = (value) => {
-    const detected = detectPlatform(value);
-
-    setForm((prev) => ({
-      ...prev,
-      postUrl: value,
-      platform: detected || prev.platform
-    }));
-  };
+  const budget = Number(campaign.budget || 0);
+  const remaining = Number(campaign.remaining || 0);
+  const paidOut = Math.max(0, budget - remaining);
+  const progress = budget > 0 ? Math.min(100, Math.round((paidOut / budget) * 100)) : 0;
 
   const update = (key, value) => {
     setForm((prev) => ({ ...prev, [key]: value }));
   };
 
-  const updateCheck = (key) => {
-    setChecks((prev) => ({ ...prev, [key]: !prev[key] }));
-  };
-
-  const copyHashtags = async () => {
-    const tags = Array.isArray(campaign?.hashtags) ? campaign.hashtags : [];
-    const text = tags.map((tag) => String(tag).startsWith('#') ? tag : '#' + tag).join(' ');
-
-    if (!text) {
-      alert('No hashtags found for this campaign.');
+  const submit = () => {
+    if (!form.postUrl) {
+      alert('Please paste your public post URL.');
       return;
     }
 
-    try {
-      await navigator.clipboard.writeText(text);
-      alert('Campaign hashtags copied.');
-    } catch (err) {
-      window.prompt('Copy hashtags:', text);
-    }
-  };
-
-  const copyRules = async () => {
-    const rules = Array.isArray(campaign?.rules) ? campaign.rules : [];
-    const requirements = campaign?.contentRequirements || campaign?.content_requirements || '';
-    const text = [
-      'SOLOHUB CAMPAIGN REQUIREMENTS',
-      '',
-      'Campaign: ' + (campaign?.title || ''),
-      '',
-      requirements,
-      '',
-      ...rules.map((rule, index) => (index + 1) + '. ' + rule)
-    ].filter(Boolean).join('\n');
-
-    try {
-      await navigator.clipboard.writeText(text);
-      alert('Campaign rules copied.');
-    } catch (err) {
-      window.prompt('Copy campaign rules:', text);
-    }
-  };
-
-  const submit = (e) => {
-    e.preventDefault();
-
-    if (!campaign) {
-      alert('No live campaign available.');
-      return;
-    }
-
-    if (!form.postUrl.trim()) {
-      alert('Paste your public post URL.');
-      return;
-    }
-
-    if (!/^https?:\/\//i.test(form.postUrl.trim())) {
-      alert('Post URL must start with http:// or https://');
-      return;
-    }
-
-    if (!form.platform.trim()) {
-      alert('Choose or confirm the platform.');
-      return;
-    }
-
-    if (Number(form.submittedViews || 0) <= 0) {
-      alert('Enter submitted views.');
-      return;
-    }
-
-    const allChecked = Object.values(checks).every(Boolean);
-
-    if (!allChecked) {
-      alert('Complete the submission checklist before submitting.');
-      return;
-    }
-
-    onSubmitClip?.({
+    onSubmitClip({
       campaignId: campaign.id,
-      campaign_id: campaign.id,
       campaign: campaign.title,
+      clipper: 'SoloHub Clipper',
       platform: form.platform,
-      postUrl: form.postUrl.trim(),
-      post_url: form.postUrl.trim(),
+      postUrl: form.postUrl,
       submittedViews: Number(form.submittedViews || 0),
-      submitted_views: Number(form.submittedViews || 0),
-      approvedViews: 0,
-      approved_views: 0,
       payout: 0,
-      status: 'Pending Review',
-      fraudStatus: 'Pending Review',
-      fraud_status: 'Pending Review',
-      notes: [
-        form.notes,
-        'Clipper declaration: public post, official resources used, real views only, no reused content.'
-      ].filter(Boolean).join('\n')
-    });
-
-    setForm({
-      postUrl: '',
-      platform: '',
-      submittedViews: '',
-      notes: ''
-    });
-
-    setChecks({
-      publicPost: false,
-      officialResources: false,
-      realViews: false,
-      noReusedContent: false
+      status: 'Pending Review'
     });
   };
-
-  if (!campaign) {
-    return (
-      <section className="panel">
-        <Pill tone="yellow">No Live Campaign</Pill>
-        <h2>No live campaign available.</h2>
-        <p>Check Discover later after admin approves campaigns.</p>
-      </section>
-    );
-  }
-
-  const imageUrl = campaign.imageUrl || campaign.image_url || '';
-  const resourceUrl = campaign.resourceUrl || campaign.resource_url || '';
-  const requirements = campaign.contentRequirements || campaign.content_requirements || 'Follow campaign instructions and use approved content only.';
-  const rules = Array.isArray(campaign.rules) ? campaign.rules : [];
-  const hashtags = Array.isArray(campaign.hashtags) ? campaign.hashtags : [];
-  const platforms = Array.isArray(campaign.platforms) ? campaign.platforms : ['TikTok', 'Instagram Reels', 'YouTube Shorts'];
 
   return (
-    <section className="smart-submit-page">
-      <div className="smart-submit-hero">
-        <div className="smart-submit-image">
-          {imageUrl ? <img src={imageUrl} alt={campaign.title} /> : <div>S</div>}
-        </div>
-
-        <div className="smart-submit-copy">
-          <Pill tone="green"><Upload size={14} /> Submit Clip</Pill>
-          <h2>{campaign.title}</h2>
+    <section className="campaign-detail">
+      <div className="campaign-detail-hero">
+        <div>
+          <Pill tone="purple">Content Rewards</Pill>
+          <h1>{campaign.title}</h1>
           <p>{campaign.description}</p>
 
-          <div className="smart-submit-meta">
-            <span>Pay: <strong>{money(campaign.payPerThousand || 0)} / 1k views</strong></span>
-            <span>Budget: <strong>{money(campaign.budget || 0)}</strong></span>
-            <span>Creator: <strong>{campaign.creator || 'SoloHub Creator'}</strong></span>
+          <div className="campaign-detail-tags">
+            <span>Clipping</span>
+            <span>{campaign.category}</span>
+            <span>{money(campaign.payPerThousand)} / 1k views</span>
           </div>
+        </div>
 
-          <div className="smart-submit-actions">
-            {resourceUrl && (
-              <a className="mini-action link-action" href={resourceUrl} target="_blank" rel="noreferrer">
-                Open resources
-              </a>
-            )}
-
-            <button type="button" className="mini-action" onClick={copyHashtags}>
-              Copy hashtags
-            </button>
-
-            <button type="button" className="mini-action ghost" onClick={copyRules}>
-              Copy rules
-            </button>
-
-            <button type="button" className="mini-action ghost" onClick={() => copyCampaignShareLink(campaign)}>
-              Copy campaign link
-            </button>
-          </div>
+        <div className="campaign-detail-image">
+          {campaign.imageUrl ? (
+            <img src={campaign.imageUrl} alt={campaign.title} />
+          ) : (
+            <div className="campaign-detail-fallback">SoloHub</div>
+          )}
         </div>
       </div>
 
-      <div className="smart-submit-grid">
-        <div className="submit-guidance-card">
-          <h3>Campaign requirements</h3>
-          <p>{requirements}</p>
-
-          {rules.length > 0 && (
-            <div className="submit-rule-list">
-              {rules.map((rule, index) => (
-                <div key={rule}>
-                  <strong>{index + 1}</strong>
-                  <span>{rule}</span>
-                </div>
-              ))}
-            </div>
-          )}
-
-          {hashtags.length > 0 && (
-            <div className="premium-tag-row submit-tags">
-              {hashtags.map((tag) => (
-                <span key={tag}>{String(tag).startsWith('#') ? tag : '#' + tag}</span>
-              ))}
-            </div>
-          )}
+      <div className="campaign-budget-card">
+        <div className="budget-line">
+          <strong>{money(budget)} budget</strong>
+          <span>{money(paidOut)} paid out</span>
         </div>
+        <div className="whop-progress large">
+          <i style={{ width: progress + '%' }} />
+        </div>
+      </div>
 
-        <form className="submit-form-card" onSubmit={submit}>
-          <h3>Submit your public post</h3>
+      <div className="campaign-info-table">
+        <div><span>Category</span><strong>{campaign.category}</strong></div>
+        <div><span>Type</span><strong>{campaign.type}</strong></div>
+        <div><span>Platforms</span><strong>{Array.isArray(campaign.platforms) ? campaign.platforms.join(', ') : campaign.platforms}</strong></div>
+        <div><span>Deadline</span><strong>{campaign.deadline || 'Open'}</strong></div>
+      </div>
 
-          <label>
-            Public post URL
-            <input
-              value={form.postUrl}
-              onChange={(e) => updatePostUrl(e.target.value)}
-              placeholder="https://www.tiktok.com/@user/video/..."
-            />
-          </label>
+      <div className="submit-video-box">
+        <h3>Submit your clip</h3>
+        <p>Paste your public TikTok, Instagram Reels, or YouTube Shorts link. Admin will verify views before payout.</p>
 
-          <label>
-            Platform
-            <select value={form.platform} onChange={(e) => update('platform', e.target.value)}>
-              <option value="">Choose platform</option>
-              {platforms.map((item) => <option key={item}>{item}</option>)}
-            </select>
-          </label>
+        <div className="submit-grid">
+          <select value={form.platform} onChange={(e) => update('platform', e.target.value)}>
+            <option>TikTok</option>
+            <option>Instagram Reels</option>
+            <option>YouTube Shorts</option>
+          </select>
 
-          <label>
-            Submitted views
-            <input
-              type="number"
-              value={form.submittedViews}
-              onChange={(e) => update('submittedViews', e.target.value)}
-              placeholder="Current public views"
-            />
-          </label>
+          <input value={form.postUrl} onChange={(e) => update('postUrl', e.target.value)} placeholder="Public post URL" />
+          <input value={form.submittedViews} onChange={(e) => update('submittedViews', e.target.value)} placeholder="Current views" type="number" />
 
-          <label>
-            Notes for admin
-            <textarea
-              value={form.notes}
-              onChange={(e) => update('notes', e.target.value)}
-              placeholder="Mention anything admin should know about this clip."
-            />
-          </label>
+          <Button type="button" onClick={submit}>Submit Video</Button>
+        </div>
+      </div>
 
-          <div className="submission-checklist">
-            <h4>Submission checklist</h4>
+      <div className="campaign-requirements">
+        <h3>Requirements</h3>
+        <p>{campaign.contentRequirements || campaign.rules?.join(' ') || 'Use approved campaign content only. Follow the creator instructions carefully.'}</p>
 
-            <button type="button" className={checks.publicPost ? 'checked' : ''} onClick={() => updateCheck('publicPost')}>
-              <CheckCircle2 size={18} /> My post is public and accessible.
-            </button>
+        {campaign.resourceUrl && (
+          <a className="resource-card" href={campaign.resourceUrl} target="_blank" rel="noreferrer">
+            <strong>Campaign Resources</strong>
+            <span>Open source folder</span>
+          </a>
+        )}
+      </div>
 
-            <button type="button" className={checks.officialResources ? 'checked' : ''} onClick={() => updateCheck('officialResources')}>
-              <CheckCircle2 size={18} /> I used approved campaign resources/instructions.
-            </button>
-
-            <button type="button" className={checks.realViews ? 'checked' : ''} onClick={() => updateCheck('realViews')}>
-              <CheckCircle2 size={18} /> My views are real and not artificially boosted.
-            </button>
-
-            <button type="button" className={checks.noReusedContent ? 'checked' : ''} onClick={() => updateCheck('noReusedContent')}>
-              <CheckCircle2 size={18} /> I am not submitting duplicate/reused content.
-            </button>
+      <div className="earnings-cards">
+        {(Array.isArray(campaign.platforms) ? campaign.platforms : ['TikTok']).map((item) => (
+          <div key={item} className="earning-card">
+            <strong>{item}</strong>
+            <span>{money(campaign.payPerThousand)} / 1k views</span>
+            <small>{money(campaign.maxPayout)} max payout</small>
           </div>
-
-          <button type="submit" className="affiliate-action-btn submit-final-btn">
-            Submit for review
-          </button>
-        </form>
+        ))}
       </div>
     </section>
   );
