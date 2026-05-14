@@ -555,37 +555,6 @@ function downloadCsv(filename, rows = []) {
   URL.revokeObjectURL(url);
 }
 
-
-function getPasswordResetRedirectUrl() {
-  if (typeof window === 'undefined') return '';
-
-  const url = new URL(window.location.origin + window.location.pathname);
-  url.searchParams.set('resetPassword', '1');
-  return url.toString();
-}
-
-function isPasswordResetUrl() {
-  if (typeof window === 'undefined') return false;
-
-  const params = new URLSearchParams(window.location.search);
-  const hash = String(window.location.hash || '').toLowerCase();
-
-  return params.get('resetPassword') === '1' || hash.includes('type=recovery');
-}
-
-function clearPasswordResetUrl() {
-  if (typeof window === 'undefined') return;
-
-  const url = new URL(window.location.href);
-  url.searchParams.delete('resetPassword');
-
-  if (url.hash && url.hash.toLowerCase().includes('type=recovery')) {
-    url.hash = '';
-  }
-
-  window.history.replaceState({}, '', url.toString());
-}
-
 function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout, activityCount = 0 }) {
   const displayRole = roleForUser(user, profile, role);
 
@@ -805,378 +774,172 @@ function Sidebar({ role, page, setPage, open, setOpen, cloudMode }) {
 }
 
 function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole }) {
-  const [mode, setMode] = useState(() => isPasswordResetUrl() ? 'reset' : 'login');
+  const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
   const [accountRole, setAccountRole] = useState(() => cleanInviteRole(inviteRole) || 'clipper');
-  const [newPassword, setNewPassword] = useState('');
-  const [confirmPassword, setConfirmPassword] = useState('');
-  const [resetEmailSent, setResetEmailSent] = useState(false);
-  const [authMessage, setAuthMessage] = useState('');
-  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
     const invited = cleanInviteRole(inviteRole);
-
     if (invited) {
       setAccountRole(invited);
     }
   }, [inviteRole]);
+  const [message, setMessage] = useState('');
+  const [busy, setBusy] = useState(false);
 
-  useEffect(() => {
-    if (isPasswordResetUrl()) {
-      setMode('reset');
-      setAuthMessage('Enter your new password to complete account recovery.');
-    }
-
-    if (!supabase?.auth?.onAuthStateChange) return;
-
-    const { data } = supabase.auth.onAuthStateChange((event) => {
-      if (event === 'PASSWORD_RECOVERY') {
-        setMode('reset');
-        setAuthMessage('Recovery link confirmed. Enter your new password.');
-      }
-    });
-
-    return () => {
-      data?.subscription?.unsubscribe?.();
-    };
-  }, []);
+  const canSubmit = email.trim() && password.trim() && (mode === 'login' || fullName.trim());
 
   const signIn = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
+    setMessage('');
+    setBusy(true);
 
-    if (!supabase) {
-      alert('Supabase is not configured.');
+    const { data, error } = await supabase.auth.signInWithPassword({
+      email: email.trim(),
+      password
+    });
+
+    setBusy(false);
+
+    if (error) {
+      console.error('Auth error:', error);
+      alert(error.message);
+      setMessage(error.message);
       return;
     }
 
-    setLoading(true);
-    setAuthMessage('Logging in...');
-
-    try {
-      const { data, error } = await supabase.auth.signInWithPassword({
-        email: email.trim(),
-        password
-      });
-
-      if (error) throw error;
-
-      if (data?.user) {
-        await onAuthUser?.(data.user, undefined, fullName);
-        setAuthMessage('Logged in successfully.');
-      }
-    } catch (err) {
-      console.error('Login failed:', err);
-      setAuthMessage('Login failed: ' + (err?.message || err));
-      alert('Login failed: ' + (err?.message || err));
-    } finally {
-      setLoading(false);
-    }
+    if (data?.user) await onAuthUser(data.user, undefined, fullName, { preserveExistingRole: true });
+    setMessage('Logged in successfully.');
   };
 
   const signUp = async (e) => {
-    e.preventDefault();
+    e?.preventDefault?.();
+    setMessage('');
+    setBusy(true);
 
-    if (!supabase) {
-      alert('Supabase is not configured.');
-      return;
-    }
+    const safeRole = accountRole === 'creator' ? 'creator' : 'clipper';
 
-    if (password.length < 6) {
-      alert('Password should be at least 6 characters.');
-      return;
-    }
-
-    setLoading(true);
-    setAuthMessage('Creating account...');
-
-    try {
-      const { data, error } = await supabase.auth.signUp({
-        email: email.trim(),
-        password,
-        options: {
-          data: {
-            full_name: fullName,
-            role: accountRole,
-            referral_code: referralCode || ''
-          }
+    const { data, error } = await supabase.auth.signUp({
+      email: email.trim(),
+      password,
+      options: {
+        data: {
+          full_name: fullName.trim(),
+          role: safeRole
         }
-      });
-
-      if (error) throw error;
-
-      if (data?.user) {
-        await onAuthUser?.(data.user, accountRole, fullName);
-        clearInviteRole();
-        setAuthMessage('Account created. If email confirmation is enabled, check your inbox.');
       }
-    } catch (err) {
-      console.error('Signup failed:', err);
-      setAuthMessage('Signup failed: ' + (err?.message || err));
-      alert('Signup failed: ' + (err?.message || err));
-    } finally {
-      setLoading(false);
+    });
+
+    setBusy(false);
+
+    if (error) {
+      setMessage(error.message);
+      return;
     }
+
+    if (data?.user) await onAuthUser(data.user, safeRole, fullName.trim());
+
+    setMessage(data?.session
+      ? 'Account created and logged in.'
+      : 'Account created. Confirm your email if Supabase requires confirmation.'
+    );
   };
 
-  const sendPasswordReset = async (e) => {
-    e.preventDefault();
+  if (!isSupabaseConfigured) {
+    return (
+      <section className="panel auth-panel clean-auth">
+        <div>
+          <Pill tone="yellow"><UserRound size={14} /> Backend not connected</Pill>
+          <h2>Connect Supabase to enable real accounts.</h2>
+          <p>Add your Supabase URL and publishable key in your .env file.</p>
+        </div>
+      </section>
+    );
+  }
 
-    if (!supabase) {
-      alert('Supabase is not configured.');
-      return;
-    }
-
-    if (!email.trim()) {
-      alert('Enter your email address first.');
-      return;
-    }
-
-    setLoading(true);
-    setAuthMessage('Sending password reset email...');
-
-    try {
-      const { error } = await supabase.auth.resetPasswordForEmail(email.trim(), {
-        redirectTo: getPasswordResetRedirectUrl()
-      });
-
-      if (error) throw error;
-
-      setResetEmailSent(true);
-      setAuthMessage('Password reset email sent. Check your inbox or spam folder.');
-      alert('Password reset email sent. Check your inbox or spam folder.');
-    } catch (err) {
-      console.error('Password reset failed:', err);
-      setAuthMessage('Password reset failed: ' + (err?.message || err));
-      alert('Password reset failed: ' + (err?.message || err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const updatePassword = async (e) => {
-    e.preventDefault();
-
-    if (!supabase) {
-      alert('Supabase is not configured.');
-      return;
-    }
-
-    if (newPassword.length < 6) {
-      alert('New password should be at least 6 characters.');
-      return;
-    }
-
-    if (newPassword !== confirmPassword) {
-      alert('Passwords do not match.');
-      return;
-    }
-
-    setLoading(true);
-    setAuthMessage('Updating password...');
-
-    try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
-
-      if (error) throw error;
-
-      clearPasswordResetUrl();
-      setNewPassword('');
-      setConfirmPassword('');
-      setMode('login');
-      setAuthMessage('Password updated. Please login again.');
-      alert('Password updated successfully. Please login again.');
-
-      await onLogout?.();
-    } catch (err) {
-      console.error('Password update failed:', err);
-      setAuthMessage('Password update failed: ' + (err?.message || err));
-      alert('Password update failed: ' + (err?.message || err));
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formHandler = mode === 'signup'
-    ? signUp
-    : mode === 'forgot'
-      ? sendPasswordReset
-      : mode === 'reset'
-        ? updatePassword
-        : signIn;
-
-  if (user && mode !== 'reset') {
-    const displayRole = roleForUser(user, profile, profile?.role || accountRole || 'clipper');
+  if (user) {
+    const currentRole = roleForUser(user, profile, 'clipper');
 
     return (
-      <div className="auth-panel">
-        <Pill tone="green"><UserRound size={14} /> Logged in</Pill>
-        <h2>{user.email}</h2>
-        <p><strong>Email:</strong> {user.email}</p>
-        <p><strong>Account type:</strong> {displayRole}</p>
-        <p className="form-note">Your dashboard and menu are based on your saved SoloHub role.</p>
-
-        <div className="auth-actions-row">
-          <Button type="button" className="small" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <LayoutDashboard size={15} /> Continue
-          </Button>
-
-          <Button type="button" variant="ghost" className="small" onClick={onLogout}>
-            <LogOut size={15} /> Logout
-          </Button>
+      <section className="panel auth-panel clean-auth logged-in-card">
+        <div>
+          <Pill tone="green"><UserRound size={14} /> Logged in</Pill>
+          <h2>{profile?.full_name || user.email}</h2>
+          <p><strong>Email:</strong> {user.email}</p>
+          <p><strong>Account type:</strong> {currentRole}</p>
+          <p className="form-note">Your dashboard and menu are based on your saved SoloHub role.</p>
         </div>
-      </div>
+
+        <div className="auth-form auth-actions-clean">
+          <Button onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}><LayoutDashboard size={16} /> Continue</Button>
+          <Button variant="ghost" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onLogout?.(); }}><LogOut size={16} /> Logout</Button>
+        </div>
+
+        {message && <p className="form-note">{message}</p>}
+      </section>
     );
   }
 
   return (
-    <div className="auth-panel auth-panel-premium">
-      <Pill tone="green"><UserRound size={14} /> SoloHub Account</Pill>
+    <section className="panel auth-panel clean-auth">
+      <div className="auth-copy">
+        <Pill tone="green"><UserRound size={14} /> SoloHub Account</Pill>
+        <h2>{mode === 'signup' ? 'Create your SoloHub account.' : 'Login to SoloHub.'}</h2>
+        <p>
+          {mode === 'signup'
+            ? 'Join as a clipper to earn from campaigns, or as a creator to launch campaigns.'
+            : 'Access your campaigns, submissions, approvals, and payouts.'}
+        </p>
+      </div>
 
-      <h2>
-        {mode === 'signup'
-          ? 'Create your SoloHub account.'
-          : mode === 'forgot'
-            ? 'Reset your password.'
-            : mode === 'reset'
-              ? 'Create a new password.'
-              : 'Login to SoloHub.'}
-      </h2>
-
-      <p>
-        {mode === 'signup'
-          ? 'Choose your account type and start using SoloHub.'
-          : mode === 'forgot'
-            ? 'Enter your email and we will send a password reset link.'
-            : mode === 'reset'
-              ? 'Enter a new password for your SoloHub account.'
-              : 'Access your campaigns, submissions, approvals, and payouts.'}
-      </p>
-
-      {authMessage && <div className="auth-status-message">{authMessage}</div>}
-
-      {mode !== 'forgot' && mode !== 'reset' && (
-        <div className="auth-tabs">
-          <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>
-            Login
-          </button>
-
-          <button type="button" className={mode === 'signup' ? 'active' : ''} onClick={() => setMode('signup')}>
-            Sign up
-          </button>
-        </div>
-      )}
-
-      <form className="auth-form auth-form-wide" onSubmit={formHandler}>
-        {referralCode && mode === 'signup' && (
+      <form className="auth-form auth-form-wide" onSubmit={mode === 'signup' ? signUp : signIn}>
+        {referralCode && (
           <div className="referral-banner">
             Referral code applied: <strong>{referralCode}</strong>
           </div>
         )}
 
-        {cleanInviteRole(inviteRole) && mode === 'signup' && (
+        {cleanInviteRole(inviteRole) && (
           <div className="invite-banner">
             Invite role selected: <strong>{cleanInviteRole(inviteRole)}</strong>
           </div>
         )}
+        <div className="auth-tabs">
+          <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>Login</button>
+          <button type="button" className={mode === 'signup' ? 'active' : ''} onClick={() => setMode('signup')}>Sign up</button>
+        </div>
 
         {mode === 'signup' && (
-          <>
-            <label>
-              Full name
-              <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Your full name" />
-            </label>
-
-            <label>
-              Account type
-              <select value={accountRole} onChange={(e) => setAccountRole(cleanRole(e.target.value))}>
-                <option value="clipper">Clipper</option>
-                <option value="creator">Creator</option>
-              </select>
-            </label>
-          </>
+          <input value={fullName} onChange={(e) => setFullName(e.target.value)} placeholder="Full name or brand name" />
         )}
 
-        {(mode === 'login' || mode === 'signup' || mode === 'forgot') && (
-          <label>
-            Email
-            <input type="email" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" required />
-          </label>
+        <input value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+        <input value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Password" type="password" />
+
+        {mode === 'signup' && (
+          <select value={accountRole} onChange={(e) => setAccountRole(e.target.value)}>
+            <option value="clipper">Join as Clipper</option>
+            <option value="creator">Join as Creator</option>
+          </select>
         )}
 
-        {(mode === 'login' || mode === 'signup') && (
-          <label>
-            Password
-            <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
-          </label>
-        )}
+        <Button
+          type="button"
+          disabled={busy || !canSubmit}
+          onClick={mode === 'signup' ? signUp : signIn}
+        >
+          {busy ? 'Please wait...' : mode === 'signup' ? 'Create account' : 'Login'}
+        </Button>
 
-        {mode === 'reset' && (
-          <>
-            <label>
-              New password
-              <input type="password" value={newPassword} onChange={(e) => setNewPassword(e.target.value)} placeholder="New password" required />
-            </label>
-
-            <label>
-              Confirm new password
-              <input type="password" value={confirmPassword} onChange={(e) => setConfirmPassword(e.target.value)} placeholder="Confirm new password" required />
-            </label>
-          </>
-        )}
-
-        <button type="submit" className="affiliate-action-btn auth-submit-btn" disabled={loading}>
-          {loading
-            ? 'Please wait...'
-            : mode === 'signup'
-              ? 'Create account'
-              : mode === 'forgot'
-                ? resetEmailSent ? 'Send reset email again' : 'Send reset email'
-                : mode === 'reset'
-                  ? 'Update password'
-                  : 'Login'}
-        </button>
+        <p className="form-note">
+          Admin accounts are assigned by the platform owner from Supabase, not public signup.
+        </p>
       </form>
 
-      <div className="auth-secondary-actions">
-        {mode === 'login' && (
-          <button type="button" onClick={() => setMode('forgot')}>
-            Forgot password?
-          </button>
-        )}
-
-        {mode === 'forgot' && (
-          <button type="button" onClick={() => setMode('login')}>
-            Back to login
-          </button>
-        )}
-
-        {mode === 'reset' && (
-          <button type="button" onClick={() => {
-            clearPasswordResetUrl();
-            setMode('login');
-          }}>
-            Back to login
-          </button>
-        )}
-      </div>
-
-      {mode === 'signup' && (
-        <p className="form-note">
-          Admin accounts are assigned by the platform owner from SoloHub admin tools.
-        </p>
-      )}
-
-      {mode === 'forgot' && (
-        <p className="form-note">
-          Check your email inbox and spam folder. The reset link will bring you back to SoloHub.
-        </p>
-      )}
-    </div>
+      {message && <p className="form-note">{message}</p>}
+    </section>
   );
 }
 
@@ -1296,75 +1059,13 @@ function Hero({ setRole, setPage, cloudMode }) {
   );
 }
 
-function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, inviteRole, cloudMode }) {
-  return (
-    <section className="logged-out-auth-page">
-      <div className="auth-marketing-card">
-        <Pill tone="green"><Sparkles size={14} /> SoloHub MVP</Pill>
-
-        <h1>Launch campaigns. Track clips. Pay creators.</h1>
-
-        <p>
-          Manage clipping campaigns, verify submissions, track deposits, monitor payouts,
-          and onboard creators, clippers, and affiliates from one premium dashboard.
-        </p>
-
-        <div className="auth-marketing-points">
-          <span><ShieldCheck size={16} /> Admin verified submissions</span>
-          <span><Wallet size={16} /> Manual M-Pesa payout tracking</span>
-          <span><Megaphone size={16} /> Creator campaign manager</span>
-          <span><Coins size={16} /> Affiliate-ready growth</span>
-        </div>
-
-        <div className="auth-storage-pill">
-          <strong>{cloudMode ? 'Cloud mode active' : 'Local mode active'}</strong>
-          <span>{cloudMode ? 'Data saves in Supabase.' : 'Data saves in this browser only.'}</span>
-        </div>
-      </div>
-
-      <AuthBox
-        user={user}
-        profile={profile}
-        onAuthUser={onAuthUser}
-        onLogout={onLogout}
-        referralCode={referralCode}
-        inviteRole={inviteRole}
-      />
-    </section>
-  );
-}
-
 function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode, inviteRole }) {
   const liveCampaigns = campaigns.filter((c) => c.status === 'Live').length;
   const pendingSubmissions = submissions.filter((s) => s.status === 'Pending Review').length;
-
-  if (!user) {
-    return (
-      <LoggedOutAuthPage
-        user={user}
-        profile={profile}
-        onAuthUser={onAuthUser}
-        onLogout={onLogout}
-        referralCode={referralCode}
-        inviteRole={inviteRole}
-        cloudMode={cloudMode}
-      />
-    );
-  }
-
   return (
     <>
       <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} />
-
-      <AuthBox
-        user={user}
-        profile={profile}
-        onAuthUser={onAuthUser}
-        onLogout={onLogout}
-        referralCode={referralCode}
-        inviteRole={inviteRole}
-      />
-
+      <AuthBox user={user} profile={profile} onAuthUser={onAuthUser} onLogout={onLogout} referralCode={referralCode} inviteRole={inviteRole} />
       <section className="panel">
         <div className="section-head">
           <div>
@@ -1373,7 +1074,6 @@ function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, p
             <p>Creators launch campaigns, clippers submit posts, admins verify performance, and affiliates drive growth.</p>
           </div>
         </div>
-
         <div className="stats-grid">
           <StatCard icon={Megaphone} label="Live campaigns" value={liveCampaigns} helper="Ready for clippers" />
           <StatCard icon={ShieldCheck} label="Pending reviews" value={pendingSubmissions} helper="Admin action needed" />
@@ -5748,18 +5448,6 @@ const updateProfileRole = async (nextRole) => {
     clearCampaignIdFromUrl();
   }, [campaigns]);
 
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-
-    document.body.classList.toggle('solohub-logged-out', !user);
-    document.body.classList.toggle('solohub-logged-in', Boolean(user));
-
-    return () => {
-      document.body.classList.remove('solohub-logged-out');
-      document.body.classList.remove('solohub-logged-in');
-    };
-  }, [user]);
-
 const content = useMemo(() => {
     const currentRole = roleForUser(user, profile, role);
     const currentUserId = user?.id || null;
@@ -5911,8 +5599,8 @@ const content = useMemo(() => {
         <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} />
         <main>
           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
-          {cloudMode && user && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : `Logged in as ${profile?.role || role || 'user'}`}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
-          {content}
+          {cloudMode && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : user ? `Logged in as ${profile?.role || role || 'user'}` : 'Supabase mode active. Login on Home for role profiles.'}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
+          {cloudMode && !user && page !== 'home' ? <AuthBox user={user} profile={profile} onAuthUser={handleAuthUser} onLogout={logout} onRoleChange={updateProfileRole} referralCode={referralCode} inviteRole={inviteRole} /> : content}
         </main>
         <CampaignModal campaign={selectedCampaign && page !== 'submit' ? selectedCampaign : null} onClose={() => setSelectedCampaign(null)} />
       </div>

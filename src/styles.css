@@ -4041,3 +4041,1191 @@ textarea:disabled {
   background: rgba(255, 255, 255, 0.035) !important;
   cursor: not-allowed;
 }
+
+/* =========================================================
+   Mobile Sidebar Close + Backdrop Fix
+   ========================================================= */
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .sidebar {
+    position: fixed !important;
+    top: 72px;
+    left: 12px;
+    bottom: 12px;
+    width: min(86vw, 340px) !important;
+    max-height: calc(100vh - 90px);
+    overflow-y: auto;
+    z-index: 80;
+    transform: translateX(-115%);
+    opacity: 0;
+    pointer-events: none;
+    transition: transform 0.22s ease, opacity 0.22s ease;
+  }
+
+  .sidebar.show {
+    transform: translateX(0);
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar-backdrop {
+    display: block;
+    position: fixed;
+    inset: 72px 0 0 0;
+    z-index: 70;
+    background: rgba(0, 0, 0, 0.55);
+    border: 0;
+    opacity: 0;
+    pointer-events: none;
+    transition: opacity 0.2s ease;
+  }
+
+  .sidebar-backdrop.show {
+    opacity: 1;
+    pointer-events: auto;
+  }
+
+  .sidebar button {
+    width: 100%;
+  }
+}
+
+@media (max-width: 650px) {
+  .sidebar {
+    top: 74px;
+    left: 10px;
+    bottom: 10px;
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100vh - 88px);
+  }
+
+  .sidebar-backdrop {
+    inset: 74px 0 0 0;
+  }
+}
+
+/* =========================================================
+   Final Mobile Sidebar Fix
+   ========================================================= */
+
+.topbar {
+  z-index: 1300 !important;
+}
+
+.mobile-only.menu-is-open {
+  background: rgba(245, 196, 83, 0.16) !important;
+  border-color: rgba(245, 196, 83, 0.38) !important;
+  color: #fff4bf !important;
+}
+
+.mobile-sidebar-close {
+  display: none;
+}
+
+.sidebar-backdrop {
+  display: none;
+}
+
+@media (max-width: 900px) {
+  .mobile-only {
+    display: inline-grid !important;
+    position: relative;
+    z-index: 1400 !important;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    top: 86px !important;
+    left: 12px !important;
+    bottom: 12px !important;
+    width: min(86vw, 360px) !important;
+    max-height: calc(100dvh - 100px) !important;
+    overflow-y: auto !important;
+    z-index: 1200 !important;
+
+    transform: translateX(-140%) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+
+    transition:
+      transform 0.24s ease,
+      opacity 0.24s ease,
+      visibility 0.24s ease !important;
+  }
+
+  .sidebar.show {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .sidebar-mobile-head {
+    display: flex !important;
+    align-items: center !important;
+    justify-content: space-between !important;
+    gap: 12px !important;
+    margin-bottom: 12px !important;
+  }
+
+  .mobile-sidebar-close {
+    display: inline-flex !important;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    width: auto !important;
+    min-width: 92px !important;
+    height: 40px !important;
+    border-radius: 999px !important;
+    border: 1px solid rgba(245, 196, 83, 0.28) !important;
+    background: rgba(245, 196, 83, 0.10) !important;
+    color: #fff4bf !important;
+    font-size: 13px !important;
+    font-weight: 1000 !important;
+  }
+
+  .sidebar-backdrop.show {
+    display: block !important;
+    position: fixed !important;
+    inset: 86px 0 0 0 !important;
+    z-index: 1100 !important;
+    background: rgba(0, 0, 0, 0.68) !important;
+    border: 0 !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}
+
+@media (max-width: 650px) {
+  .sidebar {
+    top: 84px !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 96px) !important;
+  }
+
+  .sidebar-backdrop.show {
+    inset: 84px 0 0 0 !important;
+  }
+}
+
+/* =========================================================
+   Phase 41 Forgot Password UI
+   ========================================================= */
+
+.auth-status-message {
+  margin: 14px 0;
+  padding: 13px 15px;
+  border-radius: 16px;
+  background: rgba(35, 209, 139, 0.10);
+  border: 1px solid rgba(35, 209, 139, 0.24);
+  color: #d9ffe9;
+  font-weight: 900;
+}
+
+.auth-secondary-actions {
+  display: flex;
+  justify-content: center;
+  margin-top: 14px;
+}
+
+.auth-secondary-actions button {
+  border: 0;
+  background: transparent;
+  color: #9fffd1;
+  font-weight: 1000;
+  cursor: pointer;
+  text-decoration: underline;
+}
+
+.auth-actions-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 12px;
+  margin-top: 18px;
+}
+
+.auth-submit-btn {
+  width: 100%;
+}
+
+/* =========================================================
+   Fix Desktop Sidebar Close Button Visibility
+   ========================================================= */
+
+.mobile-sidebar-close {
+  display: none !important;
+}
+
+@media (max-width: 900px) {
+  .mobile-sidebar-close {
+    display: inline-flex !important;
+  }
+}
+
+@media (min-width: 901px) {
+  .sidebar {
+    position: sticky !important;
+    top: 110px !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .sidebar-backdrop {
+    display: none !important;
+  }
+
+  .sidebar-mobile-head {
+    display: block !important;
+  }
+}
+
+/* =========================================================
+   Phase 42 Auth / Login UI Premium Cleanup
+   ========================================================= */
+
+.auth-panel-premium {
+  width: min(100%, 720px) !important;
+  margin: 40px auto !important;
+  padding: 34px !important;
+  border-radius: 32px !important;
+  display: flex !important;
+  flex-direction: column !important;
+  align-items: stretch !important;
+  gap: 18px !important;
+  background:
+    radial-gradient(circle at top right, rgba(35, 209, 139, 0.12), transparent 34%),
+    radial-gradient(circle at bottom left, rgba(245, 196, 83, 0.08), transparent 32%),
+    linear-gradient(145deg, rgba(17, 24, 32, 0.98), rgba(6, 10, 14, 0.98)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  box-shadow:
+    0 32px 90px rgba(0, 0, 0, 0.42),
+    0 0 55px rgba(35, 209, 139, 0.06) !important;
+}
+
+.auth-panel-premium > .pill,
+.auth-panel-premium .pill {
+  width: fit-content !important;
+}
+
+.auth-panel-premium h2 {
+  margin: 4px 0 0 !important;
+  max-width: 100% !important;
+  font-size: clamp(34px, 5vw, 52px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.055em !important;
+}
+
+.auth-panel-premium p {
+  max-width: 560px !important;
+  margin: 0 !important;
+  color: #aeb9c5 !important;
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+}
+
+.auth-tabs {
+  width: 100% !important;
+  display: grid !important;
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 8px !important;
+  padding: 7px !important;
+  margin: 4px 0 0 !important;
+  border-radius: 20px !important;
+  background: rgba(255, 255, 255, 0.045) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+.auth-tabs button {
+  width: 100% !important;
+  min-height: 48px !important;
+  border-radius: 15px !important;
+  border: 0 !important;
+  background: transparent !important;
+  color: #aeb9c5 !important;
+  font-weight: 1000 !important;
+  cursor: pointer !important;
+}
+
+.auth-tabs button.active {
+  background:
+    linear-gradient(135deg, rgba(35, 209, 139, 0.95), rgba(10, 116, 78, 0.95)) !important;
+  color: #ffffff !important;
+  box-shadow: 0 16px 38px rgba(35, 209, 139, 0.24) !important;
+}
+
+.auth-form-wide,
+.auth-panel-premium .auth-form,
+.auth-panel-premium form {
+  width: 100% !important;
+  max-width: 100% !important;
+  display: grid !important;
+  gap: 15px !important;
+  margin: 0 !important;
+}
+
+.auth-panel-premium label {
+  width: 100% !important;
+  display: grid !important;
+  gap: 8px !important;
+  color: #e5edf5 !important;
+  font-weight: 900 !important;
+}
+
+.auth-panel-premium input,
+.auth-panel-premium select,
+.auth-panel-premium textarea {
+  width: 100% !important;
+  min-height: 54px !important;
+  border-radius: 18px !important;
+  padding: 0 17px !important;
+  background:
+    linear-gradient(145deg, rgba(20, 28, 38, 0.98), rgba(10, 15, 21, 0.98)) !important;
+  border: 1px solid rgba(255, 255, 255, 0.10) !important;
+  color: #f8fafc !important;
+  font-size: 16px !important;
+  font-weight: 800 !important;
+}
+
+.auth-panel-premium input:focus,
+.auth-panel-premium select:focus,
+.auth-panel-premium textarea:focus {
+  border-color: rgba(35, 209, 139, 0.60) !important;
+  box-shadow: 0 0 0 4px rgba(35, 209, 139, 0.12) !important;
+}
+
+.auth-submit-btn {
+  width: 100% !important;
+  min-height: 58px !important;
+  border-radius: 19px !important;
+  margin-top: 4px !important;
+  font-size: 16px !important;
+  font-weight: 1000 !important;
+}
+
+.auth-secondary-actions {
+  margin-top: 0 !important;
+  display: flex !important;
+  justify-content: center !important;
+}
+
+.auth-secondary-actions button {
+  padding: 8px 10px !important;
+  border-radius: 999px !important;
+  background: rgba(35, 209, 139, 0.08) !important;
+  border: 1px solid rgba(35, 209, 139, 0.18) !important;
+  color: #9fffd1 !important;
+  text-decoration: none !important;
+  font-weight: 1000 !important;
+}
+
+.auth-status-message,
+.referral-banner,
+.invite-banner {
+  width: 100% !important;
+}
+
+.auth-panel-premium .form-note {
+  max-width: 100% !important;
+  padding: 13px 15px !important;
+  border-radius: 16px !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  border: 1px solid rgba(255, 255, 255, 0.08) !important;
+}
+
+/* Make the auth page area less stretched */
+.auth-panel {
+  min-height: auto !important;
+}
+
+/* Desktop: make login section feel intentionally centered */
+@media (min-width: 901px) {
+  .auth-panel-premium {
+    transform: translateY(-10px);
+  }
+}
+
+/* Mobile auth polish */
+@media (max-width: 650px) {
+  .auth-panel-premium {
+    width: 100% !important;
+    margin: 18px auto !important;
+    padding: 22px !important;
+    border-radius: 24px !important;
+  }
+
+  .auth-panel-premium h2 {
+    font-size: clamp(30px, 10vw, 42px) !important;
+  }
+
+  .auth-panel-premium input,
+  .auth-panel-premium select,
+  .auth-panel-premium textarea {
+    min-height: 52px !important;
+  }
+
+  .auth-tabs button {
+    min-height: 46px !important;
+  }
+}
+
+/* =========================================================
+   Phase 42B Proper Logged-Out Auth Layout
+   ========================================================= */
+
+body.solohub-logged-out .sidebar,
+body.solohub-logged-out .sidebar-backdrop {
+  display: none !important;
+}
+
+body.solohub-logged-out .mobile-only {
+  display: none !important;
+}
+
+body.solohub-logged-out .layout,
+body.solohub-logged-out .app-layout,
+body.solohub-logged-out .main-layout {
+  grid-template-columns: 1fr !important;
+}
+
+body.solohub-logged-out main,
+body.solohub-logged-out .content,
+body.solohub-logged-out .main-content {
+  width: 100% !important;
+  max-width: 100% !important;
+  margin: 0 auto !important;
+}
+
+body.solohub-logged-out .sync-banner,
+body.solohub-logged-out .notice-bar {
+  max-width: 960px !important;
+  margin: 22px auto 0 !important;
+  opacity: 0.78 !important;
+}
+
+/* Center auth card like a real SaaS login screen */
+body.solohub-logged-out .auth-panel-premium {
+  width: min(100%, 620px) !important;
+  margin: 58px auto 90px !important;
+  padding: 38px !important;
+}
+
+/* Stop login form from spreading sideways */
+body.solohub-logged-out .auth-panel-premium form,
+body.solohub-logged-out .auth-form-wide {
+  display: grid !important;
+  grid-template-columns: 1fr !important;
+  gap: 16px !important;
+}
+
+body.solohub-logged-out .auth-panel-premium label {
+  width: 100% !important;
+}
+
+body.solohub-logged-out .auth-panel-premium input,
+body.solohub-logged-out .auth-panel-premium select {
+  width: 100% !important;
+}
+
+body.solohub-logged-out .auth-submit-btn {
+  width: 100% !important;
+  margin-top: 6px !important;
+}
+
+/* Make forgot password sit directly under form */
+body.solohub-logged-out .auth-secondary-actions {
+  justify-content: center !important;
+  margin-top: 2px !important;
+}
+
+/* Better auth header spacing */
+body.solohub-logged-out .auth-panel-premium h2 {
+  text-align: left !important;
+  font-size: clamp(38px, 5vw, 58px) !important;
+}
+
+body.solohub-logged-out .auth-panel-premium p {
+  max-width: 100% !important;
+}
+
+/* Remove awkward empty wide panel look if parent panel exists */
+body.solohub-logged-out .auth-panel-premium {
+  border: 1px solid rgba(255, 255, 255, 0.12) !important;
+}
+
+/* Topbar logged-out polish */
+body.solohub-logged-out .topbar {
+  padding-left: clamp(18px, 5vw, 80px) !important;
+  padding-right: clamp(18px, 5vw, 80px) !important;
+}
+
+/* Tablet/mobile auth */
+@media (max-width: 900px) {
+  body.solohub-logged-out .auth-panel-premium {
+    margin: 28px auto 70px !important;
+  }
+}
+
+@media (max-width: 650px) {
+  body.solohub-logged-out .topbar {
+    padding: 12px 16px !important;
+  }
+
+  body.solohub-logged-out .brand {
+    max-width: 70vw !important;
+  }
+
+  body.solohub-logged-out .auth-panel-premium {
+    width: calc(100vw - 28px) !important;
+    margin: 20px auto 60px !important;
+    padding: 24px !important;
+    border-radius: 26px !important;
+  }
+
+  body.solohub-logged-out .auth-panel-premium h2 {
+    font-size: 34px !important;
+  }
+}
+
+/* =========================================================
+   Phase 42 Final Auth Standard Layout
+   ========================================================= */
+
+.auth-shell {
+  display: block !important;
+  grid-template-columns: 1fr !important;
+  max-width: 100% !important;
+  width: 100% !important;
+  padding: 28px clamp(18px, 5vw, 72px) !important;
+}
+
+.auth-main {
+  width: 100% !important;
+  max-width: 1240px !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+.auth-main .notice.subtle {
+  max-width: 1240px !important;
+  margin: 0 auto 24px !important;
+  opacity: 0.9 !important;
+}
+
+.logged-out-auth-page {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(320px, 0.95fr) minmax(360px, 0.82fr);
+  gap: 28px;
+  align-items: stretch;
+  margin: 24px auto 70px;
+}
+
+.auth-marketing-card,
+.logged-out-auth-page .auth-panel-premium {
+  min-height: 620px;
+}
+
+.auth-marketing-card {
+  padding: clamp(30px, 5vw, 58px);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at top left, rgba(35, 209, 139, 0.16), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(245, 196, 83, 0.10), transparent 34%),
+    linear-gradient(145deg, rgba(17, 24, 32, 0.98), rgba(6, 10, 14, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.40);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.auth-marketing-card h1 {
+  margin: 0;
+  max-width: 760px;
+  color: #f8fafc;
+  font-size: clamp(46px, 6vw, 78px);
+  line-height: 0.96;
+  letter-spacing: -0.075em;
+}
+
+.auth-marketing-card p {
+  max-width: 680px;
+  margin: 0;
+  color: #aeb9c5;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.auth-marketing-points {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.auth-marketing-points span,
+.auth-storage-pill {
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #dbe5ee;
+  font-weight: 900;
+}
+
+.auth-marketing-points span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.auth-storage-pill {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.auth-storage-pill strong {
+  color: #9fffd1 !important;
+}
+
+.auth-storage-pill span {
+  color: #aeb9c5;
+  font-weight: 800;
+}
+
+.logged-out-auth-page .auth-panel-premium {
+  width: 100% !important;
+  max-width: 540px !important;
+  margin: 0 !important;
+  justify-self: end;
+  justify-content: center;
+}
+
+.logged-out-auth-page .auth-panel-premium form,
+.logged-out-auth-page .auth-form-wide {
+  grid-template-columns: 1fr !important;
+}
+
+.logged-out-auth-page .auth-tabs button {
+  white-space: nowrap !important;
+}
+
+body.solohub-logged-out .sidebar,
+body.solohub-logged-out .sidebar-backdrop {
+  display: none !important;
+}
+
+body.solohub-logged-out .topbar {
+  padding-left: clamp(18px, 5vw, 80px) !important;
+  padding-right: clamp(18px, 5vw, 80px) !important;
+}
+
+@media (max-width: 1050px) {
+  .logged-out-auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-marketing-card,
+  .logged-out-auth-page .auth-panel-premium {
+    min-height: auto;
+  }
+
+  .logged-out-auth-page .auth-panel-premium {
+    max-width: 680px !important;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 650px) {
+  .auth-shell {
+    padding: 18px 14px !important;
+  }
+
+  .logged-out-auth-page {
+    margin: 12px auto 50px;
+    gap: 18px;
+  }
+
+  .auth-marketing-card {
+    padding: 24px;
+    border-radius: 26px;
+  }
+
+  .auth-marketing-card h1 {
+    font-size: 38px;
+  }
+
+  .auth-marketing-card p {
+    font-size: 15px;
+  }
+
+  .auth-marketing-points {
+    grid-template-columns: 1fr;
+  }
+
+  .logged-out-auth-page .auth-panel-premium {
+    max-width: 100% !important;
+    padding: 24px !important;
+    border-radius: 26px !important;
+  }
+}
+
+/* =========================================================
+   Real Standalone Auth Layout
+   ========================================================= */
+
+.auth-shell {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 32px clamp(18px, 5vw, 76px) !important;
+}
+
+.auth-main {
+  width: 100% !important;
+  max-width: 1280px !important;
+  margin: 0 auto !important;
+  display: block !important;
+}
+
+.logged-out-auth-page {
+  width: 100%;
+  display: grid;
+  grid-template-columns: minmax(420px, 1.05fr) minmax(360px, 0.78fr);
+  gap: 30px;
+  align-items: stretch;
+  margin: 18px auto 70px;
+}
+
+.auth-marketing-card,
+.logged-out-auth-page .auth-panel-premium {
+  min-height: 620px;
+}
+
+.auth-marketing-card {
+  padding: clamp(34px, 5vw, 64px);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at top left, rgba(35, 209, 139, 0.18), transparent 36%),
+    radial-gradient(circle at bottom right, rgba(245, 196, 83, 0.10), transparent 34%),
+    linear-gradient(145deg, rgba(17, 24, 32, 0.98), rgba(6, 10, 14, 0.98));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+  box-shadow: 0 32px 90px rgba(0, 0, 0, 0.40);
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 24px;
+}
+
+.auth-marketing-card h1 {
+  margin: 0;
+  color: #f8fafc;
+  font-size: clamp(48px, 6vw, 82px);
+  line-height: 0.96;
+  letter-spacing: -0.075em;
+}
+
+.auth-marketing-card p {
+  margin: 0;
+  max-width: 680px;
+  color: #aeb9c5;
+  font-size: 18px;
+  line-height: 1.7;
+}
+
+.auth-marketing-points {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.auth-marketing-points span,
+.auth-storage-pill {
+  border-radius: 18px;
+  padding: 14px 16px;
+  background: rgba(255, 255, 255, 0.045);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  color: #dbe5ee;
+  font-weight: 900;
+}
+
+.auth-marketing-points span {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.auth-storage-pill {
+  display: grid;
+  gap: 6px;
+  margin-top: 12px;
+}
+
+.auth-storage-pill strong {
+  color: #9fffd1 !important;
+}
+
+.auth-storage-pill span {
+  color: #aeb9c5;
+  font-weight: 800;
+}
+
+.logged-out-auth-page .auth-panel-premium {
+  width: 100% !important;
+  max-width: 540px !important;
+  margin: 0 !important;
+  justify-self: end;
+  justify-content: center;
+}
+
+.logged-out-auth-page .auth-panel-premium form,
+.logged-out-auth-page .auth-form-wide {
+  grid-template-columns: 1fr !important;
+}
+
+.logged-out-auth-page .auth-tabs button {
+  white-space: nowrap !important;
+}
+
+@media (max-width: 1050px) {
+  .logged-out-auth-page {
+    grid-template-columns: 1fr;
+  }
+
+  .auth-marketing-card,
+  .logged-out-auth-page .auth-panel-premium {
+    min-height: auto;
+  }
+
+  .logged-out-auth-page .auth-panel-premium {
+    max-width: 680px !important;
+    justify-self: center;
+  }
+}
+
+@media (max-width: 650px) {
+  .auth-shell {
+    padding: 18px 14px !important;
+  }
+
+  .logged-out-auth-page {
+    margin: 12px auto 50px;
+    gap: 18px;
+  }
+
+  .auth-marketing-card {
+    padding: 24px;
+    border-radius: 26px;
+  }
+
+  .auth-marketing-card h1 {
+    font-size: 38px;
+  }
+
+  .auth-marketing-card p {
+    font-size: 15px;
+  }
+
+  .auth-marketing-points {
+    grid-template-columns: 1fr;
+  }
+
+  .logged-out-auth-page .auth-panel-premium {
+    max-width: 100% !important;
+    padding: 24px !important;
+    border-radius: 26px !important;
+  }
+}
+
+/* =========================================================
+   Final Auth UI Proportion Fix
+   ========================================================= */
+
+.logged-out-auth-page {
+  max-width: 1180px !important;
+  min-height: calc(100dvh - 190px) !important;
+  margin: 28px auto 80px !important;
+  grid-template-columns: minmax(420px, 1fr) minmax(380px, 440px) !important;
+  align-items: center !important;
+}
+
+.auth-marketing-card,
+.logged-out-auth-page .auth-panel-premium {
+  min-height: auto !important;
+  height: auto !important;
+}
+
+.auth-marketing-card {
+  padding: 42px !important;
+  justify-content: center !important;
+  gap: 20px !important;
+}
+
+.auth-marketing-card h1 {
+  font-size: clamp(42px, 4.5vw, 64px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.06em !important;
+  max-width: 720px !important;
+}
+
+.auth-marketing-card p {
+  font-size: 17px !important;
+  line-height: 1.65 !important;
+  max-width: 640px !important;
+}
+
+.auth-marketing-points {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.auth-marketing-points span {
+  min-height: 76px !important;
+  padding: 13px 14px !important;
+  font-size: 14px !important;
+  line-height: 1.35 !important;
+}
+
+.auth-storage-pill {
+  margin-top: 4px !important;
+  padding: 15px 16px !important;
+}
+
+.logged-out-auth-page .auth-panel-premium {
+  max-width: 440px !important;
+  padding: 34px !important;
+  justify-self: stretch !important;
+}
+
+.logged-out-auth-page .auth-panel-premium h2 {
+  font-size: 42px !important;
+  line-height: 1.05 !important;
+  letter-spacing: -0.055em !important;
+}
+
+.logged-out-auth-page .auth-panel-premium p {
+  font-size: 15px !important;
+}
+
+.logged-out-auth-page .auth-panel-premium input,
+.logged-out-auth-page .auth-panel-premium select {
+  min-height: 52px !important;
+}
+
+.logged-out-auth-page .auth-submit-btn {
+  min-height: 54px !important;
+}
+
+/* Make login card less empty */
+.logged-out-auth-page .auth-panel-premium {
+  display: flex !important;
+  flex-direction: column !important;
+  justify-content: center !important;
+}
+
+/* Better spacing from topbar */
+.auth-shell {
+  padding-top: 34px !important;
+}
+
+/* Responsive */
+@media (max-width: 1050px) {
+  .logged-out-auth-page {
+    grid-template-columns: 1fr !important;
+    max-width: 680px !important;
+  }
+
+  .auth-marketing-card {
+    padding: 32px !important;
+  }
+
+  .auth-marketing-card h1 {
+    font-size: clamp(38px, 8vw, 56px) !important;
+  }
+
+  .logged-out-auth-page .auth-panel-premium {
+    max-width: 680px !important;
+  }
+}
+
+@media (max-width: 650px) {
+  .logged-out-auth-page {
+    min-height: auto !important;
+    margin: 14px auto 50px !important;
+  }
+
+  .auth-marketing-card {
+    padding: 22px !important;
+  }
+
+  .auth-marketing-card h1 {
+    font-size: 34px !important;
+  }
+
+  .auth-marketing-points {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-marketing-points span {
+    min-height: auto !important;
+  }
+
+  .logged-out-auth-page .auth-panel-premium {
+    padding: 22px !important;
+  }
+}
+
+/* =========================================================
+   Final Auth Balance Cleanup
+   ========================================================= */
+
+.auth-shell {
+  padding: 34px clamp(20px, 4vw, 64px) !important;
+}
+
+.auth-main {
+  max-width: 1180px !important;
+}
+
+.logged-out-auth-page {
+  max-width: 1120px !important;
+  width: 100% !important;
+  margin: 28px auto 80px !important;
+  display: grid !important;
+  grid-template-columns: minmax(420px, 0.95fr) minmax(380px, 430px) !important;
+  gap: 34px !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+
+.auth-marketing-card {
+  padding: 38px !important;
+  min-height: 560px !important;
+  max-height: none !important;
+  overflow: hidden !important;
+}
+
+.auth-marketing-card h1 {
+  font-size: clamp(42px, 4vw, 58px) !important;
+  line-height: 1.02 !important;
+  letter-spacing: -0.065em !important;
+  max-width: 620px !important;
+}
+
+.auth-marketing-card p {
+  font-size: 16px !important;
+  line-height: 1.65 !important;
+  max-width: 560px !important;
+}
+
+.auth-marketing-points {
+  grid-template-columns: repeat(2, minmax(0, 1fr)) !important;
+  gap: 10px !important;
+}
+
+.auth-marketing-points span {
+  min-height: 66px !important;
+  padding: 12px 14px !important;
+  font-size: 13px !important;
+  line-height: 1.35 !important;
+}
+
+.auth-storage-pill {
+  margin-top: 0 !important;
+  padding: 14px 16px !important;
+}
+
+.logged-out-auth-page .auth-panel-premium {
+  max-width: 430px !important;
+  min-height: auto !important;
+  padding: 32px !important;
+  justify-self: stretch !important;
+}
+
+.logged-out-auth-page .auth-panel-premium h2 {
+  font-size: 40px !important;
+  line-height: 1.04 !important;
+}
+
+.logged-out-auth-page .auth-panel-premium p {
+  font-size: 15px !important;
+  line-height: 1.6 !important;
+}
+
+.logged-out-auth-page .auth-tabs {
+  margin-top: 6px !important;
+}
+
+.logged-out-auth-page .auth-tabs button {
+  min-height: 46px !important;
+}
+
+.logged-out-auth-page .auth-panel-premium input,
+.logged-out-auth-page .auth-panel-premium select {
+  min-height: 50px !important;
+}
+
+.logged-out-auth-page .auth-submit-btn {
+  min-height: 54px !important;
+}
+
+@media (max-width: 1050px) {
+  .logged-out-auth-page {
+    max-width: 680px !important;
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-marketing-card {
+    min-height: auto !important;
+  }
+
+  .logged-out-auth-page .auth-panel-premium {
+    max-width: 680px !important;
+  }
+}
+
+@media (max-width: 650px) {
+  .auth-shell {
+    padding: 16px 12px !important;
+  }
+
+  .logged-out-auth-page {
+    margin: 12px auto 50px !important;
+    gap: 16px !important;
+  }
+
+  .auth-marketing-card {
+    padding: 22px !important;
+    border-radius: 24px !important;
+  }
+
+  .auth-marketing-card h1 {
+    font-size: 34px !important;
+    line-height: 1.05 !important;
+  }
+
+  .auth-marketing-points {
+    grid-template-columns: 1fr !important;
+  }
+
+  .auth-marketing-points span {
+    min-height: auto !important;
+  }
+
+  .logged-out-auth-page .auth-panel-premium {
+    padding: 22px !important;
+    border-radius: 24px !important;
+  }
+}

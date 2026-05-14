@@ -1296,75 +1296,13 @@ function Hero({ setRole, setPage, cloudMode }) {
   );
 }
 
-function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, inviteRole, cloudMode }) {
-  return (
-    <section className="logged-out-auth-page">
-      <div className="auth-marketing-card">
-        <Pill tone="green"><Sparkles size={14} /> SoloHub MVP</Pill>
-
-        <h1>Launch campaigns. Track clips. Pay creators.</h1>
-
-        <p>
-          Manage clipping campaigns, verify submissions, track deposits, monitor payouts,
-          and onboard creators, clippers, and affiliates from one premium dashboard.
-        </p>
-
-        <div className="auth-marketing-points">
-          <span><ShieldCheck size={16} /> Admin verified submissions</span>
-          <span><Wallet size={16} /> Manual M-Pesa payout tracking</span>
-          <span><Megaphone size={16} /> Creator campaign manager</span>
-          <span><Coins size={16} /> Affiliate-ready growth</span>
-        </div>
-
-        <div className="auth-storage-pill">
-          <strong>{cloudMode ? 'Cloud mode active' : 'Local mode active'}</strong>
-          <span>{cloudMode ? 'Data saves in Supabase.' : 'Data saves in this browser only.'}</span>
-        </div>
-      </div>
-
-      <AuthBox
-        user={user}
-        profile={profile}
-        onAuthUser={onAuthUser}
-        onLogout={onLogout}
-        referralCode={referralCode}
-        inviteRole={inviteRole}
-      />
-    </section>
-  );
-}
-
 function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode, inviteRole }) {
   const liveCampaigns = campaigns.filter((c) => c.status === 'Live').length;
   const pendingSubmissions = submissions.filter((s) => s.status === 'Pending Review').length;
-
-  if (!user) {
-    return (
-      <LoggedOutAuthPage
-        user={user}
-        profile={profile}
-        onAuthUser={onAuthUser}
-        onLogout={onLogout}
-        referralCode={referralCode}
-        inviteRole={inviteRole}
-        cloudMode={cloudMode}
-      />
-    );
-  }
-
   return (
     <>
       <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} />
-
-      <AuthBox
-        user={user}
-        profile={profile}
-        onAuthUser={onAuthUser}
-        onLogout={onLogout}
-        referralCode={referralCode}
-        inviteRole={inviteRole}
-      />
-
+      <AuthBox user={user} profile={profile} onAuthUser={onAuthUser} onLogout={onLogout} referralCode={referralCode} inviteRole={inviteRole} />
       <section className="panel">
         <div className="section-head">
           <div>
@@ -1373,7 +1311,6 @@ function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, p
             <p>Creators launch campaigns, clippers submit posts, admins verify performance, and affiliates drive growth.</p>
           </div>
         </div>
-
         <div className="stats-grid">
           <StatCard icon={Megaphone} label="Live campaigns" value={liveCampaigns} helper="Ready for clippers" />
           <StatCard icon={ShieldCheck} label="Pending reviews" value={pendingSubmissions} helper="Admin action needed" />
@@ -5748,18 +5685,6 @@ const updateProfileRole = async (nextRole) => {
     clearCampaignIdFromUrl();
   }, [campaigns]);
 
-  useEffect(() => {
-    if (typeof document === 'undefined') return;
-
-    document.body.classList.toggle('solohub-logged-out', !user);
-    document.body.classList.toggle('solohub-logged-in', Boolean(user));
-
-    return () => {
-      document.body.classList.remove('solohub-logged-out');
-      document.body.classList.remove('solohub-logged-in');
-    };
-  }, [user]);
-
 const content = useMemo(() => {
     const currentRole = roleForUser(user, profile, role);
     const currentUserId = user?.id || null;
@@ -5911,8 +5836,8 @@ const content = useMemo(() => {
         <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} />
         <main>
           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
-          {cloudMode && user && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : `Logged in as ${profile?.role || role || 'user'}`}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
-          {content}
+          {cloudMode && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : user ? `Logged in as ${profile?.role || role || 'user'}` : 'Supabase mode active. Login on Home for role profiles.'}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
+          {cloudMode && !user && page !== 'home' ? <AuthBox user={user} profile={profile} onAuthUser={handleAuthUser} onLogout={logout} onRoleChange={updateProfileRole} referralCode={referralCode} inviteRole={inviteRole} /> : content}
         </main>
         <CampaignModal campaign={selectedCampaign && page !== 'submit' ? selectedCampaign : null} onClose={() => setSelectedCampaign(null)} />
       </div>

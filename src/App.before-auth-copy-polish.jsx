@@ -1302,7 +1302,7 @@ function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, 
       <div className="auth-marketing-card">
         <Pill tone="green"><Sparkles size={14} /> SoloHub MVP</Pill>
 
-        <h1>Launch campaigns. Track clips. Pay creators.</h1>
+        <h1>Content rewards, campaign tracking, and creator payouts.</h1>
 
         <p>
           Manage clipping campaigns, verify submissions, track deposits, monitor payouts,
