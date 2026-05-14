@@ -42,22 +42,6 @@ const roleForUser = (user, profile, fallbackRole = 'clipper') => {
   return profile?.role ? cleanRole(profile.role) : cleanRole(fallbackRole);
 };
 
-async function withSupabaseTimeout(request, label = 'Supabase request', ms = 15000) {
-  let timeoutId;
-
-  const timeout = new Promise((_, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(new Error(label + ' timed out after ' + Math.round(ms / 1000) + ' seconds'));
-    }, ms);
-  });
-
-  try {
-    return await Promise.race([request, timeout]);
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
 
 function useLocalState(key, fallback) {
   const [value, setValue] = useState(() => {
@@ -1224,23 +1208,17 @@ function AdminAffiliates() {
     try {
       if (!supabase) throw new Error('Supabase is not configured.');
 
-      const { data: affiliatesData, error: affiliatesError } = await withSupabaseTimeout(
-        supabase
-          .from('affiliates')
-          .select('*')
-          .order('created_at', { ascending: false }),
-        'Load affiliates'
-      );
+      const { data: affiliatesData, error: affiliatesError } = await supabase
+        .from('affiliates')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (affiliatesError) throw affiliatesError;
 
-      const { data: referralsData, error: referralsError } = await withSupabaseTimeout(
-        supabase
-          .from('referrals')
-          .select('*')
-          .order('created_at', { ascending: false }),
-        'Load referrals'
-      );
+      const { data: referralsData, error: referralsError } = await supabase
+        .from('referrals')
+        .select('*')
+        .order('created_at', { ascending: false });
 
       if (referralsError) throw referralsError;
 
@@ -1303,14 +1281,11 @@ function AdminAffiliates() {
         updated_at: new Date().toISOString()
       };
 
-      const { data, error } = await withSupabaseTimeout(
-        supabase
-          .from('affiliates')
-          .upsert(payload, { onConflict: 'code' })
-          .select('*')
-          .single(),
-        'Create affiliate'
-      );
+      const { data, error } = await supabase
+        .from('affiliates')
+        .insert(payload)
+        .select('*')
+        .single();
 
       if (error) throw error;
 
@@ -1395,14 +1370,11 @@ function AdminAffiliates() {
           updated_at: new Date().toISOString()
         };
 
-        const { data: createdAffiliate, error: affiliateError } = await withSupabaseTimeout(
-          supabase
-            .from('affiliates')
-            .upsert(affiliatePayload, { onConflict: 'code' })
-            .select('*')
-            .single(),
-          'Auto-create affiliate'
-        );
+        const { data: createdAffiliate, error: affiliateError } = await supabase
+          .from('affiliates')
+          .insert(affiliatePayload)
+          .select('*')
+          .single();
 
         if (affiliateError) throw affiliateError;
 
@@ -1431,14 +1403,11 @@ function AdminAffiliates() {
         updated_at: new Date().toISOString()
       };
 
-      const { data, error } = await withSupabaseTimeout(
-        supabase
-          .from('referrals')
-          .insert(payload)
-          .select('*')
-          .single(),
-        'Record referral'
-      );
+      const { data, error } = await supabase
+        .from('referrals')
+        .insert(payload)
+        .select('*')
+        .single();
 
       if (error) throw error;
 

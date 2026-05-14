@@ -2108,3 +2108,59 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.affiliate-action-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: fit-content;
+  min-width: 180px;
+  border: 1px solid rgba(129, 255, 197, 0.38);
+  border-radius: 18px;
+  padding: 15px 22px;
+  background: linear-gradient(135deg, #20d68e, #08734d);
+  color: #ffffff;
+  font-weight: 900;
+  cursor: pointer;
+  box-shadow: 0 14px 38px rgba(35, 209, 139, 0.20);
+}
+
+.affiliate-action-btn:hover {
+  transform: translateY(-2px);
+  box-shadow: 0 20px 48px rgba(35, 209, 139, 0.30);
+}
+
+.affiliate-action-btn:active {
+  transform: translateY(0);
+}
+
+.affiliate-message {
+  margin-top: 12px;
+  color: #9fffd1 !important;
+}
+
+.affiliate-action-btn:disabled,
+.mini-action:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.affiliate-action-btn.secondary {
+  background: rgba(255,255,255,0.04) !important;
+  border-color: rgba(245,196,83,0.24) !important;
+}
+
+.mini-action {
+  border: 1px solid rgba(129, 255, 197, 0.28);
+  border-radius: 12px;
+  padding: 9px 12px;
+  background: rgba(35, 209, 139, 0.12);
+  color: #ffffff;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.mini-action.ghost {
+  background: rgba(255,255,255,0.035);
+  border-color: rgba(255,255,255,0.12);
+}

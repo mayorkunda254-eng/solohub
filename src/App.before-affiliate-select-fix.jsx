@@ -42,22 +42,6 @@ const roleForUser = (user, profile, fallbackRole = 'clipper') => {
   return profile?.role ? cleanRole(profile.role) : cleanRole(fallbackRole);
 };
 
-async function withSupabaseTimeout(request, label = 'Supabase request', ms = 15000) {
-  let timeoutId;
-
-  const timeout = new Promise((_, reject) => {
-    timeoutId = setTimeout(() => {
-      reject(new Error(label + ' timed out after ' + Math.round(ms / 1000) + ' seconds'));
-    }, ms);
-  });
-
-  try {
-    return await Promise.race([request, timeout]);
-  } finally {
-    clearTimeout(timeoutId);
-  }
-}
-
 
 function useLocalState(key, fallback) {
   const [value, setValue] = useState(() => {
@@ -1192,8 +1176,6 @@ function AdminAffiliates() {
   const [affiliates, setAffiliates] = useState([]);
   const [referrals, setReferrals] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [busyAction, setBusyAction] = useState('');
-  const [message, setMessage] = useState('');
 
   const [affiliateForm, setAffiliateForm] = useState({
     name: '',
@@ -1219,37 +1201,13 @@ function AdminAffiliates() {
 
   const loadAffiliateData = async () => {
     setLoading(true);
-    setMessage('Loading affiliate data...');
 
     try {
-      if (!supabase) throw new Error('Supabase is not configured.');
-
-      const { data: affiliatesData, error: affiliatesError } = await withSupabaseTimeout(
-        supabase
-          .from('affiliates')
-          .select('*')
-          .order('created_at', { ascending: false }),
-        'Load affiliates'
-      );
-
-      if (affiliatesError) throw affiliatesError;
-
-      const { data: referralsData, error: referralsError } = await withSupabaseTimeout(
-        supabase
-          .from('referrals')
-          .select('*')
-          .order('created_at', { ascending: false }),
-        'Load referrals'
-      );
-
-      if (referralsError) throw referralsError;
-
-      setAffiliates(affiliatesData || []);
-      setReferrals(referralsData || []);
-      setMessage('Affiliate data loaded.');
+      const data = await fetchAffiliateDataDirect();
+      setAffiliates(data.affiliates || []);
+      setReferrals(data.referrals || []);
     } catch (err) {
       console.error('Affiliate load failed:', err);
-      setMessage('Affiliate load failed: ' + (err?.message || err));
       alert('Affiliate load failed: ' + (err?.message || err));
     } finally {
       setLoading(false);
@@ -1269,8 +1227,6 @@ function AdminAffiliates() {
   };
 
   const createAffiliate = async () => {
-    if (busyAction) return;
-
     if (!affiliateForm.name.trim()) {
       alert('Add affiliate name.');
       return;
@@ -1281,12 +1237,7 @@ function AdminAffiliates() {
       return;
     }
 
-    setBusyAction('affiliate');
-    setMessage('Creating affiliate...');
-
     try {
-      if (!supabase) throw new Error('Supabase is not configured.');
-
       const { data: userData } = await supabase.auth.getUser();
 
       const payload = {
@@ -1298,24 +1249,11 @@ function AdminAffiliates() {
         creator_commission_percent: Number(affiliateForm.creatorCommissionPercent || 0),
         clipper_commission_amount: Number(affiliateForm.clipperCommissionAmount || 0),
         notes: affiliateForm.notes,
-        status: 'Active',
-        created_by: userData?.user?.id || null,
-        updated_at: new Date().toISOString()
+        created_by: userData?.user?.id || null
       };
 
-      const { data, error } = await withSupabaseTimeout(
-        supabase
-          .from('affiliates')
-          .upsert(payload, { onConflict: 'code' })
-          .select('*')
-          .single(),
-        'Create affiliate'
-      );
-
-      if (error) throw error;
-
-      setAffiliates((prev) => [data, ...prev]);
-      setReferralForm((prev) => ({ ...prev, affiliateId: data.id }));
+      const created = await insertAffiliateDirect(payload);
+      setAffiliates((prev) => [created, ...prev]);
 
       setAffiliateForm({
         name: '',
@@ -1328,29 +1266,17 @@ function AdminAffiliates() {
         notes: ''
       });
 
-      setMessage('Affiliate created and selected.');
-      alert('Affiliate created and selected.');
+      alert('Affiliate created.');
     } catch (err) {
       console.error('Affiliate create failed:', err);
-      setMessage('Affiliate create failed: ' + (err?.message || err));
       alert('Affiliate create failed: ' + (err?.message || err));
-    } finally {
-      setBusyAction('');
     }
   };
 
   const selectedAffiliate = affiliates.find((item) => item.id === referralForm.affiliateId);
 
   const calculateCommission = () => {
-    if (referralForm.commissionAmount) return Number(referralForm.commissionAmount || 0);
-
-    if (!selectedAffiliate) {
-      if (referralForm.referralType === 'creator') {
-        return Math.round((Number(referralForm.campaignBudget || 0) * Number(affiliateForm.creatorCommissionPercent || 0)) / 100);
-      }
-
-      return Number(affiliateForm.clipperCommissionAmount || 0);
-    }
+    if (!selectedAffiliate) return Number(referralForm.commissionAmount || 0);
 
     if (referralForm.referralType === 'creator') {
       return Math.round((Number(referralForm.campaignBudget || 0) * Number(selectedAffiliate.creator_commission_percent || 0)) / 100);
@@ -1360,65 +1286,22 @@ function AdminAffiliates() {
   };
 
   const createReferral = async () => {
-    if (busyAction) return;
+    if (!referralForm.affiliateId) {
+      alert('Choose affiliate.');
+      return;
+    }
 
     if (!referralForm.referredName.trim()) {
       alert('Add referred person or brand name.');
       return;
     }
 
-    setBusyAction('referral');
-    setMessage('Recording referral...');
-
     try {
-      if (!supabase) throw new Error('Supabase is not configured.');
-
       const { data: userData } = await supabase.auth.getUser();
-      let activeAffiliateId = referralForm.affiliateId;
-
-      if (!activeAffiliateId && affiliates.length === 1) {
-        activeAffiliateId = affiliates[0].id;
-      }
-
-      if (!activeAffiliateId && affiliateForm.name.trim() && affiliateForm.code.trim()) {
-        const affiliatePayload = {
-          name: affiliateForm.name.trim(),
-          code: affiliateForm.code.trim().toUpperCase(),
-          email: affiliateForm.email.trim(),
-          phone: affiliateForm.phone.trim(),
-          type: affiliateForm.type,
-          creator_commission_percent: Number(affiliateForm.creatorCommissionPercent || 0),
-          clipper_commission_amount: Number(affiliateForm.clipperCommissionAmount || 0),
-          notes: affiliateForm.notes,
-          status: 'Active',
-          created_by: userData?.user?.id || null,
-          updated_at: new Date().toISOString()
-        };
-
-        const { data: createdAffiliate, error: affiliateError } = await withSupabaseTimeout(
-          supabase
-            .from('affiliates')
-            .upsert(affiliatePayload, { onConflict: 'code' })
-            .select('*')
-            .single(),
-          'Auto-create affiliate'
-        );
-
-        if (affiliateError) throw affiliateError;
-
-        activeAffiliateId = createdAffiliate.id;
-        setAffiliates((prev) => [createdAffiliate, ...prev]);
-        setReferralForm((prev) => ({ ...prev, affiliateId: createdAffiliate.id }));
-      }
-
-      if (!activeAffiliateId) {
-        throw new Error('Choose affiliate or fill the Create Affiliate form first.');
-      }
-
       const commission = Number(referralForm.commissionAmount || calculateCommission() || 0);
 
       const payload = {
-        affiliate_id: activeAffiliateId,
+        affiliate_id: referralForm.affiliateId,
         referral_type: referralForm.referralType,
         referred_name: referralForm.referredName.trim(),
         referred_email: referralForm.referredEmail.trim(),
@@ -1427,25 +1310,14 @@ function AdminAffiliates() {
         commission_amount: commission,
         status: 'Pending',
         notes: referralForm.notes,
-        created_by: userData?.user?.id || null,
-        updated_at: new Date().toISOString()
+        created_by: userData?.user?.id || null
       };
 
-      const { data, error } = await withSupabaseTimeout(
-        supabase
-          .from('referrals')
-          .insert(payload)
-          .select('*')
-          .single(),
-        'Record referral'
-      );
-
-      if (error) throw error;
-
-      setReferrals((prev) => [data, ...prev]);
+      const created = await insertReferralDirect(payload);
+      setReferrals((prev) => [created, ...prev]);
 
       setReferralForm({
-        affiliateId: activeAffiliateId,
+        affiliateId: '',
         referralType: 'creator',
         referredName: '',
         referredEmail: '',
@@ -1455,51 +1327,38 @@ function AdminAffiliates() {
         notes: ''
       });
 
-      setMessage('Referral recorded.');
       alert('Referral recorded.');
     } catch (err) {
       console.error('Referral create failed:', err);
-      setMessage('Referral create failed: ' + (err?.message || err));
       alert('Referral create failed: ' + (err?.message || err));
-    } finally {
-      setBusyAction('');
     }
   };
 
   const updateReferralStatus = async (referral, status) => {
-    if (busyAction) return;
-
-    setBusyAction(referral.id);
-    setMessage('Updating referral...');
-
     try {
       const patch = {
         status,
         updated_at: new Date().toISOString()
       };
 
-      if (status === 'Qualified') patch.qualified_at = new Date().toISOString();
-      if (status === 'Paid') patch.paid_at = new Date().toISOString();
+      if (status === 'Qualified') {
+        patch.qualified_at = new Date().toISOString();
+      }
 
-      const { data, error } = await supabase
-        .from('referrals')
-        .update(patch)
-        .eq('id', referral.id)
-        .select('*')
-        .single();
+      if (status === 'Paid') {
+        patch.paid_at = new Date().toISOString();
+      }
 
-      if (error) throw error;
+      const updated = await updateReferralDirect(referral.id, patch);
 
-      setReferrals((prev) => prev.map((item) => item.id === referral.id ? data : item));
+      setReferrals((prev) =>
+        prev.map((item) => item.id === referral.id ? updated : item)
+      );
 
-      setMessage('Referral marked as ' + status + '.');
       alert('Referral marked as ' + status + '.');
     } catch (err) {
       console.error('Referral update failed:', err);
-      setMessage('Referral update failed: ' + (err?.message || err));
       alert('Referral update failed: ' + (err?.message || err));
-    } finally {
-      setBusyAction('');
     }
   };
 
@@ -1518,12 +1377,11 @@ function AdminAffiliates() {
           <Pill tone="purple">Affiliate Program</Pill>
           <h2>Track referrals and partner commissions.</h2>
           <p>Pay affiliates only after a creator funds a campaign or a clipper gets an approved submission.</p>
-          {message && <p className="form-note affiliate-message">{message}</p>}
         </div>
 
-        <button type="button" className="affiliate-action-btn secondary" onClick={loadAffiliateData} disabled={loading || Boolean(busyAction)}>
+        <Button type="button" onClick={loadAffiliateData}>
           {loading ? 'Refreshing...' : 'Refresh'}
-        </button>
+        </Button>
       </div>
 
       <div className="stats-grid">
@@ -1562,9 +1420,7 @@ function AdminAffiliates() {
 
           <label>Notes<textarea value={affiliateForm.notes} onChange={(e) => updateAffiliate('notes', e.target.value)} /></label>
 
-          <button type="button" className="affiliate-action-btn" onClick={createAffiliate} disabled={busyAction === 'affiliate'}>
-            {busyAction === 'affiliate' ? 'Creating...' : 'Create affiliate'}
-          </button>
+          <Button type="button" onClick={createAffiliate}>Create affiliate</Button>
         </div>
 
         <div className="affiliate-card">
@@ -1600,9 +1456,7 @@ function AdminAffiliates() {
 
           <label>Notes<textarea value={referralForm.notes} onChange={(e) => updateReferral('notes', e.target.value)} /></label>
 
-          <button type="button" className="affiliate-action-btn" onClick={createReferral} disabled={busyAction === 'referral'}>
-            {busyAction === 'referral' ? 'Recording...' : 'Record referral'}
-          </button>
+          <Button type="button" onClick={createReferral}>Record referral</Button>
         </div>
       </div>
 
@@ -1637,9 +1491,9 @@ function AdminAffiliates() {
                     </Pill>
                   </td>
                   <td className="row-actions">
-                    <button type="button" className="mini-action" onClick={() => updateReferralStatus(referral, 'Qualified')}>Qualify</button>
-                    <button type="button" className="mini-action" onClick={() => updateReferralStatus(referral, 'Paid')}>Mark paid</button>
-                    <button type="button" className="mini-action ghost" onClick={() => updateReferralStatus(referral, 'Rejected')}>Reject</button>
+                    <Button type="button" onClick={() => updateReferralStatus(referral, 'Qualified')}>Qualify</Button>
+                    <Button type="button" onClick={() => updateReferralStatus(referral, 'Paid')}>Mark paid</Button>
+                    <Button type="button" variant="ghost" onClick={() => updateReferralStatus(referral, 'Rejected')}>Reject</Button>
                   </td>
                 </tr>
               );
