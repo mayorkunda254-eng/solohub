@@ -180,50 +180,6 @@ async function savePlatformPaymentDetails(details = {}) {
   return data;
 }
 
-
-const INVITE_ROLE_STORAGE_KEY = 'solohub_invite_role';
-
-const cleanInviteRole = (value) => {
-  const role = String(value || '').trim().toLowerCase();
-  return ['clipper', 'creator'].includes(role) ? role : '';
-};
-
-function captureInviteRoleFromUrl() {
-  if (typeof window === 'undefined') return '';
-
-  const params = new URLSearchParams(window.location.search);
-  const role = cleanInviteRole(params.get('role') || params.get('account') || params.get('type'));
-
-  if (role) {
-    localStorage.setItem(INVITE_ROLE_STORAGE_KEY, role);
-  }
-
-  return cleanInviteRole(localStorage.getItem(INVITE_ROLE_STORAGE_KEY));
-}
-
-function clearInviteRole() {
-  try {
-    localStorage.removeItem(INVITE_ROLE_STORAGE_KEY);
-  } catch {}
-}
-
-function buildInviteLink(targetRole, refCode = '') {
-  const role = cleanInviteRole(targetRole) || 'clipper';
-  const url = new URL(window.location.origin + window.location.pathname);
-
-  url.searchParams.set('role', role);
-
-  const cleanRef = typeof cleanReferralCode === 'function'
-    ? cleanReferralCode(refCode)
-    : String(refCode || '').trim().toUpperCase();
-
-  if (cleanRef) {
-    url.searchParams.set('ref', cleanRef);
-  }
-
-  return url.toString();
-}
-
 const REFERRAL_STORAGE_KEY = 'solohub_referral_code';
 
 const cleanReferralCode = (value) =>
@@ -574,19 +530,12 @@ function Sidebar({ role, page, setPage, open, setOpen, cloudMode }) {
   );
 }
 
-function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole }) {
+function AuthBox({ user, profile, onAuthUser, onLogout, referralCode }) {
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [fullName, setFullName] = useState('');
-  const [accountRole, setAccountRole] = useState(() => cleanInviteRole(inviteRole) || 'clipper');
-
-  useEffect(() => {
-    const invited = cleanInviteRole(inviteRole);
-    if (invited) {
-      setAccountRole(invited);
-    }
-  }, [inviteRole]);
+  const [accountRole, setAccountRole] = useState('clipper');
   const [message, setMessage] = useState('');
   const [busy, setBusy] = useState(false);
 
@@ -699,12 +648,6 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
         {referralCode && (
           <div className="referral-banner">
             Referral code applied: <strong>{referralCode}</strong>
-          </div>
-        )}
-
-        {cleanInviteRole(inviteRole) && (
-          <div className="invite-banner">
-            Invite role selected: <strong>{cleanInviteRole(inviteRole)}</strong>
           </div>
         )}
         <div className="auth-tabs">
@@ -860,13 +803,13 @@ function Hero({ setRole, setPage, cloudMode }) {
   );
 }
 
-function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode, inviteRole }) {
+function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode }) {
   const liveCampaigns = campaigns.filter((c) => c.status === 'Live').length;
   const pendingSubmissions = submissions.filter((s) => s.status === 'Pending Review').length;
   return (
     <>
       <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} />
-      <AuthBox user={user} profile={profile} onAuthUser={onAuthUser} onLogout={onLogout} referralCode={referralCode} inviteRole={inviteRole} />
+      <AuthBox user={user} profile={profile} onAuthUser={onAuthUser} onLogout={onLogout} referralCode={referralCode} />
       <section className="panel">
         <div className="section-head">
           <div>
@@ -2788,54 +2731,6 @@ function AdminSubmissions({ submissions, campaigns, onReviewSubmission }) {
   );
 }
 
-function InviteLinkPanel() {
-  const [refCode, setRefCode] = useState('');
-
-  const copyLink = async (role) => {
-    const link = buildInviteLink(role, refCode);
-
-    try {
-      await navigator.clipboard.writeText(link);
-      alert(role + ' invite link copied.');
-    } catch (err) {
-      window.prompt('Copy invite link:', link);
-    }
-  };
-
-  return (
-    <div className="invite-link-panel">
-      <div>
-        <Pill tone="green">Invite Links</Pill>
-        <h3>Send onboarding links to new users.</h3>
-        <p>Use these links when onboarding creators, clippers, or affiliate traffic.</p>
-      </div>
-
-      <label>
-        Optional affiliate code
-        <input value={refCode} onChange={(e) => setRefCode(e.target.value.toUpperCase())} placeholder="MARKFX" />
-      </label>
-
-      <div className="invite-link-actions">
-        <button type="button" className="affiliate-action-btn" onClick={() => copyLink('creator')}>
-          Copy creator invite
-        </button>
-
-        <button type="button" className="affiliate-action-btn secondary" onClick={() => copyLink('clipper')}>
-          Copy clipper invite
-        </button>
-      </div>
-
-      <div className="invite-preview">
-        <span>Creator:</span>
-        <input readOnly value={typeof window !== 'undefined' ? buildInviteLink('creator', refCode) : ''} />
-
-        <span>Clipper:</span>
-        <input readOnly value={typeof window !== 'undefined' ? buildInviteLink('clipper', refCode) : ''} />
-      </div>
-    </div>
-  );
-}
-
 function AdminUsers() {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -2948,8 +2843,6 @@ function AdminUsers() {
         <StatCard icon={Megaphone} label="Creators" value={roleCounts.creator || 0} helper="Campaign owners" />
         <StatCard icon={ShieldCheck} label="Admins" value={roleCounts.admin || 0} helper="Platform managers" />
       </div>
-
-      <InviteLinkPanel />
 
       <div className="table-wrap admin-users-table">
         <table>
@@ -3698,7 +3591,6 @@ function App() {
   const [loading, setLoading] = useState(false);
   const [notice, setNotice] = useState('');
   const [referralCode, setReferralCode] = useState(() => captureReferralCodeFromUrl());
-  const [inviteRole, setInviteRole] = useState(() => captureInviteRoleFromUrl());
   const [paymentSettingsTick, setPaymentSettingsTick] = useState(0);  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
     if (!cloudMode || !currentUser) return null;
 
@@ -4547,7 +4439,7 @@ const content = useMemo(() => {
         <main>
           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
           {cloudMode && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : user ? `Logged in as ${profile?.role || role || 'user'}` : 'Supabase mode active. Login on Home for role profiles.'}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
-          {cloudMode && !user && page !== 'home' ? <AuthBox user={user} profile={profile} onAuthUser={handleAuthUser} onLogout={logout} onRoleChange={updateProfileRole} referralCode={referralCode} inviteRole={inviteRole} /> : content}
+          {cloudMode && !user && page !== 'home' ? <AuthBox user={user} profile={profile} onAuthUser={handleAuthUser} onLogout={logout} onRoleChange={updateProfileRole} referralCode={referralCode} /> : content}
         </main>
         <CampaignModal campaign={selectedCampaign && page !== 'submit' ? selectedCampaign : null} onClose={() => setSelectedCampaign(null)} />
       </div>
