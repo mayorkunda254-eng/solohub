@@ -635,7 +635,7 @@ function PwaInstallButton() {
 
   return (
     <button type="button" className="small install-app-btn" onClick={installApp}>
-      <Upload size={15} /> Install App
+      <Download size={15} /> Install App
     </button>
   );
 }
