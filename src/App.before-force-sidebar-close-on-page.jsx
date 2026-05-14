@@ -5773,11 +5773,6 @@ const updateProfileRole = async (nextRole) => {
     };
   }, [user]);
 
-  // Force close mobile sidebar after page changes.
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [page]);
-
 const content = useMemo(() => {
     const currentRole = roleForUser(user, profile, role);
     const currentUserId = user?.id || null;

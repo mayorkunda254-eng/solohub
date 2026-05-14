@@ -5483,3 +5483,134 @@ body.solohub-logged-out .sidebar-backdrop {
     grid-template-columns: 1fr !important;
   }
 }
+
+/* =========================================================
+   Mobile Sidebar Unmount Support
+   ========================================================= */
+
+@media (max-width: 900px) {
+  .sidebar:not(.show) {
+    display: none !important;
+  }
+
+  .sidebar.show {
+    display: block !important;
+    position: fixed !important;
+    top: 84px !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    width: calc(100vw - 20px) !important;
+    max-height: calc(100dvh - 96px) !important;
+    overflow-y: auto !important;
+    z-index: 1200 !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .sidebar-backdrop.show {
+    display: block !important;
+    position: fixed !important;
+    inset: 84px 0 0 0 !important;
+    z-index: 1100 !important;
+    background: rgba(0, 0, 0, 0.68) !important;
+    border: 0 !important;
+  }
+
+  .mobile-only.menu-is-open {
+    background: rgba(245, 196, 83, 0.16) !important;
+    border-color: rgba(245, 196, 83, 0.38) !important;
+    color: #fff4bf !important;
+  }
+}
+
+/* =========================================================
+   Absolute Final Mobile/Tablet Sidebar Control
+   ========================================================= */
+
+/* Treat phones + tablets as drawer layout */
+@media (max-width: 1280px) {
+  .app-shell {
+    grid-template-columns: 1fr !important;
+  }
+
+  .sidebar {
+    position: fixed !important;
+    top: 84px !important;
+    left: 10px !important;
+    right: 10px !important;
+    bottom: 10px !important;
+    width: calc(100vw - 20px) !important;
+    max-width: 420px !important;
+    max-height: calc(100dvh - 96px) !important;
+    overflow-y: auto !important;
+    z-index: 3000 !important;
+
+    transform: translateX(-120%) !important;
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    display: block !important;
+  }
+
+  .sidebar.show,
+  .sidebar[data-open='true'] {
+    transform: translateX(0) !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .sidebar-backdrop {
+    position: fixed !important;
+    inset: 84px 0 0 0 !important;
+    z-index: 2500 !important;
+    background: rgba(0, 0, 0, 0.72) !important;
+    border: 0 !important;
+
+    opacity: 0 !important;
+    visibility: hidden !important;
+    pointer-events: none !important;
+    display: block !important;
+  }
+
+  .sidebar-backdrop.show {
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+
+  .mobile-only {
+    display: inline-grid !important;
+  }
+
+  .mobile-sidebar-close {
+    display: inline-flex !important;
+  }
+}
+
+/* Desktop only: sidebar is normal */
+@media (min-width: 1281px) {
+  .mobile-only {
+    display: none !important;
+  }
+
+  .mobile-sidebar-close {
+    display: none !important;
+  }
+
+  .sidebar-backdrop {
+    display: none !important;
+  }
+
+  .sidebar {
+    position: sticky !important;
+    top: 110px !important;
+    transform: none !important;
+    opacity: 1 !important;
+    visibility: visible !important;
+    pointer-events: auto !important;
+  }
+}

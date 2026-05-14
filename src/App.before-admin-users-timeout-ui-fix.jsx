@@ -717,28 +717,6 @@ const navs = {
 };
 
 function Sidebar({ role, page, setPage, open, setOpen, cloudMode }) {
-  const [isMobileNav, setIsMobileNav] = useState(() => {
-    if (typeof window === 'undefined') return false;
-    return window.matchMedia('(max-width: 900px)').matches;
-  });
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-
-    const query = window.matchMedia('(max-width: 900px)');
-    const update = () => setIsMobileNav(query.matches);
-
-    update();
-
-    if (query.addEventListener) {
-      query.addEventListener('change', update);
-      return () => query.removeEventListener('change', update);
-    }
-
-    query.addListener(update);
-    return () => query.removeListener(update);
-  }, []);
-
   const menuItems = Array.from(
     new Map((navs[role] || navs.clipper).map((item) => [item[0], item])).values()
   );
@@ -756,11 +734,9 @@ function Sidebar({ role, page, setPage, open, setOpen, cloudMode }) {
     }, 50);
   };
 
-  const shouldRenderSidebar = !isMobileNav || open;
-
   return (
     <>
-      {isMobileNav && open && (
+      {open && (
         <button
           type="button"
           className="sidebar-backdrop show"
@@ -777,55 +753,53 @@ function Sidebar({ role, page, setPage, open, setOpen, cloudMode }) {
         />
       )}
 
-      {shouldRenderSidebar && (
-        <aside className={`sidebar ${open ? 'show' : ''}`} data-open={open ? 'true' : 'false'}>
-          <div className="sidebar-mobile-head">
-            <div className="side-title">{role} menu</div>
+      <aside className={`sidebar ${open ? 'show' : ''}`} data-open={open ? 'true' : 'false'}>
+        <div className="sidebar-mobile-head">
+          <div className="side-title">{role} menu</div>
 
-            <button
-              type="button"
-              className="mobile-sidebar-close"
-              onPointerDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                closeMenu();
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-              aria-label="Close menu"
-            >
-              <XCircle size={18} />
-              <span>Close</span>
-            </button>
-          </div>
+          <button
+            type="button"
+            className="mobile-sidebar-close"
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              closeMenu();
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+            aria-label="Close menu"
+          >
+            <XCircle size={18} />
+            <span>Close</span>
+          </button>
+        </div>
 
-          {menuItems.map(([id, Icon, label]) => (
-            <button
-              type="button"
-              key={id}
-              className={page === id ? 'active' : ''}
-              onPointerDown={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-                goToPage(id);
-              }}
-              onClick={(e) => {
-                e.preventDefault();
-                e.stopPropagation();
-              }}
-            >
-              <Icon size={18} /> {label}
-            </button>
-          ))}
+        {menuItems.map(([id, Icon, label]) => (
+          <button
+            type="button"
+            key={id}
+            className={page === id ? 'active' : ''}
+            onPointerDown={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+              goToPage(id);
+            }}
+            onClick={(e) => {
+              e.preventDefault();
+              e.stopPropagation();
+            }}
+          >
+            <Icon size={18} /> {label}
+          </button>
+        ))}
 
-          <div className="side-note">
-            <ShieldCheck size={18} />
-            <span>{cloudMode ? 'Data saves in Supabase.' : 'Data saves in this browser only.'}</span>
-          </div>
-        </aside>
-      )}
+        <div className="side-note">
+          <ShieldCheck size={18} />
+          <span>{cloudMode ? 'Data saves in Supabase.' : 'Data saves in this browser only.'}</span>
+        </div>
+      </aside>
     </>
   );
 }
@@ -4156,7 +4130,7 @@ function AdminReports({ campaigns = [], submissions = [] }) {
 function AdminUsers() {
   const [profiles, setProfiles] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState('Click Refresh users to load account roles.');
+  const [message, setMessage] = useState('');
 
   const loadProfiles = async () => {
     setLoading(true);
@@ -4172,7 +4146,7 @@ function AdminUsers() {
         .limit(100);
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Load users', 20000)
+        ? await withSupabaseTimeout(request, 'Load users', 8000)
         : await request;
 
       if (error) throw error;
@@ -4181,14 +4155,16 @@ function AdminUsers() {
       setMessage('Users loaded.');
     } catch (err) {
       console.error('User load failed:', err);
-      setMessage('User load failed: ' + (err?.message || err) + '. Try Refresh users again.');
+      setMessage('User load failed: ' + (err?.message || err));
+      alert('User load failed: ' + (err?.message || err));
     } finally {
       setLoading(false);
     }
   };
 
-  // Users are loaded manually to avoid blocking the admin page on slow networks.
-  // Click "Refresh users" to load profiles when needed.
+  useEffect(() => {
+    loadProfiles();
+  }, []);
 
   const updateUserRole = async (profile, nextRole) => {
     const cleanNextRole = cleanRole(nextRole);
@@ -4218,7 +4194,7 @@ function AdminUsers() {
         .single();
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Update user role', 20000)
+        ? await withSupabaseTimeout(request, 'Update user role', 8000)
         : await request;
 
       if (error) throw error;
@@ -5772,11 +5748,6 @@ const updateProfileRole = async (nextRole) => {
       document.body.classList.remove('solohub-logged-in');
     };
   }, [user]);
-
-  // Force close mobile sidebar after page changes.
-  useEffect(() => {
-    setSidebarOpen(false);
-  }, [page]);
 
 const content = useMemo(() => {
     const currentRole = roleForUser(user, profile, role);
