@@ -2559,3 +2559,15 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.row-actions {
+  min-width: 230px;
+}
+
+.row-actions button {
+  margin: 3px;
+}
+
+.mini-select {
+  min-width: 120px;
+}

@@ -1412,9 +1412,7 @@ function AdminOverview({ campaigns, submissions, cloudMode }) {
   );
 }
 
-function AdminCampaigns({ campaigns, onCampaignStatus, onCampaignFundingUpdate }) {
-  const [drafts, setDrafts] = useState({});
-
+function AdminCampaigns({ campaigns, onCampaignStatus }) {
   const depositTone = (status) => {
     if (status === 'Paid') return 'green';
     if (status === 'Partial') return 'yellow';
@@ -1422,45 +1420,13 @@ function AdminCampaigns({ campaigns, onCampaignStatus, onCampaignFundingUpdate }
     return 'yellow';
   };
 
-  const getDraft = (campaign) => {
-    const draft = drafts[campaign.id] || {};
-
-    return {
-      depositStatus: draft.depositStatus ?? campaign.depositStatus ?? campaign.deposit_status ?? 'Pending',
-      depositAmount: draft.depositAmount ?? campaign.depositAmount ?? campaign.deposit_amount ?? 0,
-      paymentReference: draft.paymentReference ?? campaign.paymentReference ?? campaign.payment_reference ?? '',
-      adminNotes: draft.adminNotes ?? campaign.adminNotes ?? campaign.admin_notes ?? ''
-    };
-  };
-
-  const updateDraft = (id, key, value) => {
-    setDrafts((prev) => ({
-      ...prev,
-      [id]: {
-        ...(prev[id] || {}),
-        [key]: value
-      }
-    }));
-  };
-
-  const saveDeposit = async (campaign) => {
-    const draft = getDraft(campaign);
-
-    await onCampaignFundingUpdate(campaign.id, {
-      depositStatus: draft.depositStatus,
-      depositAmount: draft.depositAmount,
-      paymentReference: draft.paymentReference,
-      adminNotes: draft.adminNotes
-    });
-  };
-
   return (
     <section className="panel">
       <div className="section-head">
         <div>
           <Pill tone="purple"><Megaphone size={14} /> Campaign Approval</Pill>
-          <h2>Confirm deposits before campaigns go live.</h2>
-          <p>Update payment reference and deposit status first. Campaigns should only be approved after deposit is Partial or Paid.</p>
+          <h2>Approve campaigns only after client deposit is confirmed.</h2>
+          <p>Campaigns should stay Pending Approval until deposit status is Partial or Paid.</p>
         </div>
       </div>
 
@@ -1472,104 +1438,54 @@ function AdminCampaigns({ campaigns, onCampaignStatus, onCampaignFundingUpdate }
               <th>Creator / Client</th>
               <th>Contact</th>
               <th>Budget</th>
-              <th>Deposit status</th>
-              <th>Deposit amount</th>
-              <th>Payment ref</th>
-              <th>Admin notes</th>
-              <th>Campaign status</th>
+              <th>Deposit</th>
+              <th>Payment Ref</th>
+              <th>Status</th>
               <th>Actions</th>
             </tr>
           </thead>
 
           <tbody>
-            {campaigns.map((c) => {
-              const draft = getDraft(c);
+            {campaigns.map((c) => (
+              <tr key={c.id}>
+                <td>
+                  <strong>{c.title}</strong>
+                  <div className="table-subtext">{c.category}</div>
+                </td>
 
-              return (
-                <tr key={c.id}>
-                  <td>
-                    <strong>{c.title}</strong>
-                    <div className="table-subtext">{c.category}</div>
-                  </td>
+                <td>
+                  <strong>{c.creator}</strong>
+                  <div className="table-subtext">{c.clientName || c.client_name || 'No client name'}</div>
+                </td>
 
-                  <td>
-                    <strong>{c.creator}</strong>
-                    <div className="table-subtext">{c.clientName || c.client_name || 'No client name'}</div>
-                  </td>
+                <td>
+                  <div>{c.clientPhone || c.client_phone || '-'}</div>
+                  <div className="table-subtext">{c.clientEmail || c.client_email || ''}</div>
+                </td>
 
-                  <td>
-                    <div>{c.clientPhone || c.client_phone || '-'}</div>
-                    <div className="table-subtext">{c.clientEmail || c.client_email || ''}</div>
-                  </td>
+                <td>{money(c.budget)}</td>
 
-                  <td>{money(c.budget)}</td>
+                <td>
+                  <Pill tone={depositTone(c.depositStatus || c.deposit_status)}>
+                    {c.depositStatus || c.deposit_status || 'Pending'}
+                  </Pill>
+                  <div className="table-subtext">{money(c.depositAmount || c.deposit_amount || 0)}</div>
+                </td>
 
-                  <td>
-                    <select
-                      className="mini-select"
-                      value={draft.depositStatus}
-                      onChange={(e) => updateDraft(c.id, 'depositStatus', e.target.value)}
-                    >
-                      <option>Pending</option>
-                      <option>Partial</option>
-                      <option>Paid</option>
-                      <option>Refunded</option>
-                    </select>
+                <td>{c.paymentReference || c.payment_reference || '-'}</td>
 
-                    <div className="table-subtext">
-                      <Pill tone={depositTone(draft.depositStatus)}>{draft.depositStatus}</Pill>
-                    </div>
-                  </td>
+                <td>
+                  <Pill tone={c.status === 'Live' ? 'green' : c.status === 'Rejected' ? 'red' : 'yellow'}>
+                    {c.status}
+                  </Pill>
+                </td>
 
-                  <td>
-                    <input
-                      className="mini-input"
-                      type="number"
-                      value={draft.depositAmount}
-                      onChange={(e) => updateDraft(c.id, 'depositAmount', e.target.value)}
-                    />
-                  </td>
-
-                  <td>
-                    <input
-                      className="mini-input"
-                      value={draft.paymentReference}
-                      onChange={(e) => updateDraft(c.id, 'paymentReference', e.target.value)}
-                      placeholder="M-Pesa code"
-                    />
-                  </td>
-
-                  <td>
-                    <textarea
-                      className="mini-textarea"
-                      value={draft.adminNotes}
-                      onChange={(e) => updateDraft(c.id, 'adminNotes', e.target.value)}
-                      placeholder="Internal deposit notes"
-                    />
-                  </td>
-
-                  <td>
-                    <Pill tone={c.status === 'Live' ? 'green' : c.status === 'Rejected' ? 'red' : 'yellow'}>
-                      {c.status}
-                    </Pill>
-                  </td>
-
-                  <td className="row-actions">
-                    <Button type="button" onClick={() => saveDeposit(c)}>
-                      Save deposit
-                    </Button>
-
-                    <Button type="button" onClick={() => onCampaignStatus(c.id, 'Live')}>
-                      <CheckCircle2 size={16} /> Approve
-                    </Button>
-
-                    <Button type="button" variant="ghost" onClick={() => onCampaignStatus(c.id, 'Rejected')}>
-                      <XCircle size={16} /> Reject
-                    </Button>
-                  </td>
-                </tr>
-              );
-            })}
+                <td className="row-actions">
+                  <Button type="button" onClick={() => onCampaignStatus(c.id, 'Live')}><CheckCircle2 size={16} /> Approve</Button>
+                  <Button type="button" variant="ghost" onClick={() => onCampaignStatus(c.id, 'Rejected')}><XCircle size={16} /> Reject</Button>
+                </td>
+              </tr>
+            ))}
           </tbody>
         </table>
       </div>
@@ -2487,65 +2403,7 @@ const updateProfileRole = async (nextRole) => {
       alert(msg);
       return false;
     }
-  };  const updateCampaignFunding = async (id, funding) => {
-    try {
-      if (!id) {
-        alert('Missing campaign ID.');
-        return;
-      }
-
-      const patch = {
-        deposit_status: funding.depositStatus || funding.deposit_status || 'Pending',
-        deposit_amount: Number(funding.depositAmount || funding.deposit_amount || 0),
-        payment_reference: funding.paymentReference || funding.payment_reference || '',
-        admin_notes: funding.adminNotes || funding.admin_notes || ''
-      };
-
-      if (cloudMode) {
-        const data = await updateCampaignDirect(id, patch);
-
-        if (!data) {
-          alert('Deposit update failed: no campaign returned.');
-          return;
-        }
-
-        setCampaigns((prev) =>
-          prev.map((campaign) => campaign.id === id ? toCampaign(data) : campaign)
-        );
-
-        setNotice('Campaign deposit details updated.');
-        alert('Deposit details updated.');
-        return;
-      }
-
-      setCampaigns((prev) =>
-        prev.map((campaign) =>
-          campaign.id === id
-            ? {
-                ...campaign,
-                depositStatus: patch.deposit_status,
-                deposit_status: patch.deposit_status,
-                depositAmount: patch.deposit_amount,
-                deposit_amount: patch.deposit_amount,
-                paymentReference: patch.payment_reference,
-                payment_reference: patch.payment_reference,
-                adminNotes: patch.admin_notes,
-                admin_notes: patch.admin_notes
-              }
-            : campaign
-        )
-      );
-
-      setNotice('Campaign deposit details updated locally.');
-      alert('Deposit details updated.');
-    } catch (err) {
-      console.error('Deposit update failed:', err);
-      alert('Deposit update failed: ' + (err?.message || err));
-      setNotice('Deposit update failed: ' + (err?.message || err));
-    }
   };
-
-
 
   const campaignStatus = async (id, status) => {
     try {
@@ -2822,7 +2680,7 @@ const updateProfileRole = async (nextRole) => {
     }
 
     if (page === 'adminCampaigns') {
-      return isAdmin ? <AdminCampaigns campaigns={campaigns} onCampaignStatus={campaignStatus} onCampaignFundingUpdate={updateCampaignFunding} /> : home;
+      return isAdmin ? <AdminCampaigns campaigns={campaigns} onCampaignStatus={campaignStatus} /> : home;
     }
 
     if (page === 'adminSubmissions') {
