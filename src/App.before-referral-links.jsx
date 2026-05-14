@@ -42,68 +42,6 @@ const roleForUser = (user, profile, fallbackRole = 'clipper') => {
   return profile?.role ? cleanRole(profile.role) : cleanRole(fallbackRole);
 };
 
-const REFERRAL_STORAGE_KEY = 'solohub_referral_code';
-
-const cleanReferralCode = (value) =>
-  String(value || '')
-    .trim()
-    .toUpperCase()
-    .replace(/[^A-Z0-9_-]/g, '')
-    .slice(0, 40);
-
-function captureReferralCodeFromUrl() {
-  if (typeof window === 'undefined') return '';
-
-  const params = new URLSearchParams(window.location.search);
-  const rawCode = params.get('ref') || params.get('affiliate') || params.get('aff');
-  const code = cleanReferralCode(rawCode);
-
-  if (code) {
-    localStorage.setItem(REFERRAL_STORAGE_KEY, code);
-  }
-
-  return localStorage.getItem(REFERRAL_STORAGE_KEY) || '';
-}
-
-async function claimStoredReferralCode(authUser, userRole = 'clipper', fullName = '') {
-  if (!supabase || !authUser?.id) return '';
-
-  const code = cleanReferralCode(localStorage.getItem(REFERRAL_STORAGE_KEY));
-
-  if (!code) return '';
-
-  // Do not create referral records for the platform owner/admin.
-  if (isOwnerEmail(authUser.email)) {
-    localStorage.removeItem(REFERRAL_STORAGE_KEY);
-    return '';
-  }
-
-  const role = cleanRole(userRole) === 'creator' ? 'creator' : 'clipper';
-
-  const request = supabase.rpc('claim_referral_code', {
-    p_code: code,
-    p_referral_type: role,
-    p_referred_name: fullName || authUser?.user_metadata?.full_name || authUser.email || '',
-    p_referred_phone: '',
-    p_notes: 'Auto captured from SoloHub referral link.'
-  });
-
-  const result = typeof withSupabaseTimeout === 'function'
-    ? await withSupabaseTimeout(request, 'Claim referral code')
-    : await request;
-
-  if (result.error) {
-    throw result.error;
-  }
-
-  if (result.data?.ok === false) {
-    throw new Error(result.data?.message || 'Referral code could not be claimed.');
-  }
-
-  localStorage.removeItem(REFERRAL_STORAGE_KEY);
-  return code;
-}
-
 async function withSupabaseTimeout(request, label = 'Supabase request', ms = 15000) {
   let timeoutId;
 
@@ -349,7 +287,7 @@ function Sidebar({ role, page, setPage, open, setOpen, cloudMode }) {
   );
 }
 
-function AuthBox({ user, profile, onAuthUser, onLogout, referralCode }) {
+function AuthBox({ user, profile, onAuthUser, onLogout }) {
   const [mode, setMode] = useState('login');
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
@@ -464,11 +402,6 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode }) {
       </div>
 
       <form className="auth-form auth-form-wide" onSubmit={mode === 'signup' ? signUp : signIn}>
-        {referralCode && (
-          <div className="referral-banner">
-            Referral code applied: <strong>{referralCode}</strong>
-          </div>
-        )}
         <div className="auth-tabs">
           <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>Login</button>
           <button type="button" className={mode === 'signup' ? 'active' : ''} onClick={() => setMode('signup')}>Sign up</button>
@@ -532,13 +465,13 @@ function Hero({ setRole, setPage, cloudMode }) {
   );
 }
 
-function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode }) {
+function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange }) {
   const liveCampaigns = campaigns.filter((c) => c.status === 'Live').length;
   const pendingSubmissions = submissions.filter((s) => s.status === 'Pending Review').length;
   return (
     <>
       <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} />
-      <AuthBox user={user} profile={profile} onAuthUser={onAuthUser} onLogout={onLogout} referralCode={referralCode} />
+      <AuthBox user={user} profile={profile} onAuthUser={onAuthUser} onLogout={onLogout} />
       <section className="panel">
         <div className="section-head">
           <div>
@@ -1673,39 +1606,6 @@ function AdminAffiliates() {
         </div>
       </div>
 
-      {affiliates.length > 0 && (
-        <div className="affiliate-link-list">
-          <h3>Affiliate referral links</h3>
-          <p className="form-note">Share these links with partners. Signups from the link are recorded as Pending referrals.</p>
-
-          {affiliates.map((affiliate) => {
-            const link = `${window.location.origin}${window.location.pathname}?ref=${affiliate.code}`;
-
-            return (
-              <div key={affiliate.id} className="affiliate-link-row">
-                <div>
-                  <strong>{affiliate.name}</strong>
-                  <span>{affiliate.code}</span>
-                </div>
-
-                <input readOnly value={link} />
-
-                <button
-                  type="button"
-                  className="mini-action"
-                  onClick={() => {
-                    navigator.clipboard?.writeText(link);
-                    alert('Affiliate link copied.');
-                  }}
-                >
-                  Copy link
-                </button>
-              </div>
-            );
-          })}
-        </div>
-      )}
-
       <div className="affiliate-table table-wrap">
         <table>
           <thead>
@@ -1788,8 +1688,7 @@ function App() {
   const [campaigns, setCampaigns] = useLocalState('solohub-campaigns-phase3', seedCampaigns);
   const [submissions, setSubmissions] = useLocalState('solohub-submissions-phase3', seedSubmissions);
   const [loading, setLoading] = useState(false);
-  const [notice, setNotice] = useState('');
-  const [referralCode, setReferralCode] = useState(() => captureReferralCodeFromUrl());  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
+  const [notice, setNotice] = useState('');  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
     if (!cloudMode || !currentUser) return null;
 
     const ownerAdmin = isOwnerEmail(currentUser.email);
@@ -1841,17 +1740,6 @@ function App() {
     setProfile(fixedProfile);
     setRole(fixedProfile.role);
     setPage(defaultPageForRole(fixedProfile.role));
-
-    try {
-      const claimedCode = await claimStoredReferralCode(currentUser, fixedProfile.role, fixedProfile.full_name);
-      if (claimedCode) {
-        setReferralCode('');
-        setNotice(`Referral code ${claimedCode} captured. Admin will qualify it after value is confirmed.`);
-      }
-    } catch (refErr) {
-      console.warn('Referral claim failed:', refErr);
-      setNotice('Referral code was found, but could not be claimed: ' + (refErr?.message || refErr));
-    }
 
     return fixedProfile;
   };  const handleAuthUser = async (authUser, preferredRole = '', fullName = '', options = {}) => {
@@ -1914,17 +1802,6 @@ function App() {
       setProfile(fixedProfile);
       setRole(fixedProfile.role);
       setPage(options?.stayHome ? 'home' : defaultPageForRole(fixedProfile.role));
-
-      try {
-        const claimedCode = await claimStoredReferralCode(authUser, fixedProfile.role, fixedProfile.full_name);
-        if (claimedCode) {
-          setReferralCode('');
-          setNotice(`Referral code ${claimedCode} captured. Admin will qualify it after value is confirmed.`);
-        }
-      } catch (refErr) {
-        console.warn('Referral claim failed:', refErr);
-        setNotice('Referral code was found, but could not be claimed: ' + (refErr?.message || refErr));
-      }
 
       return fixedProfile;
     } catch (err) {
@@ -2432,7 +2309,7 @@ const updateProfileRole = async (nextRole) => {
         <main>
           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
           {cloudMode && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : user ? `Logged in as ${profile?.role || role || 'user'}` : 'Supabase mode active. Login on Home for role profiles.'}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
-          {cloudMode && !user && page !== 'home' ? <AuthBox user={user} profile={profile} onAuthUser={handleAuthUser} onLogout={logout} onRoleChange={updateProfileRole} referralCode={referralCode} /> : content}
+          {cloudMode && !user && page !== 'home' ? <AuthBox user={user} profile={profile} onAuthUser={handleAuthUser} onLogout={logout} onRoleChange={updateProfileRole} /> : content}
         </main>
         <CampaignModal campaign={selectedCampaign && page !== 'submit' ? selectedCampaign : null} onClose={() => setSelectedCampaign(null)} />
       </div>
