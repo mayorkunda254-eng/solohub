@@ -42,15 +42,6 @@ const roleForUser = (user, profile, fallbackRole = 'clipper') => {
   return profile?.role ? cleanRole(profile.role) : cleanRole(fallbackRole);
 };
 
-const SOLOHUB_PAYMENT_DETAILS = {
-  businessName: 'SoloHub',
-  method: 'M-Pesa Till / Paybill',
-  status: 'Coming soon',
-  number: 'To be added',
-  reference: 'Campaign title or client phone',
-  note: 'After payment, enter the M-Pesa confirmation code in the Payment Reference field.'
-};
-
 const REFERRAL_STORAGE_KEY = 'solohub_referral_code';
 
 const cleanReferralCode = (value) =>
@@ -1231,39 +1222,6 @@ function CreateCampaignPage({ onCreateCampaign }) {
             <input value={form.resourceUrl} onChange={(e) => update('resourceUrl', e.target.value)} placeholder="Google Drive / Dropbox / source folder" />
           </label>
 
-          <div className="payment-instructions-box">
-            <div>
-              <Pill tone="yellow">Campaign Deposit</Pill>
-              <h3>Payment instructions</h3>
-              <p>Use this section to guide creators/clients on where to deposit the campaign budget before the campaign goes live.</p>
-            </div>
-
-            <div className="payment-instruction-grid">
-              <div>
-                <span>Business name</span>
-                <strong>{SOLOHUB_PAYMENT_DETAILS.businessName}</strong>
-              </div>
-
-              <div>
-                <span>Payment method</span>
-                <strong>{SOLOHUB_PAYMENT_DETAILS.method}</strong>
-              </div>
-
-              <div>
-                <span>Till / Paybill</span>
-                <strong>{SOLOHUB_PAYMENT_DETAILS.number}</strong>
-                <small>{SOLOHUB_PAYMENT_DETAILS.status}</small>
-              </div>
-
-              <div>
-                <span>Account reference</span>
-                <strong>{SOLOHUB_PAYMENT_DETAILS.reference}</strong>
-              </div>
-            </div>
-
-            <p className="form-note">{SOLOHUB_PAYMENT_DETAILS.note}</p>
-          </div>
-
           <div className="funding-section">
             <h3>Client & funding details</h3>
 
@@ -1425,8 +1383,8 @@ function AdminCampaigns({ campaigns, onCampaignStatus }) {
       <div className="section-head">
         <div>
           <Pill tone="purple"><Megaphone size={14} /> Campaign Approval</Pill>
-          <h2>Approve campaigns only after client deposit is confirmed.</h2>
-          <p>Campaigns should stay Pending Approval until deposit status is Partial or Paid.</p>
+          <h2>Approve campaigns and track client funding.</h2>
+          <p>Use this page to manage creator campaigns, client deposits, and approval status.</p>
         </div>
       </div>
 
