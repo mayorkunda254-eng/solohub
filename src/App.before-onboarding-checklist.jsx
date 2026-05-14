@@ -530,9 +530,7 @@ function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode
 const navs = {
   clipper: [
     ['home', Home, 'Home'],
-    ['onboarding', CheckCircle2, 'Getting Started'],
     ['activity', ShieldCheck, 'Activity'],
-    ['onboarding', CheckCircle2, 'Getting Started'],
     ['discover', Search, 'Discover'],
     ['submissions', FileVideo, 'My Submissions'],
     ['earnings', Wallet, 'Earnings'],
@@ -540,9 +538,7 @@ const navs = {
   ],
   creator: [
     ['home', Home, 'Home'],
-    ['onboarding', CheckCircle2, 'Getting Started'],
     ['activity', ShieldCheck, 'Activity'],
-    ['onboarding', CheckCircle2, 'Getting Started'],
     ['creatorDashboard', LayoutDashboard, 'Dashboard'],
     ['createCampaign', Plus, 'Create Campaign'],
     ['creatorCampaigns', Megaphone, 'My Campaigns'],
@@ -552,7 +548,6 @@ const navs = {
     ['adminOverview', LayoutDashboard, 'Overview'],
     ['adminUsers', UserRound, 'Users'],
     ['activity', ShieldCheck, 'Activity'],
-    ['onboarding', CheckCircle2, 'Getting Started'],
     ['createCampaign', Plus, 'Create Managed Campaign'],
     ['adminCampaigns', Megaphone, 'Campaigns'],
     ['adminSubmissions', ShieldCheck, 'Submissions'],
@@ -922,206 +917,87 @@ function CampaignCard({ campaign, onOpen, onSubmit }) {
 }
 
 function DiscoverPage({ campaigns, setSelectedCampaign, setPage }) {
-  const [search, setSearch] = useState('');
-  const [platform, setPlatform] = useState('All');
-  const [category, setCategory] = useState('All');
-  const [sortBy, setSortBy] = useState('Best Match');
-
-  const liveCampaigns = campaigns.filter((campaign) => campaign.status === 'Live');
-
-  const platforms = Array.from(new Set(
-    liveCampaigns.flatMap((campaign) => Array.isArray(campaign.platforms) ? campaign.platforms : [])
-  )).filter(Boolean);
-
-  const categories = Array.from(new Set(
-    liveCampaigns.map((campaign) => campaign.category).filter(Boolean)
-  ));
-
-  const filteredCampaigns = liveCampaigns
-    .filter((campaign) => {
-      const text = [
-        campaign.title,
-        campaign.creator,
-        campaign.category,
-        campaign.description,
-        Array.isArray(campaign.tags) ? campaign.tags.join(' ') : '',
-        Array.isArray(campaign.platforms) ? campaign.platforms.join(' ') : ''
-      ].join(' ').toLowerCase();
-
-      const matchesSearch = !search.trim() || text.includes(search.trim().toLowerCase());
-      const matchesPlatform = platform === 'All' || (Array.isArray(campaign.platforms) && campaign.platforms.includes(platform));
-      const matchesCategory = category === 'All' || campaign.category === category;
-
-      return matchesSearch && matchesPlatform && matchesCategory;
-    })
-    .sort((a, b) => {
-      if (sortBy === 'Highest Pay') {
-        return Number(b.payPerThousand || 0) - Number(a.payPerThousand || 0);
-      }
-
-      if (sortBy === 'Biggest Budget') {
-        return Number(b.budget || 0) - Number(a.budget || 0);
-      }
-
-      if (sortBy === 'Newest') {
-        return String(b.createdAt || b.created_at || '').localeCompare(String(a.createdAt || a.created_at || ''));
-      }
-
-      return Number(b.score || 0) - Number(a.score || 0);
-    });
+  const live = campaigns.filter((c) => c.status === 'Live');
 
   const openCampaign = (campaign) => {
     setSelectedCampaign(campaign);
     setPage('submit');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
   return (
-    <section className="discover-marketplace-page">
-      <div className="section-head discover-head">
+    <section className="whop-page">
+      <div className="whop-page-head">
         <div>
-          <Pill tone="green"><Search size={14} /> Campaign Marketplace</Pill>
-          <h2>Find campaigns and submit clips.</h2>
-          <p>Search live campaigns by niche, payout, platform, and creator requirements.</p>
+          <Pill tone="purple">Content Rewards</Pill>
+          <h2>Campaigns</h2>
+          <p>Discover active campaigns, review requirements, and submit your clips.</p>
         </div>
+        <div className="whop-search">Search campaigns</div>
       </div>
 
-      <div className="discover-filter-bar">
-        <label className="discover-search">
-          <Search size={18} />
-          <input
-            value={search}
-            onChange={(e) => setSearch(e.target.value)}
-            placeholder="Search campaigns, creators, categories..."
-          />
-        </label>
-
-        <select value={platform} onChange={(e) => setPlatform(e.target.value)}>
-          <option>All</option>
-          {platforms.map((item) => <option key={item}>{item}</option>)}
-        </select>
-
-        <select value={category} onChange={(e) => setCategory(e.target.value)}>
-          <option>All</option>
-          {categories.map((item) => <option key={item}>{item}</option>)}
-        </select>
-
-        <select value={sortBy} onChange={(e) => setSortBy(e.target.value)}>
-          <option>Best Match</option>
-          <option>Highest Pay</option>
-          <option>Biggest Budget</option>
-          <option>Newest</option>
-        </select>
-      </div>
-
-      <div className="discover-results-note">
-        Showing <strong>{filteredCampaigns.length}</strong> live campaign{filteredCampaigns.length === 1 ? '' : 's'}.
-      </div>
-
-      <div className="premium-campaign-grid">
-        {filteredCampaigns.map((campaign) => {
-          const imageUrl = campaign.imageUrl || campaign.image_url || '';
-          const platformsList = Array.isArray(campaign.platforms) ? campaign.platforms : [];
-          const tagsList = Array.isArray(campaign.tags) ? campaign.tags : [];
-          const score = Number(campaign.score || 80);
+      <div className="whop-campaign-grid">
+        {live.map((campaign) => {
           const budget = Number(campaign.budget || 0);
-          const paidOut = Number(campaign.paidOut || campaign.paid_out || 0);
+          const remaining = Number(campaign.remaining || 0);
+          const paidOut = Math.max(0, budget - remaining);
           const progress = budget > 0 ? Math.min(100, Math.round((paidOut / budget) * 100)) : 0;
 
           return (
-            <article key={campaign.id} className="premium-campaign-card">
-              <div className="premium-campaign-image">
-                {imageUrl ? (
-                  <img src={imageUrl} alt={campaign.title} />
-                ) : (
-                  <div className="premium-campaign-placeholder">S</div>
-                )}
-
-                <div className="premium-card-score">
-                  <span>Score</span>
-                  <strong>{score}</strong>
-                </div>
-
-                <div className="premium-card-badges">
-                  <Pill tone="green">Live</Pill>
-                  {campaign.managedBy === 'admin' || campaign.managed_by === 'admin' ? (
-                    <Pill tone="purple">SoloHub Managed</Pill>
+            <article key={campaign.id} className="whop-campaign-card" onClick={() => openCampaign(campaign)}>
+              <div className="whop-card-top">
+                <div className="whop-thumb">
+                  {campaign.imageUrl ? (
+                    <img src={campaign.imageUrl} alt={campaign.title} />
                   ) : (
-                    <Pill tone="yellow">Creator Managed</Pill>
+                    <div className="whop-thumb-fallback">S</div>
                   )}
                 </div>
+
+                <div className="whop-tags">
+                  <span>Clipping</span>
+                  <span>{campaign.category}</span>
+                </div>
               </div>
 
-              <div className="premium-campaign-content">
+              <h3>{campaign.title}</h3>
+
+              <div className="whop-creator-row">
+                <span>{campaign.creator}</span>
+                <strong>?</strong>
+              </div>
+
+              <div className="whop-meta-row">
                 <div>
-                  <h3>{campaign.title}</h3>
-                  <p className="premium-creator-line">
-                    {campaign.creator || 'SoloHub Creator'} <CheckCircle2 size={15} />
-                  </p>
+                  <small>Paid Out</small>
+                  <strong>{money(paidOut)} <span>/ {money(budget)}</span></strong>
                 </div>
-
-                <p className="premium-description">
-                  {campaign.description || 'Create short clips from approved content and submit your public post link for admin review.'}
-                </p>
-
-                <div className="premium-tag-row">
-                  {campaign.category && <span>{campaign.category}</span>}
-                  {tagsList.slice(0, 3).map((tag) => <span key={tag}>{tag}</span>)}
-                </div>
-
-                <div className="premium-pay-grid">
-                  <div>
-                    <span>Pay / 1,000 views</span>
-                    <strong>{money(campaign.payPerThousand || 0)}</strong>
-                  </div>
-
-                  <div>
-                    <span>Budget</span>
-                    <strong>{money(budget)}</strong>
-                  </div>
-                </div>
-
-                <div className="whop-progress">
-                  <i style={{ width: progress + '%' }} />
-                </div>
-
-                <div className="premium-platforms">
-                  {platformsList.slice(0, 4).map((item) => <span key={item}>{item}</span>)}
-                </div>
-
-                <div className="premium-card-actions">
-                  <button type="button" className="mini-action ghost" onClick={() => openCampaign(campaign)}>
-                    View details
-                  </button>
-
-                  <button type="button" className="affiliate-action-btn" onClick={() => openCampaign(campaign)}>
-                    Submit clip <Upload size={16} />
-                  </button>
+                <div>
+                  <small>CPM</small>
+                  <strong>{money(campaign.payPerThousand)} <span>/ 1k views</span></strong>
                 </div>
               </div>
+
+              <div className="whop-progress">
+                <i style={{ width: progress + '%' }} />
+              </div>
+
+              <div className="whop-card-bottom">
+                <div>
+                  <small>Minimum views</small>
+                  <strong>{Number(campaign.minimumViews || 0).toLocaleString()}</strong>
+                </div>
+                <div>
+                  <small>Max payout</small>
+                  <strong>{money(campaign.maxPayout)}</strong>
+                </div>
+              </div>
+
+              <button type="button" className="whop-submit-btn" onClick={(e) => { e.stopPropagation(); openCampaign(campaign); }}>
+                Submit clip
+              </button>
             </article>
           );
         })}
-
-        {!filteredCampaigns.length && (
-          <div className="panel empty-discover">
-            <Pill tone="yellow">No campaigns found</Pill>
-            <h3>No live campaigns match your filters.</h3>
-            <p>Try clearing the search, changing platform, or checking again after admin approves new campaigns.</p>
-            <button
-              type="button"
-              className="affiliate-action-btn"
-              onClick={() => {
-                setSearch('');
-                setPlatform('All');
-                setCategory('All');
-                setSortBy('Best Match');
-              }}
-            >
-              Clear filters
-            </button>
-          </div>
-        )}
       </div>
     </section>
   );
@@ -1276,197 +1152,6 @@ function SubmitPage({ selectedCampaign, campaigns, onSubmitClip }) {
             <small>{money(campaign.maxPayout)} max payout</small>
           </div>
         ))}
-      </div>
-    </section>
-  );
-}
-
-function OnboardingChecklist({ role, profile, campaigns = [], submissions = [], setPage }) {
-  const clean = cleanRole(role);
-
-  const hasPayoutProfile = Boolean(profile?.mpesa_phone || profile?.mpesaPhone);
-  const hasCampaign = campaigns.length > 0;
-  const hasLiveCampaign = campaigns.some((campaign) => campaign.status === 'Live');
-  const hasCampaignImage = campaigns.some((campaign) => campaign.imageUrl || campaign.image_url);
-  const hasCampaignResources = campaigns.some((campaign) => campaign.resourceUrl || campaign.resource_url);
-  const hasPaymentReference = campaigns.some((campaign) => campaign.paymentReference || campaign.payment_reference);
-  const hasSubmission = submissions.length > 0;
-  const hasApprovedSubmission = submissions.some((submission) => submission.status === 'Approved' || submission.status === 'Paid');
-  const hasPaidSubmission = submissions.some((submission) => submission.status === 'Paid');
-
-  const adminSteps = [
-    {
-      title: 'Set platform payment details',
-      description: 'Add your M-Pesa Till/Paybill once ready so creators know where to deposit campaign funds.',
-      done: SOLOHUB_PAYMENT_DETAILS.status === 'Active' && SOLOHUB_PAYMENT_DETAILS.number !== 'To be added',
-      action: 'Open Settings',
-      page: 'adminSettings'
-    },
-    {
-      title: 'Create or approve campaigns',
-      description: 'Add managed campaigns or approve creator-submitted campaigns after confirming payment.',
-      done: hasCampaign,
-      action: 'Open Campaigns',
-      page: 'adminCampaigns'
-    },
-    {
-      title: 'Confirm deposits',
-      description: 'Update deposit status, amount, payment reference, and admin notes before campaigns go live.',
-      done: campaigns.some((campaign) => ['Paid', 'Partial'].includes(campaign.depositStatus || campaign.deposit_status)),
-      action: 'Open Campaigns',
-      page: 'adminCampaigns'
-    },
-    {
-      title: 'Review submissions',
-      description: 'Verify submitted views, check fraud risk, approve valid clips, and reject suspicious clips.',
-      done: submissions.some((submission) => submission.status !== 'Pending Review'),
-      action: 'Open Submissions',
-      page: 'adminSubmissions'
-    },
-    {
-      title: 'Manage user roles',
-      description: 'Promote accounts to creator/admin or correct accounts that signed up with the wrong role.',
-      done: true,
-      action: 'Open Users',
-      page: 'adminUsers'
-    }
-  ];
-
-  const creatorSteps = [
-    {
-      title: 'Create your first campaign',
-      description: 'Set the campaign title, budget, payout rate, platforms, and content rules.',
-      done: hasCampaign,
-      action: 'Create Campaign',
-      page: 'createCampaign'
-    },
-    {
-      title: 'Add campaign image and resources',
-      description: 'Add a strong image and a Google Drive/resource folder so clippers know what to use.',
-      done: hasCampaignImage && hasCampaignResources,
-      action: 'Manage Campaigns',
-      page: 'creatorCampaigns'
-    },
-    {
-      title: 'Add payment reference',
-      description: 'After paying the campaign deposit, add the M-Pesa/payment reference for admin confirmation.',
-      done: hasPaymentReference,
-      action: 'Manage Campaigns',
-      page: 'creatorCampaigns'
-    },
-    {
-      title: 'Wait for admin approval',
-      description: 'Admin confirms your deposit and approves the campaign before clippers can submit.',
-      done: hasLiveCampaign,
-      action: 'View Campaigns',
-      page: 'creatorCampaigns'
-    },
-    {
-      title: 'Track clip performance',
-      description: 'Monitor submitted clips, approved views, review notes, and payout impact.',
-      done: hasSubmission,
-      action: 'View Submissions',
-      page: 'creatorSubmissions'
-    }
-  ];
-
-  const clipperSteps = [
-    {
-      title: 'Save your payout profile',
-      description: 'Add your M-Pesa name and phone number so admin can pay approved earnings.',
-      done: hasPayoutProfile,
-      action: 'Open Earnings',
-      page: 'earnings'
-    },
-    {
-      title: 'Find a live campaign',
-      description: 'Open Discover and choose a campaign that matches your niche and platform.',
-      done: hasLiveCampaign,
-      action: 'Discover Campaigns',
-      page: 'discover'
-    },
-    {
-      title: 'Submit your first clip',
-      description: 'Paste your TikTok, Reels, or Shorts post link and submit views for review.',
-      done: hasSubmission,
-      action: 'My Submissions',
-      page: 'submissions'
-    },
-    {
-      title: 'Wait for admin review',
-      description: 'Admin verifies views and checks for suspicious/fake traffic before payout.',
-      done: hasApprovedSubmission || hasPaidSubmission,
-      action: 'My Submissions',
-      page: 'submissions'
-    },
-    {
-      title: 'Track payout status',
-      description: 'Approved clips move to earnings. Paid clips show payment reference and receipt.',
-      done: hasPaidSubmission,
-      action: 'Open Earnings',
-      page: 'earnings'
-    }
-  ];
-
-  const steps = clean === 'admin' ? adminSteps : clean === 'creator' ? creatorSteps : clipperSteps;
-  const completed = steps.filter((step) => step.done).length;
-  const progress = Math.round((completed / steps.length) * 100);
-
-  const headline = clean === 'admin'
-    ? 'Set up and operate SoloHub like a real platform.'
-    : clean === 'creator'
-      ? 'Launch your campaign and start receiving clips.'
-      : 'Start submitting clips and prepare for payouts.';
-
-  return (
-    <section className="onboarding-page">
-      <div className="onboarding-hero">
-        <div>
-          <Pill tone="green"><CheckCircle2 size={14} /> Getting Started</Pill>
-          <h2>{headline}</h2>
-          <p>Complete these steps to get the most out of SoloHub.</p>
-        </div>
-
-        <div className="onboarding-progress-card">
-          <span>Progress</span>
-          <strong>{completed}/{steps.length}</strong>
-          <div className="whop-progress">
-            <i style={{ width: progress + '%' }} />
-          </div>
-          <small>{progress}% complete</small>
-        </div>
-      </div>
-
-      <div className="onboarding-steps">
-        {steps.map((step, index) => (
-          <article key={step.title} className={step.done ? 'onboarding-step done' : 'onboarding-step'}>
-            <div className="step-number">
-              {step.done ? <CheckCircle2 size={20} /> : index + 1}
-            </div>
-
-            <div className="step-content">
-              <h3>{step.title}</h3>
-              <p>{step.description}</p>
-            </div>
-
-            <button type="button" className="mini-action" onClick={() => setPage(step.page)}>
-              {step.action}
-            </button>
-          </article>
-        ))}
-      </div>
-
-      <div className="onboarding-tip-card">
-        <div>
-          <h3>SoloHub tip</h3>
-          <p>
-            {clean === 'admin'
-              ? 'Use Admin ? Settings first when your Till/Paybill is ready, then campaigns and invoices will show the correct payment details automatically.'
-              : clean === 'creator'
-                ? 'Campaigns should have clear requirements, strong images, and resource folders. This helps clippers create better content.'
-                : 'Use real public post links and avoid fake views. Admin-approved views are what count toward payout.'}
-          </p>
-        </div>
       </div>
     </section>
   );
@@ -4782,12 +4467,6 @@ const content = useMemo(() => {
         );
 
     if (page === 'home') return home;
-
-    if (page === 'onboarding') {
-      const onboardingCampaigns = isAdmin ? campaigns : currentRole === 'creator' ? ownCampaigns : campaigns.filter((campaign) => campaign.status === 'Live');
-      const onboardingSubmissions = isAdmin ? submissions : currentRole === 'creator' ? ownCreatorSubmissions : ownClipperSubmissions;
-      return <OnboardingChecklist role={currentRole} profile={profile} campaigns={onboardingCampaigns} submissions={onboardingSubmissions} setPage={setPage} />;
-    }
 
     if (page === 'activity') {
       const activityCampaigns = isAdmin ? campaigns : currentRole === 'creator' ? ownCampaigns : [];
