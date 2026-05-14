@@ -2637,3 +2637,194 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.creator-manager {
+  display: grid;
+  gap: 24px;
+}
+
+.creator-campaign-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 22px;
+}
+
+.creator-campaign-card {
+  overflow: hidden;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(245, 196, 83, 0.09), transparent 34%),
+    linear-gradient(145deg, rgba(20,20,20,0.96), rgba(8,10,12,0.96));
+  border: 1px solid rgba(245, 196, 83, 0.18);
+  box-shadow: 0 24px 80px rgba(0,0,0,0.38);
+}
+
+.creator-campaign-cover {
+  position: relative;
+  height: 230px;
+  overflow: hidden;
+  background: radial-gradient(circle at center, rgba(245,196,83,0.16), rgba(0,0,0,0.82));
+}
+
+.creator-campaign-cover img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.creator-cover-fallback {
+  height: 100%;
+  display: grid;
+  place-items: center;
+  font-size: 68px;
+  font-weight: 1000;
+  color: #f5c453;
+}
+
+.creator-cover-badges {
+  position: absolute;
+  top: 16px;
+  left: 16px;
+  right: 16px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.creator-campaign-body {
+  padding: 22px;
+  display: grid;
+  gap: 18px;
+}
+
+.creator-title-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+
+.creator-title-row h3 {
+  margin: 0 0 6px;
+  font-size: 24px;
+}
+
+.creator-title-row p {
+  margin: 0;
+}
+
+.creator-metrics {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0,1fr));
+  gap: 12px;
+}
+
+.creator-metrics div {
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.creator-metrics span {
+  display: block;
+  color: #9aa6b2;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.creator-metrics strong {
+  font-size: 16px;
+}
+
+.creator-card-actions {
+  display: flex;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.link-action {
+  text-decoration: none;
+  display: inline-flex;
+  align-items: center;
+}
+
+.creator-edit-panel {
+  display: grid;
+  gap: 14px;
+  padding: 18px;
+  border-radius: 22px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(35, 209, 139, 0.18);
+}
+
+.creator-edit-panel h4 {
+  margin: 0;
+}
+
+.creator-edit-panel label {
+  display: grid;
+  gap: 8px;
+  color: #cbd5e1;
+  font-weight: 900;
+}
+
+.creator-edit-panel textarea {
+  min-height: 90px;
+}
+
+.creator-lock-note {
+  padding: 13px 15px;
+  border-radius: 16px;
+  color: #fff4bf;
+  background: rgba(245, 196, 83, 0.10);
+  border: 1px solid rgba(245, 196, 83, 0.25);
+  font-weight: 900;
+}
+
+.creator-submissions-preview {
+  display: grid;
+  gap: 10px;
+}
+
+.creator-submissions-preview h4 {
+  margin: 0;
+}
+
+.creator-submission-row {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.creator-submission-row div {
+  display: grid;
+  gap: 4px;
+}
+
+.creator-submission-row span {
+  color: #9aa6b2;
+  font-size: 13px;
+}
+
+@media (max-width: 1100px) {
+  .creator-campaign-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .creator-metrics {
+    grid-template-columns: repeat(2, minmax(0,1fr));
+  }
+
+  .creator-title-row {
+    display: grid;
+  }
+}
