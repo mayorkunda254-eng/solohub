@@ -2743,14 +2743,10 @@ function AdminUsers() {
     try {
       if (!supabase) throw new Error('Supabase is not configured.');
 
-      const request = supabase
-        .from('profiles')
-        .select('id,email,full_name,role,mpesa_name,mpesa_phone,backup_phone,payout_notes,updated_at')
-        .order('updated_at', { ascending: false })
-        .limit(100);
+      const request = supabase.rpc('owner_list_users_fast');
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Load users', 8000)
+        ? await withSupabaseTimeout(request, 'Load users', 15000)
         : await request;
 
       if (error) throw error;
@@ -2787,24 +2783,21 @@ function AdminUsers() {
     setMessage('Updating user role...');
 
     try {
-      const request = supabase
-        .from('profiles')
-        .update({
-          role: cleanNextRole,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', profile.id)
-        .select('id,email,full_name,role,mpesa_name,mpesa_phone,backup_phone,payout_notes,updated_at')
-        .single();
+      const request = supabase.rpc('owner_update_user_role_fast', {
+        p_user_id: profile.id,
+        p_role: cleanNextRole
+      });
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Update user role', 8000)
+        ? await withSupabaseTimeout(request, 'Update user role', 15000)
         : await request;
 
       if (error) throw error;
 
+      const updatedProfile = Array.isArray(data) ? data[0] : data;
+
       setProfiles((prev) =>
-        prev.map((item) => item.id === profile.id ? data : item)
+        prev.map((item) => item.id === profile.id ? updatedProfile : item)
       );
 
       setMessage('User role updated.');

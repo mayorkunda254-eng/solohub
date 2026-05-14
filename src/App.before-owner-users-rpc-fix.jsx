@@ -2743,14 +2743,10 @@ function AdminUsers() {
     try {
       if (!supabase) throw new Error('Supabase is not configured.');
 
-      const request = supabase
-        .from('profiles')
-        .select('id,email,full_name,role,mpesa_name,mpesa_phone,backup_phone,payout_notes,updated_at')
-        .order('updated_at', { ascending: false })
-        .limit(100);
+      const request = supabase.rpc('admin_list_profiles');
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Load users', 8000)
+        ? await withSupabaseTimeout(request, 'Load users', 25000)
         : await request;
 
       if (error) throw error;
@@ -2787,18 +2783,13 @@ function AdminUsers() {
     setMessage('Updating user role...');
 
     try {
-      const request = supabase
-        .from('profiles')
-        .update({
-          role: cleanNextRole,
-          updated_at: new Date().toISOString()
-        })
-        .eq('id', profile.id)
-        .select('id,email,full_name,role,mpesa_name,mpesa_phone,backup_phone,payout_notes,updated_at')
-        .single();
+      const request = supabase.rpc('admin_update_profile_role', {
+        p_user_id: profile.id,
+        p_role: cleanNextRole
+      });
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Update user role', 8000)
+        ? await withSupabaseTimeout(request, 'Update user role', 25000)
         : await request;
 
       if (error) throw error;

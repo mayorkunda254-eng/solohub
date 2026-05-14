@@ -3139,3 +3139,22 @@ a {
     justify-content: center;
   }
 }
+
+.admin-users-page {
+  display: grid;
+  gap: 24px;
+}
+
+.admin-users-table {
+  overflow-x: auto;
+}
+
+.admin-users-table table {
+  min-width: 1050px;
+}
+
+.role-action-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}

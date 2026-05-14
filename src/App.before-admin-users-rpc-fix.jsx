@@ -2745,12 +2745,11 @@ function AdminUsers() {
 
       const request = supabase
         .from('profiles')
-        .select('id,email,full_name,role,mpesa_name,mpesa_phone,backup_phone,payout_notes,updated_at')
-        .order('updated_at', { ascending: false })
-        .limit(100);
+        .select('*')
+        .order('updated_at', { ascending: false });
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Load users', 8000)
+        ? await withSupabaseTimeout(request, 'Load users')
         : await request;
 
       if (error) throw error;
@@ -2794,11 +2793,11 @@ function AdminUsers() {
           updated_at: new Date().toISOString()
         })
         .eq('id', profile.id)
-        .select('id,email,full_name,role,mpesa_name,mpesa_phone,backup_phone,payout_notes,updated_at')
+        .select('*')
         .single();
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Update user role', 8000)
+        ? await withSupabaseTimeout(request, 'Update user role')
         : await request;
 
       if (error) throw error;
