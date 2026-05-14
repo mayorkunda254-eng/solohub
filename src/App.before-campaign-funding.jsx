@@ -167,21 +167,7 @@ const toCampaign = (row) => ({
   resourceUrl: row.resource_url || row.resourceUrl || '',
   resource_url: row.resource_url || row.resourceUrl || '',
   contentRequirements: row.content_requirements || row.contentRequirements || '',
-  content_requirements: row.content_requirements || row.contentRequirements || '',
-  clientName: row.client_name || row.clientName || '',
-  client_name: row.client_name || row.clientName || '',
-  clientEmail: row.client_email || row.clientEmail || '',
-  client_email: row.client_email || row.clientEmail || '',
-  clientPhone: row.client_phone || row.clientPhone || '',
-  client_phone: row.client_phone || row.clientPhone || '',
-  depositStatus: row.deposit_status || row.depositStatus || 'Pending',
-  deposit_status: row.deposit_status || row.depositStatus || 'Pending',
-  depositAmount: Number(row.deposit_amount || row.depositAmount || 0),
-  deposit_amount: Number(row.deposit_amount || row.depositAmount || 0),
-  paymentReference: row.payment_reference || row.paymentReference || '',
-  payment_reference: row.payment_reference || row.paymentReference || '',
-  adminNotes: row.admin_notes || row.adminNotes || '',
-  admin_notes: row.admin_notes || row.adminNotes || ''
+  content_requirements: row.content_requirements || row.contentRequirements || ''
 });
 
 const toCampaignDb = (campaign) => ({
@@ -207,14 +193,7 @@ const toCampaignDb = (campaign) => ({
   assets: campaign.assets || [],
   image_url: campaign.image_url || campaign.imageUrl || '',
   resource_url: campaign.resource_url || campaign.resourceUrl || '',
-  content_requirements: campaign.content_requirements || campaign.contentRequirements || '',
-  client_name: campaign.client_name || campaign.clientName || '',
-  client_email: campaign.client_email || campaign.clientEmail || '',
-  client_phone: campaign.client_phone || campaign.clientPhone || '',
-  deposit_status: campaign.deposit_status || campaign.depositStatus || 'Pending',
-  deposit_amount: Number(campaign.deposit_amount || campaign.depositAmount || 0),
-  payment_reference: campaign.payment_reference || campaign.paymentReference || '',
-  admin_notes: campaign.admin_notes || campaign.adminNotes || ''
+  content_requirements: campaign.content_requirements || campaign.contentRequirements || ''
 });
 
 const toSubmission = (row) => ({
@@ -1028,14 +1007,7 @@ function CreateCampaignPage({ onCreateCampaign }) {
     hashtags: '#SoloHub',
     imageUrl: '',
     resourceUrl: '',
-    contentRequirements: '',
-    clientName: '',
-    clientEmail: '',
-    clientPhone: '',
-    depositStatus: 'Pending',
-    depositAmount: 0,
-    paymentReference: '',
-    adminNotes: ''
+    contentRequirements: ''
   });
 
   const update = (key, value) => {
@@ -1104,20 +1076,6 @@ function CreateCampaignPage({ onCreateCampaign }) {
         resource_url: form.resourceUrl,
         contentRequirements: form.contentRequirements,
         content_requirements: form.contentRequirements,
-        clientName: form.clientName,
-        client_name: form.clientName,
-        clientEmail: form.clientEmail,
-        client_email: form.clientEmail,
-        clientPhone: form.clientPhone,
-        client_phone: form.clientPhone,
-        depositStatus: form.depositStatus,
-        deposit_status: form.depositStatus,
-        depositAmount: Number(form.depositAmount || 0),
-        deposit_amount: Number(form.depositAmount || 0),
-        paymentReference: form.paymentReference,
-        payment_reference: form.paymentReference,
-        adminNotes: form.adminNotes,
-        admin_notes: form.adminNotes,
         status: 'Pending Approval',
         beginnerFriendly: true,
         verified: false,
@@ -1222,52 +1180,6 @@ function CreateCampaignPage({ onCreateCampaign }) {
             <input value={form.resourceUrl} onChange={(e) => update('resourceUrl', e.target.value)} placeholder="Google Drive / Dropbox / source folder" />
           </label>
 
-          <div className="funding-section">
-            <h3>Client & funding details</h3>
-
-            <div className="form-grid">
-              <label>
-                Client / brand name
-                <input value={form.clientName} onChange={(e) => update('clientName', e.target.value)} placeholder="Client or company name" />
-              </label>
-
-              <label>
-                Client email
-                <input value={form.clientEmail} onChange={(e) => update('clientEmail', e.target.value)} placeholder="client@email.com" />
-              </label>
-
-              <label>
-                Client phone / WhatsApp
-                <input value={form.clientPhone} onChange={(e) => update('clientPhone', e.target.value)} placeholder="+254..." />
-              </label>
-
-              <label>
-                Deposit status
-                <select value={form.depositStatus} onChange={(e) => update('depositStatus', e.target.value)}>
-                  <option>Pending</option>
-                  <option>Partial</option>
-                  <option>Paid</option>
-                  <option>Refunded</option>
-                </select>
-              </label>
-
-              <label>
-                Deposit amount
-                <input type="number" value={form.depositAmount} onChange={(e) => update('depositAmount', e.target.value)} placeholder="KES amount received" />
-              </label>
-
-              <label>
-                Payment reference
-                <input value={form.paymentReference} onChange={(e) => update('paymentReference', e.target.value)} placeholder="M-Pesa code / bank ref" />
-              </label>
-            </div>
-
-            <label>
-              Admin notes
-              <textarea value={form.adminNotes} onChange={(e) => update('adminNotes', e.target.value)} placeholder="Internal notes about the client, deposit, agreement, or campaign management." />
-            </label>
-          </div>
-
           <label>
             Description
             <textarea value={form.description} onChange={(e) => update('description', e.target.value)} placeholder="Explain what clippers should create." />
@@ -1371,76 +1283,22 @@ function AdminOverview({ campaigns, submissions, cloudMode }) {
 }
 
 function AdminCampaigns({ campaigns, onCampaignStatus }) {
-  const depositTone = (status) => {
-    if (status === 'Paid') return 'green';
-    if (status === 'Partial') return 'yellow';
-    if (status === 'Refunded') return 'red';
-    return 'yellow';
-  };
-
   return (
     <section className="panel">
-      <div className="section-head">
-        <div>
-          <Pill tone="purple"><Megaphone size={14} /> Campaign Approval</Pill>
-          <h2>Approve campaigns and track client funding.</h2>
-          <p>Use this page to manage creator campaigns, client deposits, and approval status.</p>
-        </div>
-      </div>
-
-      <div className="table-wrap wide-table">
+      <div className="section-head"><div><Pill tone="purple"><Megaphone size={14} /> Campaign Approval</Pill><h2>Approve campaigns before clippers see them.</h2></div></div>
+      <div className="table-wrap">
         <table>
-          <thead>
-            <tr>
-              <th>Campaign</th>
-              <th>Creator / Client</th>
-              <th>Contact</th>
-              <th>Budget</th>
-              <th>Deposit</th>
-              <th>Payment Ref</th>
-              <th>Status</th>
-              <th>Actions</th>
-            </tr>
-          </thead>
-
+          <thead><tr><th>Campaign</th><th>Creator</th><th>Budget</th><th>Status</th><th>Actions</th></tr></thead>
           <tbody>
             {campaigns.map((c) => (
               <tr key={c.id}>
-                <td>
-                  <strong>{c.title}</strong>
-                  <div className="table-subtext">{c.category}</div>
-                </td>
-
-                <td>
-                  <strong>{c.creator}</strong>
-                  <div className="table-subtext">{c.clientName || c.client_name || 'No client name'}</div>
-                </td>
-
-                <td>
-                  <div>{c.clientPhone || c.client_phone || '-'}</div>
-                  <div className="table-subtext">{c.clientEmail || c.client_email || ''}</div>
-                </td>
-
+                <td>{c.title}</td>
+                <td>{c.creator}</td>
                 <td>{money(c.budget)}</td>
-
-                <td>
-                  <Pill tone={depositTone(c.depositStatus || c.deposit_status)}>
-                    {c.depositStatus || c.deposit_status || 'Pending'}
-                  </Pill>
-                  <div className="table-subtext">{money(c.depositAmount || c.deposit_amount || 0)}</div>
-                </td>
-
-                <td>{c.paymentReference || c.payment_reference || '-'}</td>
-
-                <td>
-                  <Pill tone={c.status === 'Live' ? 'green' : c.status === 'Rejected' ? 'red' : 'yellow'}>
-                    {c.status}
-                  </Pill>
-                </td>
-
+                <td><Pill tone={c.status === 'Live' ? 'green' : c.status === 'Rejected' ? 'red' : 'yellow'}>{c.status}</Pill></td>
                 <td className="row-actions">
-                  <Button type="button" onClick={() => onCampaignStatus(c.id, 'Live')}><CheckCircle2 size={16} /> Approve</Button>
-                  <Button type="button" variant="ghost" onClick={() => onCampaignStatus(c.id, 'Rejected')}><XCircle size={16} /> Reject</Button>
+                  <Button onClick={() => onCampaignStatus(c.id, 'Live')}><CheckCircle2 size={16} /> Approve</Button>
+                  <Button variant="ghost" onClick={() => onCampaignStatus(c.id, 'Rejected')}><XCircle size={16} /> Reject</Button>
                 </td>
               </tr>
             ))}
