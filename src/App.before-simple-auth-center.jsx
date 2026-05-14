@@ -1298,11 +1298,28 @@ function Hero({ setRole, setPage, cloudMode }) {
 
 function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, inviteRole, cloudMode }) {
   return (
-    <section className="logged-out-auth-page simple-auth-page">
-      <div className="simple-auth-intro">
+    <section className="logged-out-auth-page">
+      <div className="auth-marketing-card">
         <Pill tone="green"><Sparkles size={14} /> SoloHub MVP</Pill>
+
         <h1>Launch campaigns. Track clips. Pay creators.</h1>
-        <p>Login to manage clipping campaigns, submissions, deposits, payouts, affiliates, and creator activity.</p>
+
+        <p>
+          Manage clipping campaigns, verify submissions, track deposits, monitor payouts,
+          and onboard creators, clippers, and affiliates from one premium dashboard.
+        </p>
+
+        <div className="auth-marketing-points">
+          <span><ShieldCheck size={16} /> Admin verified submissions</span>
+          <span><Wallet size={16} /> Manual M-Pesa payout tracking</span>
+          <span><Megaphone size={16} /> Creator campaign manager</span>
+          <span><Coins size={16} /> Affiliate-ready growth</span>
+        </div>
+
+        <div className="auth-storage-pill">
+          <strong>{cloudMode ? 'Cloud mode active' : 'Local mode active'}</strong>
+          <span>{cloudMode ? 'Data saves in Supabase.' : 'Data saves in this browser only.'}</span>
+        </div>
       </div>
 
       <AuthBox
@@ -1313,12 +1330,6 @@ function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, 
         referralCode={referralCode}
         inviteRole={inviteRole}
       />
-
-      <div className="simple-auth-points">
-        <span><ShieldCheck size={15} /> Verified submissions</span>
-        <span><Wallet size={15} /> M-Pesa payout tracking</span>
-        <span><Megaphone size={15} /> Creator campaigns</span>
-      </div>
     </section>
   );
 }
