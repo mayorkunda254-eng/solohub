@@ -586,60 +586,6 @@ function clearPasswordResetUrl() {
   window.history.replaceState({}, '', url.toString());
 }
 
-function PwaInstallButton() {
-  const [installPrompt, setInstallPrompt] = useState(null);
-  const [installed, setInstalled] = useState(false);
-
-  useEffect(() => {
-    const isStandalone =
-      window.matchMedia?.('(display-mode: standalone)')?.matches ||
-      window.navigator.standalone === true;
-
-    if (isStandalone) {
-      setInstalled(true);
-    }
-
-    const handleBeforeInstallPrompt = (event) => {
-      event.preventDefault();
-      setInstallPrompt(event);
-    };
-
-    const handleInstalled = () => {
-      setInstalled(true);
-      setInstallPrompt(null);
-    };
-
-    window.addEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-    window.addEventListener('appinstalled', handleInstalled);
-
-    return () => {
-      window.removeEventListener('beforeinstallprompt', handleBeforeInstallPrompt);
-      window.removeEventListener('appinstalled', handleInstalled);
-    };
-  }, []);
-
-  const installApp = async () => {
-    if (!installPrompt) {
-      alert('To install SoloHub, open Chrome menu ? and choose Add to Home screen or Install app.');
-      return;
-    }
-
-    installPrompt.prompt();
-    await installPrompt.userChoice;
-    setInstallPrompt(null);
-  };
-
-  if (installed) {
-    return null;
-  }
-
-  return (
-    <button type="button" className="small install-app-btn" onClick={installApp}>
-      <Download size={15} /> Install App
-    </button>
-  );
-}
-
 function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout, activityCount = 0 }) {
   const displayRole = roleForUser(user, profile, role);
 
@@ -713,7 +659,6 @@ function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode
       </button>
 
       <div className="topbar-right">
-          <PwaInstallButton />
         {user ? (
           <>
             <Button type="button" variant="ghost" className="small activity-bell" onClick={goActivity}>

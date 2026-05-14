@@ -1,4 +1,6 @@
-const CACHE_NAME = 'solohub-cache-v2';
+const fs = require("fs");
+
+const sw = `const CACHE_NAME = 'solohub-cache-v2';
 
 const CORE_ASSETS = [
   '/',
@@ -47,3 +49,7 @@ self.addEventListener('fetch', (event) => {
       )
   );
 });
+`;
+
+fs.writeFileSync("public/solohub-sw.js", sw);
+console.log("? Safer service worker installed.");
