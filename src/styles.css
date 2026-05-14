@@ -2024,3 +2024,32 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   Phase 17 Supabase Storage Upload
+   ========================================================= */
+
+.upload-field {
+  border: 1px dashed rgba(245, 196, 83, 0.35);
+  border-radius: 20px;
+  padding: 16px;
+  background:
+    radial-gradient(circle at top right, rgba(245, 196, 83, 0.08), transparent 30%),
+    rgba(255, 255, 255, 0.035);
+}
+
+.upload-field input[type='file'] {
+  padding: 14px;
+  cursor: pointer;
+}
+
+.upload-field input[type='file']::file-selector-button {
+  border: 0;
+  border-radius: 12px;
+  padding: 10px 14px;
+  margin-right: 12px;
+  background: linear-gradient(135deg, #f5c453, #b87318);
+  color: #071018;
+  font-weight: 900;
+  cursor: pointer;
+}

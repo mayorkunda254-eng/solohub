@@ -33,15 +33,6 @@ const cleanRole = (value) => {
   return ['clipper', 'creator', 'admin'].includes(role) ? role : 'clipper';
 };
 
-const OWNER_ADMIN_EMAILS = ['mayorkunda254@gmail.com'];
-
-const isOwnerEmail = (email) => OWNER_ADMIN_EMAILS.includes(String(email || '').trim().toLowerCase());
-
-const roleForUser = (user, profile, fallbackRole = 'clipper') => {
-  if (isOwnerEmail(user?.email)) return 'admin';
-  return profile?.role ? cleanRole(profile.role) : cleanRole(fallbackRole);
-};
-
 
 function useLocalState(key, fallback) {
   const [value, setValue] = useState(() => {
@@ -112,10 +103,7 @@ const toCampaignDb = (campaign) => ({
   description: campaign.description || '',
   rules: campaign.rules || [],
   hashtags: campaign.hashtags || [],
-  assets: campaign.assets || [],
-  image_url: campaign.image_url || campaign.imageUrl || '',
-  resource_url: campaign.resource_url || campaign.resourceUrl || '',
-  content_requirements: campaign.content_requirements || campaign.contentRequirements || ''
+  assets: campaign.assets || []
 });
 
 const toSubmission = (row) => ({
@@ -170,13 +158,13 @@ function StatCard({ icon: Icon, label, value, helper }) {
 }
 
 function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout }) {
-  const displayRole = roleForUser(user, profile, role);
+  const displayRole = profile?.role ? cleanRole(profile.role) : cleanRole(role);
 
   const goDashboard = (e) => {
     e?.preventDefault?.();
     e?.stopPropagation?.();
 
-    const targetRole = roleForUser(user, profile, role);
+    const targetRole = profile?.role ? cleanRole(profile.role) : cleanRole(role);
     setRole(targetRole);
     setPage(defaultPageForRole(targetRole));
 
@@ -246,7 +234,6 @@ const navs = {
   ],
   admin: [
     ['adminOverview', LayoutDashboard, 'Overview'],
-    ['createCampaign', Plus, 'Create Managed Campaign'],
     ['adminCampaigns', Megaphone, 'Campaigns'],
     ['adminSubmissions', ShieldCheck, 'Submissions'],
     ['adminPayouts', Coins, 'Payouts']
@@ -350,7 +337,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout }) {
   }
 
   if (user) {
-    const currentRole = roleForUser(user, profile, 'clipper');
+    const currentRole = profile?.role ? cleanRole(profile.role) : 'clipper';
 
     return (
       <section className="panel auth-panel clean-auth logged-in-card">
@@ -1208,10 +1195,19 @@ function App() {
   const [campaigns, setCampaigns] = useLocalState('solohub-campaigns-phase3', seedCampaigns);
   const [submissions, setSubmissions] = useLocalState('solohub-submissions-phase3', seedSubmissions);
   const [loading, setLoading] = useState(false);
-  const [notice, setNotice] = useState('');  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
+  const [notice, setNotice] = useState('');
+
+
+  const loadProfile = async (currentUser, preferredRole = 'clipper', fullName = '') => {
     if (!cloudMode || !currentUser) return null;
 
-    const ownerAdmin = isOwnerEmail(currentUser.email);
+    const fallbackRole = cleanRole(
+      preferredRole ||
+      currentUser.user_metadata?.role ||
+      profile?.role ||
+      role ||
+      'clipper'
+    );
 
     const { data: existing, error: selectError } = await supabase
       .from('profiles')
@@ -1225,19 +1221,25 @@ function App() {
       return null;
     }
 
-    const finalRole = ownerAdmin
-      ? 'admin'
-      : cleanRole(existing?.role || preferredRole || currentUser.user_metadata?.role || role || 'clipper');
+    if (existing) {
+      const fixedProfile = {
+        ...existing,
+        role: cleanRole(existing.role || fallbackRole)
+      };
+
+      setProfile(fixedProfile);
+      setRole(fixedProfile.role);
+      setPage(defaultPageForRole(fixedProfile.role));
+      return fixedProfile;
+    }
 
     const profilePayload = {
       id: currentUser.id,
-      email: currentUser.email || existing?.email || '',
-      full_name: existing?.full_name || fullName || currentUser.user_metadata?.full_name || currentUser.email || '',
-      role: finalRole,
+      email: currentUser.email,
+      full_name: fullName || currentUser.user_metadata?.full_name || currentUser.email,
+      role: fallbackRole,
       updated_at: new Date().toISOString()
     };
-
-    let savedProfile = { ...(existing || {}), ...profilePayload };
 
     const { data, error } = await supabase
       .from('profiles')
@@ -1246,27 +1248,20 @@ function App() {
       .single();
 
     if (error) {
-      console.warn('Profile upsert failed. Using local profile state:', error);
-      setNotice(`Profile save warning: ${error.message}`);
-    } else if (data) {
-      savedProfile = data;
+      console.error('Profile upsert failed:', error);
+      setNotice(`Profile upsert failed: ${error.message}`);
+      return null;
     }
 
-    const fixedProfile = {
-      ...savedProfile,
-      role: ownerAdmin ? 'admin' : cleanRole(savedProfile.role || finalRole)
-    };
-
+    const fixedProfile = { ...data, role: cleanRole(data.role) };
     setProfile(fixedProfile);
     setRole(fixedProfile.role);
     setPage(defaultPageForRole(fixedProfile.role));
-
     return fixedProfile;
-  };  const handleAuthUser = async (authUser, preferredRole = '', fullName = '', options = {}) => {
+  };  const handleAuthUser = async (authUser, preferredRole, fullName = '', options = {}) => {
     try {
       if (!authUser?.id) return null;
 
-      const ownerAdmin = isOwnerEmail(authUser.email);
       setUser(authUser);
 
       let existingProfile = null;
@@ -1285,14 +1280,24 @@ function App() {
         existingProfile = profileData || null;
       }
 
-      const finalRole = ownerAdmin
-        ? 'admin'
-        : cleanRole(existingProfile?.role || preferredRole || authUser?.user_metadata?.role || 'clipper');
+      const savedRole = existingProfile?.role ? cleanRole(existingProfile.role) : '';
+      const metadataRole = authUser?.user_metadata?.role ? cleanRole(authUser.user_metadata.role) : '';
+      const requestedRole = preferredRole ? cleanRole(preferredRole) : '';
+
+      // Important:
+      // Existing database role always wins.
+      // This prevents login from changing admin back to clipper.
+      const finalRole = savedRole || requestedRole || metadataRole || 'clipper';
 
       const profilePayload = {
         id: authUser.id,
         email: authUser.email || existingProfile?.email || '',
-        full_name: existingProfile?.full_name || fullName || authUser?.user_metadata?.full_name || authUser.email || '',
+        full_name:
+          existingProfile?.full_name ||
+          fullName ||
+          authUser?.user_metadata?.full_name ||
+          authUser.email ||
+          '',
         role: finalRole,
         updated_at: new Date().toISOString()
       };
@@ -1307,23 +1312,25 @@ function App() {
           .single();
 
         if (error) {
-          console.warn('Profile save failed. Using local profile state:', error);
-          setNotice(`Profile save warning: ${error.message}`);
+          console.error('Profile save failed:', error);
+          alert('Profile save failed: ' + error.message);
         } else if (data) {
           savedProfile = data;
         }
       }
 
-      const fixedProfile = {
-        ...savedProfile,
-        role: ownerAdmin ? 'admin' : cleanRole(savedProfile.role || finalRole)
-      };
+      const cleanFinalRole = cleanRole(savedProfile.role || finalRole);
 
-      setProfile(fixedProfile);
-      setRole(fixedProfile.role);
-      setPage(options?.stayHome ? 'home' : defaultPageForRole(fixedProfile.role));
+      setProfile(savedProfile);
+      setRole(cleanFinalRole);
 
-      return fixedProfile;
+      if (options?.stayHome) {
+        setPage('home');
+      } else {
+        setPage(defaultPageForRole(cleanFinalRole));
+      }
+
+      return savedProfile;
     } catch (err) {
       console.error('Auth profile handling failed:', err);
       alert('Auth profile handling failed: ' + (err?.message || err));
@@ -1714,7 +1721,7 @@ const updateProfileRole = async (nextRole) => {
   };
 
   const content = useMemo(() => {
-    const currentRole = roleForUser(user, profile, role);
+    const currentRole = profile?.role ? cleanRole(profile.role) : cleanRole(role);
     const currentUserId = user?.id || null;
 
     const home = (
@@ -1819,9 +1826,9 @@ const updateProfileRole = async (nextRole) => {
 
   return (
     <>
-      <Header role={roleForUser(user, profile, role)} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} />
+      <Header role={role} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} />
       <div className="app-shell">
-        <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} />
+        <Sidebar role={role} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} />
         <main>
           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
           {cloudMode && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : user ? `Logged in as ${profile?.role || role || 'user'}` : 'Supabase mode active. Login on Home for role profiles.'}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
