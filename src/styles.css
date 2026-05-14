@@ -3113,3 +3113,29 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.activity-bell {
+  position: relative;
+  gap: 8px !important;
+}
+
+.activity-badge {
+  min-width: 22px;
+  height: 22px;
+  padding: 0 7px;
+  border-radius: 999px;
+  display: inline-grid;
+  place-items: center;
+  background: linear-gradient(135deg, #f5c453, #b87318);
+  color: #071018 !important;
+  font-size: 12px;
+  font-weight: 1000;
+  box-shadow: 0 0 24px rgba(245, 196, 83, 0.28);
+}
+
+@media (max-width: 650px) {
+  .activity-bell {
+    width: 100%;
+    justify-content: center;
+  }
+}

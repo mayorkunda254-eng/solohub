@@ -42,43 +42,6 @@ const roleForUser = (user, profile, fallbackRole = 'clipper') => {
   return profile?.role ? cleanRole(profile.role) : cleanRole(fallbackRole);
 };
 
-function getActivityCountForRole(role, campaigns = [], submissions = []) {
-  const clean = cleanRole(role);
-
-  const pendingCampaigns = campaigns.filter((campaign) =>
-    campaign.status === 'Pending Approval'
-  ).length;
-
-  const depositIssues = campaigns.filter((campaign) => {
-    const status = campaign.status || '';
-    const depositStatus = campaign.depositStatus || campaign.deposit_status || 'Pending';
-    return status !== 'Rejected' && status !== 'Live' && !['Paid', 'Partial'].includes(depositStatus);
-  }).length;
-
-  const pendingSubmissions = submissions.filter((submission) =>
-    submission.status === 'Pending Review'
-  ).length;
-
-  const fraudFlags = submissions.filter((submission) => {
-    const fraud = submission.fraudStatus || submission.fraud_status || 'Clear';
-    return fraud !== 'Clear';
-  }).length;
-
-  const approvedUnpaid = submissions.filter((submission) =>
-    submission.status === 'Approved'
-  ).length;
-
-  if (clean === 'admin') {
-    return pendingCampaigns + pendingSubmissions + fraudFlags + approvedUnpaid;
-  }
-
-  if (clean === 'creator') {
-    return depositIssues + pendingSubmissions + fraudFlags;
-  }
-
-  return pendingSubmissions + approvedUnpaid;
-}
-
 const PLATFORM_PAYMENT_SETTING_KEY = 'payment_details';
 const PLATFORM_PAYMENT_STORAGE_KEY = 'solohub_payment_details';
 
@@ -406,7 +369,7 @@ function StatCard({ icon: Icon, label, value, helper }) {
   );
 }
 
-function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout, activityCount = 0 }) {
+function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout }) {
   const displayRole = roleForUser(user, profile, role);
 
   const goDashboard = (e) => {
@@ -453,11 +416,6 @@ function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode
       <div className="topbar-right">
         {user ? (
           <>
-            <Button type="button" variant="ghost" className="small activity-bell" onClick={goActivity}>
-              <ShieldCheck size={15} /> Activity
-              {activityCount > 0 && <span className="activity-badge">{activityCount > 99 ? '99+' : activityCount}</span>}
-            </Button>
-
             <Button type="button" variant="ghost" className="small" onClick={goDashboard}><LayoutDashboard size={15} /> Dashboard</Button>
             <Button variant="ghost" className="small" onClick={(e) => { e.preventDefault(); e.stopPropagation(); onLogout?.(); }}><LogOut size={15} /> Logout</Button>
           </>
@@ -4233,7 +4191,7 @@ const content = useMemo(() => {
 
   return (
     <>
-      <Header role={roleForUser(user, profile, role)} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} activityCount={getActivityCountForRole(roleForUser(user, profile, role), campaigns, submissions)} />
+      <Header role={roleForUser(user, profile, role)} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} />
       <div className="app-shell">
         <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} />
         <main>
