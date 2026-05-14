@@ -2223,3 +2223,259 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+/* =========================================================
+   Phase 20 Public Landing Page
+   ========================================================= */
+
+.public-landing-hero {
+  position: relative;
+  overflow: hidden;
+  display: grid;
+  grid-template-columns: minmax(0, 1.1fr) minmax(360px, 0.9fr);
+  gap: 28px;
+  align-items: stretch;
+  padding: clamp(28px, 5vw, 70px);
+  border-radius: 34px;
+  background:
+    radial-gradient(circle at 76% 28%, rgba(245, 196, 83, 0.18), transparent 30%),
+    radial-gradient(circle at 18% 20%, rgba(35, 209, 139, 0.16), transparent 28%),
+    linear-gradient(135deg, rgba(8, 15, 20, 0.98), rgba(5, 7, 10, 0.98));
+  border: 1px solid rgba(245, 196, 83, 0.20);
+  box-shadow:
+    0 32px 100px rgba(0, 0, 0, 0.48),
+    inset 0 1px 0 rgba(255, 255, 255, 0.08);
+}
+
+.public-landing-hero::after {
+  content: "";
+  position: absolute;
+  inset: auto -10% -35% 35%;
+  height: 420px;
+  background:
+    radial-gradient(circle, rgba(35, 209, 139, 0.18), transparent 68%);
+  pointer-events: none;
+}
+
+.landing-hero-copy {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  align-content: center;
+  gap: 22px;
+}
+
+.landing-hero-copy h1 {
+  max-width: 850px;
+  margin: 0;
+  font-size: clamp(48px, 7vw, 96px);
+  line-height: 0.94;
+  letter-spacing: -0.075em;
+}
+
+.landing-hero-copy h1 span {
+  display: block;
+  background: linear-gradient(135deg, #fff2b8 0%, #f5c453 42%, #b87318 100%);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent !important;
+}
+
+.landing-hero-copy p {
+  max-width: 720px;
+  font-size: clamp(17px, 1.6vw, 22px);
+  line-height: 1.7;
+  color: #aeb9c5 !important;
+}
+
+.landing-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+}
+
+.landing-trust-row {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin-top: 8px;
+}
+
+.landing-trust-row span {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  background: rgba(255, 255, 255, 0.035);
+  color: #cbd5e1;
+  border-radius: 999px;
+  padding: 10px 13px;
+  font-weight: 800;
+}
+
+.landing-money-panel {
+  position: relative;
+  z-index: 1;
+  display: grid;
+  gap: 18px;
+}
+
+.landing-vault-card {
+  min-height: 230px;
+  display: grid;
+  align-content: end;
+  gap: 18px;
+  padding: 28px;
+  border-radius: 30px;
+  background:
+    radial-gradient(circle at 76% 25%, rgba(245, 196, 83, 0.28), transparent 38%),
+    linear-gradient(145deg, rgba(26, 28, 28, 0.96), rgba(7, 10, 12, 0.96));
+  border: 1px solid rgba(245, 196, 83, 0.30);
+  box-shadow:
+    0 24px 80px rgba(0,0,0,0.4),
+    0 0 48px rgba(245,196,83,0.08);
+}
+
+.vault-glow {
+  width: 82px;
+  height: 82px;
+  border-radius: 24px;
+  display: grid;
+  place-items: center;
+  background: linear-gradient(145deg, #f8d477, #b87318);
+  color: #071018;
+  font-size: 36px;
+  font-weight: 1000;
+  box-shadow: 0 0 54px rgba(245, 196, 83, 0.32);
+}
+
+.landing-vault-card small,
+.landing-mini-grid small {
+  color: #9aa6b2;
+  font-weight: 800;
+}
+
+.landing-vault-card strong {
+  display: block;
+  margin: 6px 0;
+  font-size: clamp(34px, 4vw, 54px);
+  color: #ffffff !important;
+}
+
+.landing-vault-card span,
+.landing-mini-grid span {
+  color: #aeb9c5;
+}
+
+.landing-mini-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 14px;
+}
+
+.landing-mini-grid div {
+  min-height: 150px;
+  padding: 20px;
+  border-radius: 22px;
+  background:
+    linear-gradient(145deg, rgba(255,255,255,0.065), rgba(255,255,255,0.025));
+  border: 1px solid rgba(255, 255, 255, 0.10);
+}
+
+.landing-mini-grid strong {
+  display: block;
+  margin: 8px 0;
+  font-size: 21px;
+  color: #ffffff !important;
+}
+
+.landing-paths {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(220px, 1fr));
+  gap: 18px;
+}
+
+.landing-path-card {
+  padding: 26px;
+  border-radius: 28px;
+  background:
+    radial-gradient(circle at top right, rgba(245, 196, 83, 0.08), transparent 35%),
+    linear-gradient(145deg, rgba(14, 22, 31, 0.96), rgba(7, 11, 16, 0.96));
+  border: 1px solid rgba(255, 255, 255, 0.09);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.34);
+}
+
+.landing-path-card.featured {
+  border-color: rgba(35, 209, 139, 0.34);
+  box-shadow:
+    0 24px 70px rgba(0,0,0,0.34),
+    0 0 40px rgba(35, 209, 139, 0.10);
+}
+
+.path-icon {
+  width: 56px;
+  height: 56px;
+  border-radius: 18px;
+  display: grid;
+  place-items: center;
+  background: rgba(35, 209, 139, 0.12);
+  color: #9fffd1;
+  border: 1px solid rgba(35, 209, 139, 0.24);
+  margin-bottom: 18px;
+}
+
+.landing-path-card h3 {
+  margin: 0 0 10px;
+  font-size: 26px;
+}
+
+.landing-path-card p {
+  min-height: 96px;
+  line-height: 1.65;
+}
+
+.landing-path-card button {
+  width: 100%;
+  border: 1px solid rgba(245, 196, 83, 0.25);
+  background: rgba(255, 255, 255, 0.04);
+  color: #ffffff;
+  border-radius: 16px;
+  padding: 14px 16px;
+  font-weight: 900;
+  cursor: pointer;
+}
+
+.landing-path-card button:hover {
+  background: linear-gradient(135deg, rgba(35,209,139,0.22), rgba(245,196,83,0.12));
+  transform: translateY(-2px);
+}
+
+@media (max-width: 1050px) {
+  .public-landing-hero,
+  .landing-paths {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-money-panel {
+    grid-row: auto;
+  }
+}
+
+@media (max-width: 650px) {
+  .public-landing-hero {
+    padding: 24px;
+    border-radius: 26px;
+  }
+
+  .landing-mini-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .landing-actions button {
+    width: 100%;
+  }
+
+  .landing-hero-copy h1 {
+    font-size: 48px;
+  }
+}

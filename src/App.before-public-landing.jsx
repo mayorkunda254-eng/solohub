@@ -507,118 +507,28 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode }) {
 }
 
 function Hero({ setRole, setPage, cloudMode }) {
-  const goClipper = () => {
-    setRole('clipper');
-    setPage('discover');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const goCreator = () => {
-    setRole('creator');
-    setPage('createCampaign');
-    window.scrollTo({ top: 0, behavior: 'smooth' });
-  };
-
-  const goSignup = () => {
-    setPage('home');
-    setTimeout(() => {
-      const authPanel = document.querySelector('.auth-panel');
-      if (authPanel) {
-        authPanel.scrollIntoView({ behavior: 'smooth', block: 'center' });
-      }
-    }, 120);
-  };
-
   return (
-    <>
-      <section className="public-landing-hero">
-        <div className="landing-hero-copy">
-          <Pill tone="green"><Sparkles size={14} /> Premium content rewards platform</Pill>
-
-          <h1>
-            Creators fund campaigns.
-            <span> Clippers earn from views.</span>
-          </h1>
-
-          <p>
-            SoloHub helps brands, creators, and community managers launch clipping campaigns,
-            verify submissions, track payouts, and grow through affiliate referrals.
-          </p>
-
-          <div className="landing-actions">
-            <Button type="button" onClick={goClipper}>Explore campaigns <Search size={16} /></Button>
-            <Button type="button" variant="ghost" onClick={goCreator}>Launch campaign <Megaphone size={16} /></Button>
-            <Button type="button" variant="ghost" onClick={goSignup}>Join SoloHub <UserRound size={16} /></Button>
-          </div>
-
-          <div className="landing-trust-row">
-            <span><ShieldCheck size={16} /> Admin verified payouts</span>
-            <span><Wallet size={16} /> Manual M-Pesa tracking</span>
-            <span><Coins size={16} /> Affiliate-ready growth</span>
-          </div>
+    <section className="hero-grid">
+      <div className="hero-card big">
+        <Pill tone="purple"><Sparkles size={14} /> SoloHub MVP</Pill>
+        <h1>Run content reward campaigns with creators and clippers.</h1>
+        <p>Creators fund campaigns. Clippers submit short-form posts. Admin approves performance and payouts.</p>
+        <div className="hero-actions">
+          <Button onClick={() => { setRole('clipper'); setPage('discover'); }}>Start as Clipper</Button>
+          <Button variant="ghost" onClick={() => { setRole('creator'); setPage('createCampaign'); }}>Create Campaign</Button>
         </div>
+      </div>
 
-        <div className="landing-money-panel">
-          <div className="landing-vault-card">
-            <div className="vault-glow">S</div>
-            <div>
-              <small>Reward pool</small>
-              <strong>KES 250,000+</strong>
-              <span>Campaign potential</span>
-            </div>
-          </div>
-
-          <div className="landing-mini-grid">
-            <div>
-              <small>For creators</small>
-              <strong>Launch campaigns</strong>
-              <span>Set budget, rules, assets, and payout rate.</span>
-            </div>
-
-            <div>
-              <small>For clippers</small>
-              <strong>Submit clips</strong>
-              <span>Post short videos and get reviewed for payout.</span>
-            </div>
-
-            <div>
-              <small>For affiliates</small>
-              <strong>Refer users</strong>
-              <span>Earn commissions after value is confirmed.</span>
-            </div>
-
-            <div>
-              <small>Storage mode</small>
-              <strong>{cloudMode ? 'Cloud' : 'Local'}</strong>
-              <span>{cloudMode ? 'Supabase connected' : 'Browser demo mode'}</span>
-            </div>
-          </div>
+      <div className="hero-card money-card">
+        <div className="gradient-box">
+          <span>Storage mode</span>
+          <strong>{cloudMode ? 'Cloud' : 'Local'}</strong>
+          <small>{cloudMode ? 'Supabase database' : 'Browser localStorage'}</small>
         </div>
-      </section>
-
-      <section className="landing-paths">
-        <div className="landing-path-card">
-          <div className="path-icon"><Megaphone size={24} /></div>
-          <h3>Creators</h3>
-          <p>Create campaigns with budgets, approved assets, platform rules, hashtags, and payout limits.</p>
-          <button type="button" onClick={goCreator}>Create campaign</button>
-        </div>
-
-        <div className="landing-path-card featured">
-          <div className="path-icon"><Upload size={24} /></div>
-          <h3>Clippers</h3>
-          <p>Find live campaigns, submit public post links, and wait for verified views before payout.</p>
-          <button type="button" onClick={goClipper}>Find campaigns</button>
-        </div>
-
-        <div className="landing-path-card">
-          <div className="path-icon"><Coins size={24} /></div>
-          <h3>Affiliates</h3>
-          <p>Share referral links and earn commissions when creators fund campaigns or clippers qualify.</p>
-          <button type="button" onClick={goSignup}>Become partner</button>
-        </div>
-      </section>
-    </>
+        <div className="mini-card"><span>Next backend step</span><strong>Profiles</strong><small>Role permissions</small></div>
+        <div className="mini-card"><span>Payment mode</span><strong>Manual</strong><small>M-Pesa tracking later</small></div>
+      </div>
+    </section>
   );
 }
 
@@ -632,9 +542,9 @@ function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, p
       <section className="panel">
         <div className="section-head">
           <div>
-            <Pill tone="purple"><LayoutDashboard size={14} /> SoloHub System</Pill>
-            <h2>Built for campaigns, submissions, payouts, and referrals.</h2>
-            <p>Creators launch campaigns, clippers submit posts, admins verify performance, and affiliates drive growth.</p>
+            <Pill tone="purple"><LayoutDashboard size={14} /> MVP Progress</Pill>
+            <h2>Campaigns and submissions can now connect to a real database.</h2>
+            <p>Use local mode to design fast. Use Supabase mode to save real cloud data.</p>
           </div>
         </div>
         <div className="stats-grid">
