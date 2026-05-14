@@ -2979,7 +2979,7 @@ function CreatorCampaigns({ campaigns, submissions = [], onCreatorCampaignUpdate
           const draft = getDraft(campaign);
           const stats = getStats(campaign);
           const isEditing = editingId === campaign.id;
-          const isLive = ['Live', 'Paused', 'Completed'].includes(campaign.status);
+          const isLive = campaign.status === 'Live';
           const budget = Number(campaign.budget || 0);
           const depositStatus = campaign.depositStatus || campaign.deposit_status || 'Pending';
           const depositAmount = Number(campaign.depositAmount || campaign.deposit_amount || 0);
@@ -3051,7 +3051,7 @@ function CreatorCampaigns({ campaigns, submissions = [], onCreatorCampaignUpdate
 
                     {isLive && (
                       <div className="creator-lock-note">
-                        Launched campaign: payout rules, budget, minimum views, and max payout are locked.
+                        Live campaign: payout rules, budget, minimum views, and max payout are locked.
                       </div>
                     )}
 
@@ -3155,7 +3155,6 @@ function AdminOverview({ campaigns, submissions, cloudMode }) {
 }
 
 function AdminCampaigns({ campaigns, onCampaignStatus, onCampaignFundingUpdate }) {
-  const [statusFilter, setStatusFilter] = useState('All');
   const [drafts, setDrafts] = useState({});
 
   const depositTone = (status) => {
@@ -3319,10 +3318,6 @@ function AdminCampaigns({ campaigns, onCampaignStatus, onCampaignFundingUpdate }
     }, 300);
   };
 
-  const visibleCampaigns = campaigns.filter((campaign) =>
-    statusFilter === 'All' ? true : campaign.status === statusFilter
-  );
-
   return (
     <section className="panel">
       <div className="section-head">
@@ -3331,22 +3326,6 @@ function AdminCampaigns({ campaigns, onCampaignStatus, onCampaignFundingUpdate }
           <h2>Confirm deposits before campaigns go live.</h2>
           <p>Update payment reference and deposit status first. Campaigns should only be approved after deposit is Partial or Paid.</p>
         </div>
-      </div>
-
-      <div className="campaign-lifecycle-filter">
-        <label>
-          Filter campaigns
-          <select value={statusFilter} onChange={(e) => setStatusFilter(e.target.value)}>
-            <option>All</option>
-            <option>Pending Approval</option>
-            <option>Live</option>
-            <option>Paused</option>
-            <option>Completed</option>
-            <option>Rejected</option>
-          </select>
-        </label>
-
-        <span>{visibleCampaigns.length} campaign{visibleCampaigns.length === 1 ? '' : 's'} shown</span>
       </div>
 
       <div className="table-wrap wide-table">
@@ -3367,7 +3346,7 @@ function AdminCampaigns({ campaigns, onCampaignStatus, onCampaignFundingUpdate }
           </thead>
 
           <tbody>
-            {visibleCampaigns.map((c) => {
+            {campaigns.map((c) => {
               const draft = getDraft(c);
 
               return (
@@ -3434,7 +3413,7 @@ function AdminCampaigns({ campaigns, onCampaignStatus, onCampaignFundingUpdate }
                   </td>
 
                   <td>
-                    <Pill tone={c.status === 'Live' ? 'green' : c.status === 'Rejected' ? 'red' : c.status === 'Paused' ? 'purple' : c.status === 'Completed' ? 'green' : 'yellow'}>
+                    <Pill tone={c.status === 'Live' ? 'green' : c.status === 'Rejected' ? 'red' : 'yellow'}>
                       {c.status}
                     </Pill>
                   </td>
@@ -3458,18 +3437,6 @@ function AdminCampaigns({ campaigns, onCampaignStatus, onCampaignFundingUpdate }
 
                     <Button type="button" variant="ghost" onClick={() => onCampaignStatus(c.id, 'Rejected')}>
                       <XCircle size={16} /> Reject
-                    </Button>
-
-                    <Button type="button" variant="ghost" onClick={() => onCampaignStatus(c.id, 'Paused')}>
-                      Pause
-                    </Button>
-
-                    <Button type="button" variant="ghost" onClick={() => onCampaignStatus(c.id, 'Completed')}>
-                      Complete
-                    </Button>
-
-                    <Button type="button" onClick={() => onCampaignStatus(c.id, 'Live')}>
-                      Reopen
                     </Button>
                   </td>
                 </tr>

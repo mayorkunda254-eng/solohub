@@ -3958,3 +3958,86 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.campaign-lifecycle-filter {
+  display: flex;
+  justify-content: space-between;
+  align-items: end;
+  flex-wrap: wrap;
+  gap: 14px;
+  margin: 18px 0;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.campaign-lifecycle-filter label {
+  display: grid;
+  gap: 8px;
+  color: #cbd5e1;
+  font-weight: 900;
+}
+
+.campaign-lifecycle-filter select {
+  min-width: 220px;
+}
+
+.campaign-lifecycle-filter span {
+  color: #9fffd1;
+  font-weight: 900;
+}
+
+/* =========================================================
+   Global Dropdown Visibility Fix
+   ========================================================= */
+
+select,
+.select,
+input,
+textarea {
+  color: #f8fafc !important;
+}
+
+select {
+  appearance: auto;
+  background:
+    linear-gradient(145deg, rgba(15, 23, 32, 0.98), rgba(7, 11, 16, 0.98)) !important;
+  color: #f8fafc !important;
+  border: 1px solid rgba(245, 196, 83, 0.22) !important;
+}
+
+select option {
+  background: #0b1118 !important;
+  color: #f8fafc !important;
+}
+
+select option:checked,
+select option:hover {
+  background: #182433 !important;
+  color: #ffffff !important;
+}
+
+select:focus,
+input:focus,
+textarea:focus {
+  outline: none !important;
+  border-color: rgba(35, 209, 139, 0.55) !important;
+  box-shadow: 0 0 0 4px rgba(35, 209, 139, 0.10) !important;
+}
+
+/* Fix placeholder contrast */
+input::placeholder,
+textarea::placeholder {
+  color: #7f8ea3 !important;
+}
+
+/* Fix disabled fields */
+select:disabled,
+input:disabled,
+textarea:disabled {
+  opacity: 0.65;
+  color: #94a3b8 !important;
+  background: rgba(255, 255, 255, 0.035) !important;
+  cursor: not-allowed;
+}
