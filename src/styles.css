@@ -2828,3 +2828,128 @@ a {
     display: grid;
   }
 }
+
+.creator-submissions-page {
+  display: grid;
+  gap: 24px;
+}
+
+.creator-submission-actions {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  align-items: center;
+}
+
+.creator-submission-actions select {
+  min-width: 190px;
+}
+
+.creator-submission-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(320px, 1fr));
+  gap: 20px;
+}
+
+.creator-submission-card {
+  padding: 22px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(35, 209, 139, 0.08), transparent 35%),
+    linear-gradient(145deg, rgba(20,20,20,0.96), rgba(8,10,12,0.96));
+  border: 1px solid rgba(35, 209, 139, 0.16);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.34);
+  display: grid;
+  gap: 18px;
+}
+
+.creator-submission-top {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+
+.creator-submission-top h3 {
+  margin: 0 0 6px;
+  font-size: 22px;
+}
+
+.creator-submission-top p {
+  margin: 0;
+}
+
+.creator-submission-metrics {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px;
+}
+
+.creator-submission-metrics div {
+  padding: 13px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.04);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.creator-submission-metrics span {
+  display: block;
+  color: #9aa6b2;
+  font-size: 12px;
+  font-weight: 900;
+  margin-bottom: 6px;
+}
+
+.creator-submission-metrics strong {
+  font-size: 15px;
+}
+
+.creator-review-note {
+  padding: 16px;
+  border-radius: 18px;
+  background: rgba(245, 196, 83, 0.06);
+  border: 1px solid rgba(245, 196, 83, 0.16);
+}
+
+.creator-review-note strong {
+  color: #fff4bf !important;
+}
+
+.creator-review-note p {
+  margin: 8px 0 0;
+}
+
+.creator-submission-footer {
+  display: flex;
+  justify-content: space-between;
+  gap: 16px;
+  align-items: center;
+}
+
+.creator-submission-footer a {
+  font-weight: 900;
+  text-decoration: none;
+}
+
+.creator-submission-footer span {
+  color: #9aa6b2;
+  font-size: 13px;
+  font-weight: 800;
+}
+
+@media (max-width: 1050px) {
+  .creator-submission-grid {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 700px) {
+  .creator-submission-metrics {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .creator-submission-top,
+  .creator-submission-footer {
+    display: grid;
+  }
+}
