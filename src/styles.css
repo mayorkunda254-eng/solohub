@@ -3685,3 +3685,12 @@ a {
     grid-template-columns: 1fr;
   }
 }
+
+.share-action {
+  border-color: rgba(245, 196, 83, 0.28) !important;
+  color: #fff4bf !important;
+}
+
+.saved-campaign-actions .mini-action {
+  width: fit-content;
+}

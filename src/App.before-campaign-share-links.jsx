@@ -469,54 +469,6 @@ function saveCampaignIds(ids = []) {
   return cleanIds;
 }
 
-
-function getCampaignIdFromUrl() {
-  if (typeof window === 'undefined') return '';
-
-  const params = new URLSearchParams(window.location.search);
-  return String(params.get('campaign') || params.get('campaignId') || params.get('c') || '').trim();
-}
-
-function buildCampaignShareLink(campaign) {
-  if (typeof window === 'undefined') return '';
-
-  const id = campaign?.id ? String(campaign.id) : '';
-  const url = new URL(window.location.origin + window.location.pathname);
-
-  if (id) {
-    url.searchParams.set('campaign', id);
-  }
-
-  return url.toString();
-}
-
-async function copyCampaignShareLink(campaign) {
-  const link = buildCampaignShareLink(campaign);
-
-  if (!link) {
-    alert('Campaign link could not be created.');
-    return;
-  }
-
-  try {
-    await navigator.clipboard.writeText(link);
-    alert('Campaign link copied.');
-  } catch (err) {
-    window.prompt('Copy campaign link:', link);
-  }
-}
-
-function clearCampaignIdFromUrl() {
-  if (typeof window === 'undefined') return;
-
-  const url = new URL(window.location.href);
-  url.searchParams.delete('campaign');
-  url.searchParams.delete('campaignId');
-  url.searchParams.delete('c');
-
-  window.history.replaceState({}, '', url.toString());
-}
-
 function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout, activityCount = 0 }) {
   const displayRole = roleForUser(user, profile, role);
 
@@ -1047,10 +999,6 @@ function SavedCampaignsPage({ campaigns, savedCampaignIds = [], onToggleSaved, s
                     Submit clip
                   </button>
 
-                  <button type="button" className="mini-action" onClick={() => copyCampaignShareLink(campaign)}>
-                    Copy campaign link
-                  </button>
-
                   <button type="button" className="mini-action ghost" onClick={() => onToggleSaved?.(campaign.id)}>
                     Remove
                   </button>
@@ -1251,10 +1199,6 @@ function DiscoverPage({ campaigns, setSelectedCampaign, setPage, savedCampaignId
 
                   <button type="button" className={isSaved ? "mini-action saved" : "mini-action"} onClick={() => onToggleSaved?.(campaign.id)}>
                     {isSaved ? 'Saved' : 'Save'}
-                  </button>
-
-                  <button type="button" className="mini-action ghost share-action" onClick={() => copyCampaignShareLink(campaign)}>
-                    Copy link
                   </button>
 
                   <button type="button" className="affiliate-action-btn" onClick={() => openCampaign(campaign)}>
@@ -2817,10 +2761,6 @@ function CreatorCampaigns({ campaigns, submissions = [], onCreatorCampaignUpdate
                 <div className="creator-card-actions">
                   <button type="button" className="mini-action" onClick={() => copyPaymentSummary(campaign)}>
                     Copy payment summary
-                  </button>
-
-                  <button type="button" className="mini-action ghost" onClick={() => copyCampaignShareLink(campaign)}>
-                    Copy public link
                   </button>
 
                   {draft.resourceUrl && (
@@ -4911,22 +4851,6 @@ const updateProfileRole = async (nextRole) => {
       return next;
     });
   };
-
-  useEffect(() => {
-    const campaignIdFromUrl = getCampaignIdFromUrl();
-
-    if (!campaignIdFromUrl || !campaigns.length) return;
-
-    const campaignFromLink = campaigns.find((campaign) =>
-      String(campaign.id) === String(campaignIdFromUrl)
-    );
-
-    if (!campaignFromLink) return;
-
-    setSelectedCampaign(campaignFromLink);
-    setPage('submit');
-    clearCampaignIdFromUrl();
-  }, [campaigns]);
 
 const content = useMemo(() => {
     const currentRole = roleForUser(user, profile, role);
