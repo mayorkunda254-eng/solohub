@@ -803,6 +803,7 @@ const navs = {
     ['createCampaign', Plus, 'Create Managed Campaign'],
     ['adminCampaigns', Megaphone, 'Campaigns'],
     ['adminDeposits', Wallet, 'Deposit Proofs'],
+    ['adminRequests', Megaphone, 'Campaign Requests'],
     ['adminSubmissions', ShieldCheck, 'Submissions'],
     ['adminAffiliates', Coins, 'Affiliates'],
     ['adminPayouts', Coins, 'Payouts'],
@@ -1542,6 +1543,569 @@ const PUBLIC_LEGAL_DOCS = {
   }
 };
 
+function getLocalCampaignRequests() {
+  try {
+    const saved = localStorage.getItem('solohub_campaign_requests_fallback_v1');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveLocalCampaignRequests(items = []) {
+  localStorage.setItem('solohub_campaign_requests_fallback_v1', JSON.stringify(items));
+}
+
+function PublicCampaignRequestPage({ setPage }) {
+  const [form, setForm] = useState({
+    name: '',
+    whatsapp: '',
+    brand_name: '',
+    campaign_goal: '',
+    budget_range: 'KES 2,500 - 5,000',
+    platforms: ['TikTok'],
+    start_date: '',
+    resource_link: '',
+    notes: ''
+  });
+
+  const [submitting, setSubmitting] = useState(false);
+  const [submitted, setSubmitted] = useState(false);
+
+  const platformOptions = ['TikTok', 'Instagram Reels', 'YouTube Shorts', 'Facebook Reels'];
+
+  const update = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const togglePlatform = (platform) => {
+    setForm((prev) => {
+      const current = Array.isArray(prev.platforms) ? prev.platforms : [];
+
+      return {
+        ...prev,
+        platforms: current.includes(platform)
+          ? current.filter((item) => item !== platform)
+          : [...current, platform]
+      };
+    });
+  };
+
+  const submitRequest = async (e) => {
+    e.preventDefault();
+
+    if (!form.name.trim()) {
+      alert('Enter your name.');
+      return;
+    }
+
+    if (!form.whatsapp.trim()) {
+      alert('Enter your WhatsApp number.');
+      return;
+    }
+
+    if (!form.campaign_goal.trim()) {
+      alert('Describe the campaign goal.');
+      return;
+    }
+
+    if (!form.platforms.length) {
+      alert('Choose at least one platform.');
+      return;
+    }
+
+    setSubmitting(true);
+
+    const payload = {
+      name: form.name.trim(),
+      whatsapp: form.whatsapp.trim(),
+      brand_name: form.brand_name.trim(),
+      campaign_goal: form.campaign_goal.trim(),
+      budget_range: form.budget_range,
+      platforms: form.platforms,
+      start_date: form.start_date,
+      resource_link: form.resource_link.trim(),
+      notes: form.notes.trim(),
+      status: 'New',
+      updated_at: new Date().toISOString()
+    };
+
+    try {
+      if (!supabase) {
+        const item = {
+          ...payload,
+          id: 'local-' + Date.now(),
+          created_at: new Date().toISOString()
+        };
+
+        saveLocalCampaignRequests([item, ...getLocalCampaignRequests()]);
+      } else {
+        const request = supabase
+          .from('campaign_requests')
+          .insert(payload)
+          .select('*')
+          .single();
+
+        const { error } = typeof withSupabaseTimeout === 'function'
+          ? await withSupabaseTimeout(request, 'Submit campaign request', 15000)
+          : await request;
+
+        if (error) throw error;
+      }
+
+      setSubmitted(true);
+      setForm({
+        name: '',
+        whatsapp: '',
+        brand_name: '',
+        campaign_goal: '',
+        budget_range: 'KES 2,500 - 5,000',
+        platforms: ['TikTok'],
+        start_date: '',
+        resource_link: '',
+        notes: ''
+      });
+
+      alert('Campaign request submitted. We will contact you on WhatsApp.');
+    } catch (err) {
+      console.error('Campaign request failed:', err);
+      alert('Request failed: ' + (err?.message || err));
+    } finally {
+      setSubmitting(false);
+    }
+  };
+
+  return (
+    <main className="solo-public-auth campaign-request-public-page">
+      <section className="campaign-request-hero">
+        <div>
+          <Pill tone="green"><Megaphone size={14} /> Request a Campaign</Pill>
+          <h1>Want clippers to promote your brand?</h1>
+          <p>Submit your campaign request and SoloHub will contact you on WhatsApp to confirm the budget, content, rules, and launch plan.</p>
+        </div>
+
+        <button type="button" className="mini-action" onClick={() => setPage('home')}>
+          Back to Login
+        </button>
+      </section>
+
+      {submitted && (
+        <div className="campaign-request-success">
+          <Pill tone="green">Request Sent</Pill>
+          <h3>Your request has been received.</h3>
+          <p>SoloHub will contact you on WhatsApp to confirm the campaign details and payment process.</p>
+        </div>
+      )}
+
+      <form className="campaign-request-form" onSubmit={submitRequest}>
+        <div className="campaign-request-grid">
+          <label>
+            Your name
+            <input value={form.name} onChange={(e) => update('name', e.target.value)} placeholder="Example: Mark Maiga" />
+          </label>
+
+          <label>
+            WhatsApp number
+            <input value={form.whatsapp} onChange={(e) => update('whatsapp', e.target.value)} placeholder="07XXXXXXXX / 2547XXXXXXXX" />
+          </label>
+
+          <label>
+            Brand / business name
+            <input value={form.brand_name} onChange={(e) => update('brand_name', e.target.value)} placeholder="Example: Moh Bakes" />
+          </label>
+
+          <label>
+            Budget range
+            <select value={form.budget_range} onChange={(e) => update('budget_range', e.target.value)}>
+              <option>KES 2,500 - 5,000</option>
+              <option>KES 5,000 - 10,000</option>
+              <option>KES 10,000 - 25,000</option>
+              <option>KES 25,000+</option>
+              <option>Need guidance</option>
+            </select>
+          </label>
+        </div>
+
+        <label>
+          Campaign goal
+          <textarea value={form.campaign_goal} onChange={(e) => update('campaign_goal', e.target.value)} placeholder="Example: I want more TikTok reach for a bakery offer in Nairobi." />
+        </label>
+
+        <div className="campaign-platform-picker">
+          <span>Platforms</span>
+
+          <div>
+            {platformOptions.map((platform) => (
+              <button
+                type="button"
+                key={platform}
+                className={form.platforms.includes(platform) ? 'active' : ''}
+                onClick={() => togglePlatform(platform)}
+              >
+                {platform}
+              </button>
+            ))}
+          </div>
+        </div>
+
+        <div className="campaign-request-grid">
+          <label>
+            Expected start date
+            <input type="date" value={form.start_date} onChange={(e) => update('start_date', e.target.value)} />
+          </label>
+
+          <label>
+            Content/resource link
+            <input value={form.resource_link} onChange={(e) => update('resource_link', e.target.value)} placeholder="Google Drive / website / social page link" />
+          </label>
+        </div>
+
+        <label>
+          Extra notes
+          <textarea value={form.notes} onChange={(e) => update('notes', e.target.value)} placeholder="Mention target location, offer details, rules, or anything important." />
+        </label>
+
+        <button type="submit" className="affiliate-action-btn campaign-request-submit" disabled={submitting}>
+          {submitting ? 'Submitting...' : 'Submit campaign request'}
+        </button>
+      </form>
+    </main>
+  );
+}
+
+function CampaignRequestCta({ setPage }) {
+  return (
+    <section className="campaign-request-cta">
+      <div>
+        <Pill tone="yellow">For Creators & Businesses</Pill>
+        <h3>Need people to clip and promote your content?</h3>
+        <p>Submit a campaign request and SoloHub will contact you to plan budget, rules, content resources, and launch date.</p>
+      </div>
+
+      <button type="button" className="affiliate-action-btn" onClick={() => typeof setPage === 'function' ? setPage('publicCampaignRequest') : null}>
+        Request a campaign
+      </button>
+    </section>
+  );
+}
+
+function AdminCampaignRequestsPage({ setPage }) {
+  const [requests, setRequests] = useState([]);
+  const [filter, setFilter] = useState('All');
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('Load and manage campaign request leads.');
+  const [notes, setNotes] = useState({});
+
+  const loadRequests = async () => {
+    setLoading(true);
+    setMessage('Loading campaign requests...');
+
+    try {
+      if (!supabase) {
+        setRequests(getLocalCampaignRequests());
+        setMessage('Loaded local campaign requests.');
+        return;
+      }
+
+      const request = supabase
+        .from('campaign_requests')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      const { data, error } = typeof withSupabaseTimeout === 'function'
+        ? await withSupabaseTimeout(request, 'Load campaign requests', 15000)
+        : await request;
+
+      if (error) throw error;
+
+      setRequests(data || []);
+      setMessage('Campaign requests loaded.');
+    } catch (err) {
+      console.error('Campaign requests load failed:', err);
+      setRequests(getLocalCampaignRequests());
+      setMessage('Cloud load failed. Showing local fallback if available.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadRequests();
+  }, []);
+
+  const visibleRequests = requests.filter((item) =>
+    filter === 'All' ? true : item.status === filter
+  );
+
+  const updateStatus = async (item, status) => {
+    const adminNote = notes[item.id] ?? item.admin_notes ?? '';
+
+    try {
+      if (!supabase || String(item.id).startsWith('local-')) {
+        const next = requests.map((request) =>
+          request.id === item.id
+            ? { ...request, status, admin_notes: adminNote, updated_at: new Date().toISOString() }
+            : request
+        );
+
+        saveLocalCampaignRequests(next);
+        setRequests(next);
+      } else {
+        const request = supabase
+          .from('campaign_requests')
+          .update({
+            status,
+            admin_notes: adminNote,
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', item.id)
+          .select('*')
+          .single();
+
+        const { data, error } = typeof withSupabaseTimeout === 'function'
+          ? await withSupabaseTimeout(request, 'Update campaign request', 15000)
+          : await request;
+
+        if (error) throw error;
+
+        setRequests((prev) => prev.map((requestItem) => requestItem.id === item.id ? data : requestItem));
+      }
+
+      setMessage('Request updated.');
+    } catch (err) {
+      console.error('Campaign request update failed:', err);
+      alert('Update failed: ' + (err?.message || err));
+    }
+  };
+
+  const deleteRequest = async (item) => {
+    if (!confirm('Delete this campaign request?')) return;
+
+    try {
+      if (!supabase || String(item.id).startsWith('local-')) {
+        const next = requests.filter((request) => request.id !== item.id);
+        saveLocalCampaignRequests(next);
+        setRequests(next);
+      } else {
+        const request = supabase
+          .from('campaign_requests')
+          .delete()
+          .eq('id', item.id);
+
+        const { error } = typeof withSupabaseTimeout === 'function'
+          ? await withSupabaseTimeout(request, 'Delete campaign request', 15000)
+          : await request;
+
+        if (error) throw error;
+
+        setRequests((prev) => prev.filter((requestItem) => requestItem.id !== item.id));
+      }
+
+      setMessage('Request deleted.');
+    } catch (err) {
+      console.error('Campaign request delete failed:', err);
+      alert('Delete failed: ' + (err?.message || err));
+    }
+  };
+
+  const copyWhatsAppFollowUp = async (item) => {
+    const text = [
+      'Hi ' + item.name + ', this is SoloHub.',
+      '',
+      'Thank you for requesting a campaign for ' + (item.brand_name || 'your brand') + '.',
+      '',
+      'I have seen your goal:',
+      item.campaign_goal || '-',
+      '',
+      'Budget range: ' + (item.budget_range || 'Not specified'),
+      'Platforms: ' + (Array.isArray(item.platforms) ? item.platforms.join(', ') : item.platforms || 'Not specified'),
+      '',
+      'To proceed, kindly confirm:',
+      '1. Campaign budget',
+      '2. Content/resources link',
+      '3. Preferred start date',
+      '4. Any rules clippers must follow',
+      '',
+      'Once confirmed, we will prepare the campaign and payment instructions.'
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('WhatsApp follow-up copied.');
+    } catch (err) {
+      window.prompt('Copy WhatsApp message:', text);
+    }
+  };
+
+  const copyCampaignBrief = async (item) => {
+    const text = [
+      'CAMPAIGN REQUEST BRIEF',
+      '',
+      'Name: ' + item.name,
+      'WhatsApp: ' + item.whatsapp,
+      'Brand: ' + (item.brand_name || ''),
+      'Goal: ' + (item.campaign_goal || ''),
+      'Budget: ' + (item.budget_range || ''),
+      'Platforms: ' + (Array.isArray(item.platforms) ? item.platforms.join(', ') : item.platforms || ''),
+      'Start date: ' + (item.start_date || ''),
+      'Resource link: ' + (item.resource_link || ''),
+      'Notes: ' + (item.notes || ''),
+      'Admin notes: ' + (notes[item.id] ?? item.admin_notes ?? '')
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Campaign brief copied.');
+    } catch (err) {
+      window.prompt('Copy campaign brief:', text);
+    }
+  };
+
+  const newCount = requests.filter((item) => item.status === 'New').length;
+  const contactedCount = requests.filter((item) => item.status === 'Contacted').length;
+  const convertedCount = requests.filter((item) => item.status === 'Converted').length;
+  const closedCount = requests.filter((item) => ['Closed', 'Rejected'].includes(item.status)).length;
+
+  return (
+    <section className="campaign-requests-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="green"><Megaphone size={14} /> Campaign Requests</Pill>
+          <h2>Turn creator interest into paid campaigns.</h2>
+          <p>Review public campaign requests, contact leads on WhatsApp, and convert them into managed campaigns.</p>
+          {message && <p className="form-note affiliate-message">{message}</p>}
+        </div>
+
+        <button type="button" className="affiliate-action-btn secondary" onClick={loadRequests} disabled={loading}>
+          {loading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard icon={Megaphone} label="New" value={newCount} helper="Fresh leads" />
+        <StatCard icon={UserRound} label="Contacted" value={contactedCount} helper="Followed up" />
+        <StatCard icon={CheckCircle2} label="Converted" value={convertedCount} helper="Ready/paid" />
+        <StatCard icon={XCircle} label="Closed" value={closedCount} helper="Closed/rejected" />
+      </div>
+
+      <div className="campaign-request-filter-row">
+        <label>
+          Filter requests
+          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option>All</option>
+            <option>New</option>
+            <option>Contacted</option>
+            <option>Converted</option>
+            <option>Closed</option>
+            <option>Rejected</option>
+          </select>
+        </label>
+
+        <span>{visibleRequests.length} request{visibleRequests.length === 1 ? '' : 's'} shown</span>
+      </div>
+
+      <div className="campaign-request-admin-feed">
+        {visibleRequests.map((item) => (
+          <article key={item.id} className="campaign-request-admin-card">
+            <div className="campaign-request-admin-head">
+              <div>
+                <Pill tone={item.status === 'Converted' ? 'green' : item.status === 'Rejected' ? 'red' : item.status === 'Contacted' ? 'yellow' : 'purple'}>
+                  {item.status}
+                </Pill>
+                <h3>{item.brand_name || 'Untitled campaign request'}</h3>
+                <p>{item.name} • {item.whatsapp}</p>
+              </div>
+
+              <div className="campaign-request-budget">
+                <span>Budget</span>
+                <strong>{item.budget_range || 'Not specified'}</strong>
+                <small>{item.created_at ? String(item.created_at).slice(0, 10) : 'Today'}</small>
+              </div>
+            </div>
+
+            <div className="campaign-request-admin-body">
+              <div>
+                <span>Goal</span>
+                <p>{item.campaign_goal || '-'}</p>
+              </div>
+
+              <div>
+                <span>Platforms</span>
+                <p>{Array.isArray(item.platforms) ? item.platforms.join(', ') : item.platforms || '-'}</p>
+              </div>
+
+              <div>
+                <span>Start date</span>
+                <p>{item.start_date || '-'}</p>
+              </div>
+
+              <div>
+                <span>Resource link</span>
+                <p>{item.resource_link || '-'}</p>
+              </div>
+
+              <div>
+                <span>Notes</span>
+                <p>{item.notes || '-'}</p>
+              </div>
+            </div>
+
+            <label className="campaign-request-admin-note">
+              Admin notes
+              <textarea
+                value={notes[item.id] ?? item.admin_notes ?? ''}
+                onChange={(e) => setNotes((prev) => ({ ...prev, [item.id]: e.target.value }))}
+                placeholder="Add follow-up notes, pricing discussion, or conversion details."
+              />
+            </label>
+
+            <div className="campaign-request-actions">
+              <button type="button" className="affiliate-action-btn" onClick={() => copyWhatsAppFollowUp(item)}>
+                Copy WhatsApp follow-up
+              </button>
+
+              <button type="button" className="mini-action" onClick={() => copyCampaignBrief(item)}>
+                Copy brief
+              </button>
+
+              <button type="button" className="mini-action" onClick={() => updateStatus(item, 'Contacted')}>
+                Mark contacted
+              </button>
+
+              <button type="button" className="mini-action" onClick={() => updateStatus(item, 'Converted')}>
+                Mark converted
+              </button>
+
+              <button type="button" className="mini-action" onClick={() => {
+                copyCampaignBrief(item);
+                setPage('createCampaign');
+              }}>
+                Create campaign
+              </button>
+
+              <button type="button" className="mini-action ghost" onClick={() => updateStatus(item, 'Closed')}>
+                Close
+              </button>
+
+              <button type="button" className="mini-action ghost" onClick={() => deleteRequest(item)}>
+                Delete
+              </button>
+            </div>
+          </article>
+        ))}
+
+        {!visibleRequests.length && (
+          <div className="panel">
+            <Pill tone="yellow">No requests</Pill>
+            <h3>No campaign requests found.</h3>
+            <p>When creators submit the public request form, their leads will appear here.</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function PublicLegalPage({ page, setPage }) {
   const doc = PUBLIC_LEGAL_DOCS[page] || PUBLIC_LEGAL_DOCS.publicTerms;
 
@@ -1732,6 +2296,8 @@ function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, 
         </div>
       </section>
 
+      {typeof setPage === 'function' && <CampaignRequestCta setPage={setPage} />}
+
       <PublicHowItWorks />
 
       <PublicLegalLinks setPage={setPage} />
@@ -1742,6 +2308,10 @@ function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, 
 function HomePage({ page, setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode, inviteRole }) {
   const liveCampaigns = campaigns.filter((c) => c.status === 'Live').length;
   const pendingSubmissions = submissions.filter((s) => s.status === 'Pending Review').length;
+
+  if (!user && page === 'publicCampaignRequest') {
+    return <PublicCampaignRequestPage setPage={setPage} />;
+  }
 
   if (!user && ['publicTerms', 'publicPrivacy', 'publicPayoutRules', 'publicFraudPolicy'].includes(page)) {
     return <PublicLegalPage page={page} setPage={setPage} />;
@@ -8280,6 +8850,10 @@ const content = useMemo(() => {
 
     if (page === 'adminOverview') {
       return isAdmin ? <AdminOverview campaigns={campaigns} submissions={submissions} cloudMode={cloudMode} /> : home;
+    }
+
+    if (page === 'adminRequests') {
+      return isAdmin ? <AdminCampaignRequestsPage setPage={setPage} /> : home;
     }
 
     if (page === 'adminDeposits') {
