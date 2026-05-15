@@ -772,6 +772,7 @@ const navs = {
     ['adminReports', FileVideo, 'Reports'],
     ['adminReadiness', CheckCircle2, 'MVP Checklist'],
     ['adminCompliance', ShieldCheck, 'Compliance'],
+    ['adminAudit', ShieldCheck, 'Audit Log'],
     ['adminSettings', Wallet, 'Settings']
   ]
 };
@@ -4502,6 +4503,322 @@ function InviteLinkPanel() {
   );
 }
 
+function AdminAuditLog({ campaigns = [], submissions = [], user }) {
+  const storageKey = 'solohub_manual_audit_notes_v1';
+
+  const [filter, setFilter] = useState('All');
+  const [manualNotes, setManualNotes] = useState(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return saved ? JSON.parse(saved) : [];
+    } catch {
+      return [];
+    }
+  });
+
+  const [noteForm, setNoteForm] = useState({
+    type: 'General',
+    title: '',
+    note: ''
+  });
+
+  const saveManualNotes = (items) => {
+    localStorage.setItem(storageKey, JSON.stringify(items));
+    setManualNotes(items);
+  };
+
+  const addManualNote = (e) => {
+    e.preventDefault();
+
+    if (!noteForm.title.trim() || !noteForm.note.trim()) {
+      alert('Add an audit title and note.');
+      return;
+    }
+
+    const entry = {
+      id: 'manual-' + Date.now(),
+      type: noteForm.type,
+      title: noteForm.title.trim(),
+      description: noteForm.note.trim(),
+      actor: user?.email || 'Admin',
+      date: new Date().toISOString(),
+      source: 'Manual note',
+      severity: noteForm.type === 'Risk' ? 'High' : noteForm.type === 'Payment' ? 'Medium' : 'Normal'
+    };
+
+    saveManualNotes([entry, ...manualNotes]);
+
+    setNoteForm({
+      type: 'General',
+      title: '',
+      note: ''
+    });
+
+    alert('Audit note added.');
+  };
+
+  const removeManualNote = (id) => {
+    if (!confirm('Remove this manual audit note?')) return;
+    saveManualNotes(manualNotes.filter((item) => item.id !== id));
+  };
+
+  const derivedLogs = useMemo(() => {
+    const logs = [];
+
+    campaigns.forEach((campaign) => {
+      const status = campaign.status || 'Pending Approval';
+      const depositStatus = campaign.depositStatus || campaign.deposit_status || 'Pending';
+      const depositAmount = Number(campaign.depositAmount || campaign.deposit_amount || 0);
+
+      logs.push({
+        id: 'campaign-status-' + campaign.id,
+        type: 'Campaign',
+        title: 'Campaign status: ' + status,
+        description: (campaign.title || 'Untitled campaign') + ' is currently marked as ' + status + '.',
+        actor: campaign.creator || campaign.clientName || campaign.client_name || 'SoloHub',
+        date: campaign.updatedAt || campaign.updated_at || campaign.createdAt || campaign.created_at || '',
+        source: 'Campaign record',
+        severity: status === 'Rejected' ? 'High' : status === 'Pending Approval' ? 'Medium' : 'Normal'
+      });
+
+      logs.push({
+        id: 'campaign-deposit-' + campaign.id,
+        type: 'Payment',
+        title: 'Deposit status: ' + depositStatus,
+        description: (campaign.title || 'Untitled campaign') + ' deposit is ' + depositStatus + ' with amount ' + money(depositAmount) + '. Ref: ' + (campaign.paymentReference || campaign.payment_reference || 'Not provided'),
+        actor: campaign.creator || campaign.clientName || campaign.client_name || 'Creator/client',
+        date: campaign.updatedAt || campaign.updated_at || campaign.createdAt || campaign.created_at || '',
+        source: 'Payment/deposit record',
+        severity: depositStatus === 'Pending' ? 'Medium' : 'Normal'
+      });
+    });
+
+    submissions.forEach((submission) => {
+      const status = submission.status || 'Pending Review';
+      const fraudStatus = submission.fraudStatus || submission.fraud_status || 'Clear';
+      const payout = Number(submission.payout || submission.approvedPayout || submission.approved_payout || 0);
+      const submittedViews = Number(submission.submittedViews || submission.submitted_views || 0);
+      const approvedViews = Number(submission.approvedViews || submission.approved_views || 0);
+
+      logs.push({
+        id: 'submission-status-' + submission.id,
+        type: 'Submission',
+        title: 'Submission status: ' + status,
+        description: (submission.campaign || 'Campaign') + ' clip on ' + (submission.platform || 'platform') + '. Submitted views: ' + submittedViews.toLocaleString() + '. Approved views: ' + approvedViews.toLocaleString() + '.',
+        actor: submission.clipper || submission.clipperEmail || submission.clipper_email || 'Clipper',
+        date: submission.paidAt || submission.paid_at || submission.updatedAt || submission.updated_at || submission.createdAt || submission.created_at || '',
+        source: 'Submission record',
+        severity: status === 'Rejected' ? 'High' : status === 'Pending Review' ? 'Medium' : 'Normal'
+      });
+
+      if (status === 'Approved' || status === 'Paid') {
+        logs.push({
+          id: 'submission-payout-' + submission.id,
+          type: 'Payout',
+          title: status === 'Paid' ? 'Payout marked paid' : 'Payout approved',
+          description: (submission.campaign || 'Campaign') + ' payout value is ' + money(payout) + '. Payment ref: ' + (submission.paymentReference || submission.payment_reference || 'Not paid yet'),
+          actor: submission.clipper || submission.clipperEmail || submission.clipper_email || 'Clipper',
+          date: submission.paidAt || submission.paid_at || submission.updatedAt || submission.updated_at || submission.createdAt || submission.created_at || '',
+          source: 'Payout record',
+          severity: status === 'Paid' ? 'Normal' : 'Medium'
+        });
+      }
+
+      if (fraudStatus && fraudStatus !== 'Clear') {
+        logs.push({
+          id: 'submission-fraud-' + submission.id,
+          type: 'Risk',
+          title: 'Fraud review: ' + fraudStatus,
+          description: (submission.campaign || 'Campaign') + ' submission has fraud status ' + fraudStatus + '. Notes: ' + (submission.reviewNotes || submission.review_notes || submission.notes || 'No notes.'),
+          actor: submission.clipper || submission.clipperEmail || submission.clipper_email || 'Clipper',
+          date: submission.updatedAt || submission.updated_at || submission.createdAt || submission.created_at || '',
+          source: 'Fraud review',
+          severity: fraudStatus === 'Flagged' ? 'High' : 'Medium'
+        });
+      }
+    });
+
+    return logs;
+  }, [campaigns, submissions]);
+
+  const allLogs = [...manualNotes, ...derivedLogs].sort((a, b) =>
+    String(b.date || '').localeCompare(String(a.date || ''))
+  );
+
+  const visibleLogs = allLogs.filter((log) =>
+    filter === 'All' ? true : log.type === filter
+  );
+
+  const highRiskCount = allLogs.filter((log) => log.severity === 'High').length;
+  const paymentCount = allLogs.filter((log) => log.type === 'Payment' || log.type === 'Payout').length;
+  const manualCount = manualNotes.length;
+
+  const exportRows = visibleLogs.map((log) => ({
+    id: log.id,
+    type: log.type,
+    title: log.title,
+    description: log.description,
+    actor: log.actor,
+    date: log.date,
+    source: log.source,
+    severity: log.severity
+  }));
+
+  const copyAuditSummary = async () => {
+    const text = [
+      'SOLOHUB AUDIT SUMMARY',
+      '',
+      'Total audit events: ' + visibleLogs.length,
+      'High-risk events: ' + highRiskCount,
+      'Payment/payout events: ' + paymentCount,
+      'Manual notes: ' + manualCount,
+      '',
+      ...visibleLogs.slice(0, 25).map((log, index) => [
+        (index + 1) + '. ' + log.title,
+        'Type: ' + log.type,
+        'Actor: ' + log.actor,
+        'Date: ' + (log.date || 'Not recorded'),
+        'Source: ' + log.source,
+        'Severity: ' + log.severity,
+        log.description,
+        ''
+      ].join('\n'))
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Audit summary copied.');
+    } catch (err) {
+      window.prompt('Copy audit summary:', text);
+    }
+  };
+
+  const today = new Date().toISOString().slice(0, 10);
+
+  const severityTone = (severity) => {
+    if (severity === 'High') return 'red';
+    if (severity === 'Medium') return 'yellow';
+    return 'green';
+  };
+
+  return (
+    <section className="audit-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="purple"><ShieldCheck size={14} /> Audit Log</Pill>
+          <h2>Track important SoloHub admin and platform events.</h2>
+          <p>Review campaign status changes, deposits, submissions, payouts, fraud flags, and manual audit notes.</p>
+        </div>
+
+        <div className="audit-top-actions">
+          <button type="button" className="mini-action" onClick={copyAuditSummary}>
+            Copy summary
+          </button>
+
+          <button type="button" className="affiliate-action-btn" onClick={() => downloadCsv('solohub-audit-log-' + today + '.csv', exportRows)}>
+            Export CSV
+          </button>
+        </div>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard icon={ShieldCheck} label="Audit Events" value={visibleLogs.length} helper="Current filter" />
+        <StatCard icon={XCircle} label="High Risk" value={highRiskCount} helper="Needs attention" />
+        <StatCard icon={Wallet} label="Payments" value={paymentCount} helper="Deposits and payouts" />
+        <StatCard icon={FileVideo} label="Manual Notes" value={manualCount} helper="Admin-added notes" />
+      </div>
+
+      <div className="audit-layout">
+        <form className="audit-note-card" onSubmit={addManualNote}>
+          <h3>Add manual audit note</h3>
+
+          <label>
+            Type
+            <select value={noteForm.type} onChange={(e) => setNoteForm((prev) => ({ ...prev, type: e.target.value }))}>
+              <option>General</option>
+              <option>Campaign</option>
+              <option>Payment</option>
+              <option>Payout</option>
+              <option>Submission</option>
+              <option>Risk</option>
+            </select>
+          </label>
+
+          <label>
+            Title
+            <input value={noteForm.title} onChange={(e) => setNoteForm((prev) => ({ ...prev, title: e.target.value }))} placeholder="Example: Investor demo completed" />
+          </label>
+
+          <label>
+            Note
+            <textarea value={noteForm.note} onChange={(e) => setNoteForm((prev) => ({ ...prev, note: e.target.value }))} placeholder="Write what happened and why it matters." />
+          </label>
+
+          <button type="submit" className="affiliate-action-btn">
+            Add audit note
+          </button>
+        </form>
+
+        <div className="audit-feed-card">
+          <div className="audit-filter-row">
+            <label>
+              Filter
+              <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+                <option>All</option>
+                <option>General</option>
+                <option>Campaign</option>
+                <option>Payment</option>
+                <option>Payout</option>
+                <option>Submission</option>
+                <option>Risk</option>
+              </select>
+            </label>
+
+            <span>{visibleLogs.length} event{visibleLogs.length === 1 ? '' : 's'} shown</span>
+          </div>
+
+          <div className="audit-feed">
+            {visibleLogs.map((log) => (
+              <article key={log.id} className="audit-event">
+                <div className="audit-event-head">
+                  <div>
+                    <Pill tone={severityTone(log.severity)}>{log.severity}</Pill>
+                    <h3>{log.title}</h3>
+                    <p>{log.description}</p>
+                  </div>
+
+                  <div className="audit-event-meta">
+                    <span>{log.type}</span>
+                    <small>{log.date ? String(log.date).slice(0, 19).replace('T', ' ') : 'No date'}</small>
+                  </div>
+                </div>
+
+                <div className="audit-event-footer">
+                  <span>Actor: <strong>{log.actor}</strong></span>
+                  <span>Source: <strong>{log.source}</strong></span>
+
+                  {String(log.id).startsWith('manual-') && (
+                    <button type="button" className="mini-action ghost" onClick={() => removeManualNote(log.id)}>
+                      Remove
+                    </button>
+                  )}
+                </div>
+              </article>
+            ))}
+
+            {!visibleLogs.length && (
+              <div className="panel">
+                <h3>No audit events found.</h3>
+                <p>Change the filter or add a manual audit note.</p>
+              </div>
+            )}
+          </div>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function AdminComplianceCenter() {
   const defaultDocs = {
     terms: {
@@ -6835,6 +7152,10 @@ const content = useMemo(() => {
 
     if (page === 'creatorSubmissions') {
       return <CreatorSubmissionsPage submissions={ownCreatorSubmissions} campaigns={ownCampaigns} />;
+    }
+
+    if (page === 'adminAudit') {
+      return isAdmin ? <AdminAuditLog campaigns={campaigns} submissions={submissions} user={user} /> : home;
     }
 
     if (page === 'adminCompliance') {
