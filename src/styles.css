@@ -6305,3 +6305,169 @@ body.solohub-logged-out main {
     width: 100%;
   }
 }
+
+/* =========================================================
+   Phase 58 Admin Demo Script Page
+   ========================================================= */
+
+.demo-script-page {
+  display: grid;
+  gap: 24px;
+}
+
+.demo-quick-grid {
+  display: grid;
+  grid-template-columns: repeat(6, minmax(130px, 1fr));
+  gap: 12px;
+}
+
+.demo-quick-grid button {
+  min-height: 78px;
+  display: grid;
+  place-items: center;
+  gap: 8px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.045);
+  border: 1px solid rgba(255,255,255,0.09);
+  color: #f8fafc;
+  font-weight: 1000;
+  cursor: pointer;
+}
+
+.demo-quick-grid button:hover {
+  border-color: rgba(35, 209, 139, 0.32);
+  background: rgba(35, 209, 139, 0.09);
+}
+
+.demo-layout {
+  display: grid;
+  grid-template-columns: minmax(420px, 1.2fr) minmax(300px, 0.8fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.demo-timeline-card,
+.demo-copy-card,
+.demo-checklist-card,
+.demo-close-card {
+  padding: 24px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(35, 209, 139, 0.08), transparent 35%),
+    linear-gradient(145deg, rgba(20,20,20,0.96), rgba(8,10,12,0.96));
+  border: 1px solid rgba(35, 209, 139, 0.16);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.30);
+}
+
+.demo-timeline-card h3,
+.demo-copy-card h3,
+.demo-checklist-card h3 {
+  margin: 0 0 16px;
+  font-size: 26px;
+}
+
+.demo-timeline {
+  display: grid;
+  gap: 14px;
+}
+
+.demo-step-card {
+  display: grid;
+  grid-template-columns: 48px 1fr;
+  gap: 14px;
+  padding: 16px;
+  border-radius: 20px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+}
+
+.demo-step-number {
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  border-radius: 15px;
+  background: rgba(245, 196, 83, 0.13);
+  border: 1px solid rgba(245, 196, 83, 0.25);
+  color: #fff4bf;
+  font-weight: 1000;
+}
+
+.demo-step-card span {
+  color: #9fffd1;
+  font-weight: 1000;
+}
+
+.demo-step-card h4 {
+  margin: 6px 0 8px;
+  font-size: 20px;
+}
+
+.demo-step-card p {
+  margin: 0 0 12px;
+  line-height: 1.65;
+}
+
+.demo-side-panel {
+  display: grid;
+  gap: 18px;
+}
+
+.demo-copy-card {
+  display: grid;
+  gap: 12px;
+}
+
+.demo-copy-card button {
+  width: 100%;
+}
+
+.demo-checklist {
+  display: grid;
+  gap: 10px;
+}
+
+.demo-checklist div {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 13px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #aeb9c5;
+  font-weight: 900;
+}
+
+.demo-checklist div.done {
+  color: #d9ffe9;
+  background: rgba(35, 209, 139, 0.10);
+  border-color: rgba(35, 209, 139, 0.24);
+}
+
+.demo-close-card p {
+  margin: 12px 0 0;
+  color: #dbe5ee;
+  line-height: 1.7;
+  font-weight: 900;
+}
+
+@media (max-width: 1050px) {
+  .demo-quick-grid {
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .demo-layout {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 650px) {
+  .demo-quick-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .demo-step-card {
+    grid-template-columns: 1fr;
+  }
+}

@@ -808,6 +808,7 @@ const navs = {
     ['adminPayouts', Coins, 'Payouts'],
     ['adminReports', FileVideo, 'Reports'],
     ['adminReadiness', CheckCircle2, 'MVP Checklist'],
+    ['adminDemo', FileVideo, 'Demo Script'],
     ['adminCompliance', ShieldCheck, 'Compliance'],
     ['adminAudit', ShieldCheck, 'Audit Log'],
     ['adminAnnouncements', Megaphone, 'Manage Announcements'],
@@ -4857,6 +4858,228 @@ function CreatorDepositsPage({ campaigns = [], onCampaignFundingUpdate }) {
   );
 }
 
+function AdminDemoScriptPage({ campaigns = [], submissions = [], setPage }) {
+  const liveCampaigns = campaigns.filter((campaign) => campaign.status === 'Live');
+  const pendingCampaigns = campaigns.filter((campaign) => campaign.status === 'Pending Approval');
+  const pendingSubmissions = submissions.filter((submission) => submission.status === 'Pending Review');
+  const approvedSubmissions = submissions.filter((submission) => submission.status === 'Approved');
+  const paidSubmissions = submissions.filter((submission) => submission.status === 'Paid');
+
+  const demoPitch = [
+    'SoloHub is a content rewards platform that helps creators launch clipping campaigns, receive public post submissions, verify performance, and track payouts.',
+    '',
+    'Instead of creators manually managing WhatsApp groups, spreadsheets, proof of payment, clip links, and payouts, SoloHub organizes the full workflow in one dashboard.',
+    '',
+    'The MVP already supports creator campaigns, clipper submissions, admin verification, deposit proof review, payout tracking, reports, compliance pages, announcements, and audit logs.',
+    '',
+    'The next commercial step is onboarding real creators and clippers, testing paid campaigns, then automating payment confirmation and payout processing.'
+  ].join('\n');
+
+  const creatorPitch = [
+    'For creators, SoloHub helps you launch a campaign, set the budget, add requirements, upload resources, submit proof of payment, and track clip submissions.',
+    'You do not need to manually chase links and screenshots because clippers submit public post links directly into the platform.'
+  ].join('\n\n');
+
+  const clipperPitch = [
+    'For clippers, SoloHub gives you a place to discover live campaigns, save opportunities, submit clips, and track review or payout status.',
+    'The platform is built around verified views and admin-approved payouts, not fake or unclear traffic.'
+  ].join('\n\n');
+
+  const copyText = async (text, label) => {
+    try {
+      await navigator.clipboard.writeText(text);
+      alert(label + ' copied.');
+    } catch (err) {
+      window.prompt('Copy ' + label + ':', text);
+    }
+  };
+
+  const demoSteps = [
+    {
+      time: '0:00 - 0:45',
+      title: 'Open with the problem',
+      page: 'adminDemo',
+      say: 'Creators want reach, clippers want earning opportunities, but the process is usually messy: WhatsApp groups, unverified links, screenshots, manual payments, and no clean reporting.'
+    },
+    {
+      time: '0:45 - 1:30',
+      title: 'Show the public login and How It Works',
+      page: 'home',
+      say: 'SoloHub explains the model clearly before signup: creators create campaigns, clippers submit clips, admin verifies views, and payouts are tracked.'
+    },
+    {
+      time: '1:30 - 2:15',
+      title: 'Show campaign operations',
+      page: 'adminCampaigns',
+      say: 'Admin can approve, pause, complete, reject, or reopen campaigns. This gives the platform control over what is live.'
+    },
+    {
+      time: '2:15 - 2:55',
+      title: 'Show deposit proof flow',
+      page: 'adminDeposits',
+      say: 'Before a campaign goes live, creators can submit payment proof. Admin reviews the M-Pesa reference, amount, phone number, and proof link, then confirms funding.'
+    },
+    {
+      time: '2:55 - 3:35',
+      title: 'Show clip submission review',
+      page: 'adminSubmissions',
+      say: 'Clippers submit public links. Admin reviews submitted views, fraud status, approved views, and payout value before marking anything as payable.'
+    },
+    {
+      time: '3:35 - 4:10',
+      title: 'Show reports and audit log',
+      page: 'adminReports',
+      say: 'The platform can export campaign, submission, payout, and deposit data. The audit log gives accountability for important events and disputes.'
+    },
+    {
+      time: '4:10 - 4:40',
+      title: 'Show compliance and readiness',
+      page: 'adminCompliance',
+      say: 'SoloHub already has starter compliance documents, public legal pages, signup acceptance, MVP checklist, and policies ready for review before full launch.'
+    },
+    {
+      time: '4:40 - 5:00',
+      title: 'Close with the ask',
+      page: 'adminReadiness',
+      say: 'We are ready to test with real creators and clippers. The investment need is for customer acquisition, payment setup, product polish, and onboarding operations.'
+    }
+  ];
+
+  const demoChecklist = [
+    { title: 'Create one sample creator account', done: true },
+    { title: 'Create one sample clipper account', done: true },
+    { title: 'Create one campaign with image/resources', done: campaigns.length > 0 },
+    { title: 'Submit deposit proof on a campaign', done: campaigns.some((c) => c.paymentReference || c.payment_reference) },
+    { title: 'Make one campaign Live', done: liveCampaigns.length > 0 },
+    { title: 'Submit one sample clip', done: submissions.length > 0 },
+    { title: 'Approve one sample submission', done: approvedSubmissions.length > 0 || paidSubmissions.length > 0 },
+    { title: 'Create one announcement', done: true },
+    { title: 'Open public Terms/Privacy pages', done: true },
+    { title: 'Test on mobile', done: true }
+  ];
+
+  const completedChecklist = demoChecklist.filter((item) => item.done).length;
+  const readinessScore = Math.round((completedChecklist / demoChecklist.length) * 100);
+
+  return (
+    <section className="demo-script-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="green"><FileVideo size={14} /> Live Demo Script</Pill>
+          <h2>Run a confident 5-minute SoloHub demo.</h2>
+          <p>Use this page when showing SoloHub to investors, creators, schools, agencies, or potential partners.</p>
+        </div>
+
+        <button type="button" className="affiliate-action-btn" onClick={() => copyText(demoPitch, 'Investor demo pitch')}>
+          Copy investor pitch
+        </button>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard icon={CheckCircle2} label="Demo Readiness" value={readinessScore + '%'} helper={completedChecklist + ' of ' + demoChecklist.length + ' checks'} />
+        <StatCard icon={Megaphone} label="Live Campaigns" value={liveCampaigns.length} helper="Visible to clippers" />
+        <StatCard icon={ShieldCheck} label="Pending Reviews" value={pendingSubmissions.length} helper="Admin action" />
+        <StatCard icon={Wallet} label="Paid Records" value={paidSubmissions.length} helper="Payout proof" />
+      </div>
+
+      <div className="demo-quick-grid">
+        <button type="button" onClick={() => setPage('adminCampaigns')}>
+          <Megaphone size={18} />
+          <span>Campaigns</span>
+        </button>
+
+        <button type="button" onClick={() => setPage('adminDeposits')}>
+          <Wallet size={18} />
+          <span>Deposit Proofs</span>
+        </button>
+
+        <button type="button" onClick={() => setPage('adminSubmissions')}>
+          <ShieldCheck size={18} />
+          <span>Submissions</span>
+        </button>
+
+        <button type="button" onClick={() => setPage('adminReports')}>
+          <FileVideo size={18} />
+          <span>Reports</span>
+        </button>
+
+        <button type="button" onClick={() => setPage('adminCompliance')}>
+          <ShieldCheck size={18} />
+          <span>Compliance</span>
+        </button>
+
+        <button type="button" onClick={() => setPage('adminReadiness')}>
+          <CheckCircle2 size={18} />
+          <span>MVP Checklist</span>
+        </button>
+      </div>
+
+      <div className="demo-layout">
+        <div className="demo-timeline-card">
+          <h3>5-minute click-by-click script</h3>
+
+          <div className="demo-timeline">
+            {demoSteps.map((step, index) => (
+              <article key={step.title} className="demo-step-card">
+                <div className="demo-step-number">{index + 1}</div>
+
+                <div>
+                  <span>{step.time}</span>
+                  <h4>{step.title}</h4>
+                  <p>{step.say}</p>
+
+                  <button type="button" className="mini-action" onClick={() => setPage(step.page)}>
+                    Open this page
+                  </button>
+                </div>
+              </article>
+            ))}
+          </div>
+        </div>
+
+        <aside className="demo-side-panel">
+          <div className="demo-copy-card">
+            <h3>Copyable pitches</h3>
+
+            <button type="button" className="affiliate-action-btn" onClick={() => copyText(demoPitch, 'Investor pitch')}>
+              Copy investor pitch
+            </button>
+
+            <button type="button" className="mini-action" onClick={() => copyText(creatorPitch, 'Creator pitch')}>
+              Copy creator pitch
+            </button>
+
+            <button type="button" className="mini-action" onClick={() => copyText(clipperPitch, 'Clipper pitch')}>
+              Copy clipper pitch
+            </button>
+          </div>
+
+          <div className="demo-checklist-card">
+            <h3>Pre-demo checklist</h3>
+
+            <div className="demo-checklist">
+              {demoChecklist.map((item) => (
+                <div key={item.title} className={item.done ? 'done' : ''}>
+                  <CheckCircle2 size={17} />
+                  <span>{item.title}</span>
+                </div>
+              ))}
+            </div>
+          </div>
+
+          <div className="demo-close-card">
+            <Pill tone="yellow">Close line</Pill>
+            <p>
+              “SoloHub is ready for real market testing. What we need now is creator onboarding,
+              payment setup, marketing, and operational support to validate revenue.”
+            </p>
+          </div>
+        </aside>
+      </div>
+    </section>
+  );
+}
+
 function AdminDepositProofsPage({ campaigns = [], onCampaignFundingUpdate, onCampaignStatus }) {
   const [filter, setFilter] = useState('All');
   const [reviewNotes, setReviewNotes] = useState({});
@@ -8037,6 +8260,10 @@ const content = useMemo(() => {
 
     if (page === 'adminCompliance') {
       return isAdmin ? <AdminComplianceCenter /> : home;
+    }
+
+    if (page === 'adminDemo') {
+      return isAdmin ? <AdminDemoScriptPage campaigns={campaigns} submissions={submissions} setPage={setPage} /> : home;
     }
 
     if (page === 'adminReadiness') {
