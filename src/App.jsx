@@ -640,6 +640,38 @@ function PwaInstallButton() {
   );
 }
 
+
+const ANNOUNCEMENT_READ_STORAGE_KEY = 'solohub_read_announcement_ids_v1';
+
+function getReadAnnouncementIds() {
+  try {
+    const raw = localStorage.getItem(ANNOUNCEMENT_READ_STORAGE_KEY);
+    const parsed = raw ? JSON.parse(raw) : [];
+    return Array.isArray(parsed) ? parsed.map(String) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveReadAnnouncementIds(ids = []) {
+  const clean = Array.from(new Set(ids.filter(Boolean).map(String)));
+  localStorage.setItem(ANNOUNCEMENT_READ_STORAGE_KEY, JSON.stringify(clean));
+  return clean;
+}
+
+function markAnnouncementsRead(ids = []) {
+  const current = getReadAnnouncementIds();
+  return saveReadAnnouncementIds([...current, ...ids.map(String)]);
+}
+
+function getUnreadAnnouncementCount(items = []) {
+  const readIds = getReadAnnouncementIds();
+
+  return items.filter((item) =>
+    item?.id && !readIds.includes(String(item.id))
+  ).length;
+}
+
 function Header({ role, setRole, setPage, sidebarOpen, setSidebarOpen, cloudMode, user, profile, onLogout, activityCount = 0 }) {
   const displayRole = roleForUser(user, profile, role);
 
@@ -781,7 +813,7 @@ const navs = {
   ]
 };
 
-function Sidebar({ role, page, setPage, open, setOpen, cloudMode }) {
+function Sidebar({ role, page, setPage, open, setOpen, cloudMode, announcementUnreadCount = 0 }) {
   const [isMobileNav, setIsMobileNav] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(max-width: 900px)').matches;
@@ -881,7 +913,11 @@ function Sidebar({ role, page, setPage, open, setOpen, cloudMode }) {
                 e.stopPropagation();
               }}
             >
-              <Icon size={18} /> {label}
+              <Icon size={18} /> 
+            <span className="nav-label-text">{label}</span>
+            {id === 'announcements' && announcementUnreadCount > 0 && (
+              <span className="nav-unread-badge">{announcementUnreadCount > 99 ? '99+' : announcementUnreadCount}</span>
+            )}
             </button>
           ))}
 
@@ -1725,7 +1761,7 @@ function HomePage({ page, setRole, setPage, campaigns, submissions, cloudMode, u
 
   return (
     <>
-      <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} />
+      <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
 
       <AuthBox
         user={user}
@@ -4526,10 +4562,11 @@ function saveFallbackAnnouncements(items = []) {
   localStorage.setItem('solohub_announcements_fallback_v1', JSON.stringify(items));
 }
 
-function AnnouncementsPage({ currentRole }) {
+function AnnouncementsPage({ currentRole, onUnreadChange }) {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState('Loading announcements...');
+  const [readTick, setReadTick] = useState(0);
 
   const loadAnnouncements = async () => {
     setLoading(true);
@@ -4580,6 +4617,22 @@ function AnnouncementsPage({ currentRole }) {
     loadAnnouncements();
   }, [currentRole]);
 
+  const unreadCount = getUnreadAnnouncementCount(announcements);
+
+  const markAllAnnouncementsRead = () => {
+    const ids = announcements.map((item) => item.id).filter(Boolean);
+
+    if (!ids.length) {
+      alert('No announcements to mark as read.');
+      return;
+    }
+
+    markAnnouncementsRead(ids);
+    setReadTick((value) => value + 1);
+    onUnreadChange?.();
+    alert('Announcements marked as read.');
+  };
+
   return (
     <section className="announcements-page">
       <div className="section-head">
@@ -4590,9 +4643,15 @@ function AnnouncementsPage({ currentRole }) {
           {message && <p className="form-note affiliate-message">{message}</p>}
         </div>
 
-        <button type="button" className="affiliate-action-btn secondary" onClick={loadAnnouncements} disabled={loading}>
-          {loading ? 'Refreshing...' : 'Refresh'}
-        </button>
+        <div className="announcement-page-actions">
+          <button type="button" className="mini-action" onClick={markAllAnnouncementsRead}>
+            Mark all read {unreadCount > 0 ? '(' + unreadCount + ')' : ''}
+          </button>
+
+          <button type="button" className="affiliate-action-btn secondary" onClick={loadAnnouncements} disabled={loading}>
+            {loading ? 'Refreshing...' : 'Refresh'}
+          </button>
+        </div>
       </div>
 
       <div className="announcement-feed">
@@ -4600,7 +4659,12 @@ function AnnouncementsPage({ currentRole }) {
           <article key={item.id} className={'announcement-card priority-' + String(item.priority || 'Normal').toLowerCase()}>
             <div className="announcement-card-head">
               <div>
-                <Pill tone={announcementTone(item.priority)}>{item.priority || 'Normal'}</Pill>
+                <div className="announcement-priority-row">
+                  <Pill tone={announcementTone(item.priority)}>{item.priority || 'Normal'}</Pill>
+                  {!getReadAnnouncementIds().includes(String(item.id)) && (
+                    <span className="announcement-unread-pill">Unread</span>
+                  )}
+                </div>
                 <h3>{item.title}</h3>
               </div>
 
@@ -6710,7 +6774,8 @@ function App() {
   const [referralCode, setReferralCode] = useState(() => captureReferralCodeFromUrl());
   const [inviteRole, setInviteRole] = useState(() => captureInviteRoleFromUrl());
   const [paymentSettingsTick, setPaymentSettingsTick] = useState(0);
-  const [savedCampaignIds, setSavedCampaignIds] = useState(() => getSavedCampaignIds());  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
+  const [savedCampaignIds, setSavedCampaignIds] = useState(() => getSavedCampaignIds());
+  const [announcementUnreadCount, setAnnouncementUnreadCount] = useState(0);  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
     if (!cloudMode || !currentUser) return null;
 
     const ownerAdmin = isOwnerEmail(currentUser.email);
@@ -7473,6 +7538,57 @@ const updateProfileRole = async (nextRole) => {
     setSidebarOpen(false);
   }, [page]);
 
+  const refreshAnnouncementUnreadCount = async () => {
+    try {
+      if (!user) {
+        setAnnouncementUnreadCount(0);
+        return;
+      }
+
+      const currentRoleForAnnouncements = roleForUser(user, profile, role);
+
+      if (!supabase) {
+        const localItems = fallbackAnnouncements()
+          .filter((item) => item.status === 'Published')
+          .filter((item) => ['All', currentRoleForAnnouncements].includes(item.audience));
+
+        setAnnouncementUnreadCount(getUnreadAnnouncementCount(localItems));
+        return;
+      }
+
+      const request = supabase
+        .from('announcements')
+        .select('id,audience,status,created_at')
+        .eq('status', 'Published')
+        .in('audience', ['All', currentRoleForAnnouncements]);
+
+      const { data, error } = typeof withSupabaseTimeout === 'function'
+        ? await withSupabaseTimeout(request, 'Load announcement unread count', 10000)
+        : await request;
+
+      if (error) throw error;
+
+      setAnnouncementUnreadCount(getUnreadAnnouncementCount(data || []));
+    } catch (err) {
+      console.warn('Unread announcement count failed:', err);
+
+      try {
+        const currentRoleForAnnouncements = roleForUser(user, profile, role);
+        const localItems = fallbackAnnouncements()
+          .filter((item) => item.status === 'Published')
+          .filter((item) => ['All', currentRoleForAnnouncements].includes(item.audience));
+
+        setAnnouncementUnreadCount(getUnreadAnnouncementCount(localItems));
+      } catch {
+        setAnnouncementUnreadCount(0);
+      }
+    }
+  };
+
+  useEffect(() => {
+    refreshAnnouncementUnreadCount();
+  }, [user?.id, profile?.role, role]);
+
 const content = useMemo(() => {
     const currentRole = roleForUser(user, profile, role);
     const currentUserId = user?.id || null;
@@ -7526,7 +7642,7 @@ const content = useMemo(() => {
     if (page === 'home') return home;
 
     if (page === 'announcements') {
-      return <AnnouncementsPage currentRole={currentRole} />;
+      return <AnnouncementsPage currentRole={currentRole} onUnreadChange={refreshAnnouncementUnreadCount} />;
     }
 
     if (page === 'profile') {
@@ -7646,7 +7762,7 @@ const content = useMemo(() => {
     <>
       <Header role={roleForUser(user, profile, role)} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} activityCount={getActivityCountForRole(roleForUser(user, profile, role), campaigns || [], submissions || [])} />
       <div className="app-shell">
-        <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} />
+        <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
         <main>
           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
           {cloudMode && user && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : `Logged in as ${profile?.role || role || 'user'}`}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
