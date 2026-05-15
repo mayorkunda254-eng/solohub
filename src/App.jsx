@@ -739,6 +739,7 @@ const navs = {
     ['home', Home, 'Home'],
     ['onboarding', CheckCircle2, 'Getting Started'],
     ['activity', ShieldCheck, 'Activity'],
+    ['profile', UserRound, 'Profile'],
     ['discover', Search, 'Discover'],
     ['savedCampaigns', BookOpen, 'Saved Campaigns'],
     ['submissions', FileVideo, 'My Submissions'],
@@ -750,6 +751,7 @@ const navs = {
     ['home', Home, 'Home'],
     ['onboarding', CheckCircle2, 'Getting Started'],
     ['activity', ShieldCheck, 'Activity'],
+    ['profile', UserRound, 'Profile'],
     ['creatorDashboard', LayoutDashboard, 'Dashboard'],
     ['createCampaign', Plus, 'Create Campaign'],
     ['creatorCampaigns', Megaphone, 'My Campaigns'],
@@ -760,6 +762,7 @@ const navs = {
     ['adminOverview', LayoutDashboard, 'Overview'],
     ['adminUsers', UserRound, 'Users'],
     ['activity', ShieldCheck, 'Activity'],
+    ['profile', UserRound, 'Profile'],
     ['onboarding', CheckCircle2, 'Getting Started'],
     ['createCampaign', Plus, 'Create Managed Campaign'],
     ['adminCampaigns', Megaphone, 'Campaigns'],
@@ -2404,6 +2407,189 @@ function SubmitPage({ selectedCampaign, campaigns, onSubmitClip }) {
             Submit for review
           </button>
         </form>
+      </div>
+    </section>
+  );
+}
+
+function UserProfilePage({ user, profile, currentRole, onProfileSaved }) {
+  const [form, setForm] = useState(() => ({
+    full_name: profile?.full_name || profile?.fullName || '',
+    mpesa_name: profile?.mpesa_name || '',
+    mpesa_phone: profile?.mpesa_phone || '',
+    backup_phone: profile?.backup_phone || '',
+    payout_notes: profile?.payout_notes || ''
+  }));
+
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState('Update your account and payout details.');
+
+  useEffect(() => {
+    setForm({
+      full_name: profile?.full_name || profile?.fullName || '',
+      mpesa_name: profile?.mpesa_name || '',
+      mpesa_phone: profile?.mpesa_phone || '',
+      backup_phone: profile?.backup_phone || '',
+      payout_notes: profile?.payout_notes || ''
+    });
+  }, [profile?.id]);
+
+  const update = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const saveProfile = async (e) => {
+    e.preventDefault();
+
+    if (!user?.id) {
+      alert('Login required.');
+      return;
+    }
+
+    setSaving(true);
+    setMessage('Saving profile...');
+
+    const cleanProfile = {
+      id: user.id,
+      email: user.email || profile?.email || '',
+      full_name: form.full_name.trim(),
+      role: cleanRole(profile?.role || currentRole || 'clipper'),
+      mpesa_name: form.mpesa_name.trim(),
+      mpesa_phone: form.mpesa_phone.trim(),
+      backup_phone: form.backup_phone.trim(),
+      payout_notes: form.payout_notes.trim(),
+      updated_at: new Date().toISOString()
+    };
+
+    try {
+      if (!supabase) {
+        throw new Error('Supabase is not configured.');
+      }
+
+      const request = supabase
+        .from('profiles')
+        .upsert(cleanProfile, { onConflict: 'id' })
+        .select('*')
+        .single();
+
+      const { data, error } = typeof withSupabaseTimeout === 'function'
+        ? await withSupabaseTimeout(request, 'Save profile', 15000)
+        : await request;
+
+      if (error) throw error;
+
+      onProfileSaved?.(data || cleanProfile);
+      setMessage('Profile saved successfully.');
+      alert('Profile saved successfully.');
+    } catch (err) {
+      console.error('Profile save failed:', err);
+      setMessage('Profile save failed: ' + (err?.message || err));
+      alert('Profile save failed: ' + (err?.message || err));
+    } finally {
+      setSaving(false);
+    }
+  };
+
+  const payoutReady = Boolean(form.mpesa_name.trim() && form.mpesa_phone.trim());
+
+  return (
+    <section className="profile-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="green"><UserRound size={14} /> Profile</Pill>
+          <h2>Manage your SoloHub account details.</h2>
+          <p>Keep your name and payout details updated so admin can verify users and process manual payments correctly.</p>
+          {message && <p className="form-note affiliate-message">{message}</p>}
+        </div>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard icon={UserRound} label="Role" value={cleanRole(profile?.role || currentRole || 'clipper')} helper="Assigned account type" />
+        <StatCard icon={ShieldCheck} label="Account" value={user?.email ? 'Active' : 'Guest'} helper={user?.email || 'Not logged in'} />
+        <StatCard icon={Wallet} label="Payout Profile" value={payoutReady ? 'Ready' : 'Incomplete'} helper={payoutReady ? 'M-Pesa details saved' : 'Add payout details'} />
+        <StatCard icon={CheckCircle2} label="Status" value="Editable" helper="Profile can be updated" />
+      </div>
+
+      <div className="profile-layout">
+        <form className="profile-card" onSubmit={saveProfile}>
+          <h3>Account details</h3>
+
+          <label>
+            Email
+            <input value={user?.email || profile?.email || ''} disabled />
+          </label>
+
+          <label>
+            Full name
+            <input value={form.full_name} onChange={(e) => update('full_name', e.target.value)} placeholder="Your full name" />
+          </label>
+
+          <label>
+            Account role
+            <input value={cleanRole(profile?.role || currentRole || 'clipper')} disabled />
+          </label>
+
+          <h3>Payout details</h3>
+
+          <label>
+            M-Pesa name
+            <input value={form.mpesa_name} onChange={(e) => update('mpesa_name', e.target.value)} placeholder="Name registered on M-Pesa" />
+          </label>
+
+          <label>
+            M-Pesa phone
+            <input value={form.mpesa_phone} onChange={(e) => update('mpesa_phone', e.target.value)} placeholder="07XXXXXXXX or 2547XXXXXXXX" />
+          </label>
+
+          <label>
+            Backup phone
+            <input value={form.backup_phone} onChange={(e) => update('backup_phone', e.target.value)} placeholder="Optional backup number" />
+          </label>
+
+          <label>
+            Payout notes
+            <textarea value={form.payout_notes} onChange={(e) => update('payout_notes', e.target.value)} placeholder="Any notes admin should know before paying you." />
+          </label>
+
+          <button type="submit" className="affiliate-action-btn profile-save-btn" disabled={saving}>
+            {saving ? 'Saving...' : 'Save profile'}
+          </button>
+        </form>
+
+        <aside className="profile-help-card">
+          <Pill tone={payoutReady ? 'green' : 'yellow'}>
+            {payoutReady ? 'Payout Ready' : 'Action Needed'}
+          </Pill>
+
+          <h3>{payoutReady ? 'Your payout profile is ready.' : 'Complete your payout profile.'}</h3>
+
+          <p>
+            {payoutReady
+              ? 'Admin can use your saved M-Pesa details when marking approved payouts as paid.'
+              : 'Add your M-Pesa name and phone number before submitting clips or requesting payment.'}
+          </p>
+
+          <div className="profile-checklist">
+            <div className={form.full_name.trim() ? 'done' : ''}>
+              <CheckCircle2 size={17} />
+              <span>Full name added</span>
+            </div>
+
+            <div className={form.mpesa_name.trim() ? 'done' : ''}>
+              <CheckCircle2 size={17} />
+              <span>M-Pesa name added</span>
+            </div>
+
+            <div className={form.mpesa_phone.trim() ? 'done' : ''}>
+              <CheckCircle2 size={17} />
+              <span>M-Pesa phone added</span>
+            </div>
+          </div>
+
+          <p className="form-note">
+            Admin can still manage user roles from Admin → Users. Users cannot promote themselves.
+          </p>
+        </aside>
       </div>
     </section>
   );
@@ -6588,6 +6774,10 @@ const content = useMemo(() => {
         );
 
     if (page === 'home') return home;
+
+    if (page === 'profile') {
+      return <UserProfilePage user={user} profile={profile} currentRole={currentRole} onProfileSaved={setProfile} />;
+    }
 
     if (page === 'onboarding') {
       const onboardingCampaigns = isAdmin ? campaigns : currentRole === 'creator' ? ownCampaigns : campaigns.filter((campaign) => campaign.status === 'Live');
