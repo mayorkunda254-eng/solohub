@@ -1362,6 +1362,187 @@ function Hero({ setRole, setPage, cloudMode }) {
   );
 }
 
+
+const PUBLIC_LEGAL_DOCS = {
+  publicTerms: {
+    title: 'Terms and Conditions',
+    status: 'MVP Draft',
+    body: [
+      '1. Overview',
+      'SoloHub is a content rewards platform that helps creators launch clipping campaigns, receive submissions, verify performance, and track payouts.',
+      '',
+      '2. User Roles',
+      'Users may operate as clippers, creators, affiliates, or administrators depending on account approval and platform permissions.',
+      '',
+      '3. Campaigns',
+      'Creators or SoloHub administrators may create campaigns with budgets, rules, payout rates, platform requirements, hashtags, and deadlines.',
+      '',
+      '4. Submissions',
+      'Clippers submit public post links for review. Submitted content must be accessible, original where required, and compliant with campaign rules.',
+      '',
+      '5. Verification',
+      'SoloHub may review submitted views, post authenticity, fraud signals, duplicate links, and campaign compliance before approving payouts.',
+      '',
+      '6. Payments',
+      'Payments are currently tracked manually. Approved payouts are not final until confirmed by admin records and payment references.',
+      '',
+      '7. Prohibited Activity',
+      'Fake views, bot traffic, duplicate content, stolen content, misleading links, or manipulation of performance may lead to rejection or account restriction.',
+      '',
+      '8. Updates',
+      'SoloHub may update these terms as the platform grows and adds payment automation or new features.'
+    ].join('\n')
+  },
+
+  publicPrivacy: {
+    title: 'Privacy Policy',
+    status: 'MVP Draft',
+    body: [
+      '1. Information Collected',
+      'SoloHub may collect names, emails, account roles, campaign records, submission links, payout details, M-Pesa contact information, and activity records.',
+      '',
+      '2. Use of Information',
+      'Information is used to manage accounts, verify submissions, track campaigns, process manual payouts, prevent fraud, and improve the platform.',
+      '',
+      '3. Payment Information',
+      'SoloHub may store payout contact details and payment references for reconciliation and reporting.',
+      '',
+      '4. Sharing',
+      'SoloHub does not sell user data. Limited information may be visible to admins, creators, or clippers where needed for campaign operations.',
+      '',
+      '5. Security',
+      'SoloHub uses Supabase and platform-level access controls to help protect account data. Users should keep login details private.',
+      '',
+      '6. Corrections',
+      'Users may request correction of inaccurate account or payout details.',
+      '',
+      '7. Updates',
+      'This policy may be updated as SoloHub adds new features, payment integrations, or compliance processes.'
+    ].join('\n')
+  },
+
+  publicPayoutRules: {
+    title: 'Clipper Payout Rules',
+    status: 'MVP Draft',
+    body: [
+      '1. Eligible Submissions',
+      'Clippers must submit public TikTok, Instagram Reels, YouTube Shorts, Facebook Reels, or other approved post links.',
+      '',
+      '2. Real Views Only',
+      'Artificial views, bot traffic, paid fake engagement, view manipulation, or misleading traffic are not allowed.',
+      '',
+      '3. Campaign Compliance',
+      'Clips must follow campaign instructions, approved platforms, hashtags, content rules, and deadlines.',
+      '',
+      '4. Review Process',
+      'Submissions remain pending until admin reviews the post and approved views.',
+      '',
+      '5. Payout Calculation',
+      'Payouts are calculated using approved views, not submitted views. Admin may approve fewer views than submitted if verification requires adjustment.',
+      '',
+      '6. Payment Timing',
+      'Payouts are manual during MVP. Payment status may show Pending, Approved, or Paid depending on admin records.',
+      '',
+      '7. Rejections',
+      'Submissions may be rejected for broken links, private posts, duplicate content, reused content, fake views, or rule violations.'
+    ].join('\n')
+  },
+
+  publicFraudPolicy: {
+    title: 'Content and Fraud Policy',
+    status: 'MVP Draft',
+    body: [
+      '1. Content Standards',
+      'All campaign content and clip submissions should be lawful, respectful, and aligned with campaign instructions.',
+      '',
+      '2. Not Allowed',
+      'Fake engagement, stolen content, impersonation, harmful content, misleading claims, spam links, or bot-generated traffic are not allowed.',
+      '',
+      '3. Verification Signals',
+      'SoloHub may review post accessibility, view patterns, platform quality, duplicate URLs, timing, and admin notes.',
+      '',
+      '4. Admin Review',
+      'Admin may mark submissions as clear, suspicious, rejected, approved, or paid depending on available evidence.',
+      '',
+      '5. Account Action',
+      'Repeated suspicious activity may lead to suspension, blocked payouts, or removal from campaigns.',
+      '',
+      '6. Creator Protection',
+      'This policy protects creator budgets from invalid or manipulated traffic.'
+    ].join('\n')
+  }
+};
+
+function PublicLegalPage({ page, setPage }) {
+  const doc = PUBLIC_LEGAL_DOCS[page] || PUBLIC_LEGAL_DOCS.publicTerms;
+
+  const copyDocument = async () => {
+    const text = doc.title + '\n\nStatus: ' + doc.status + '\n\n' + doc.body;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      alert(doc.title + ' copied.');
+    } catch (err) {
+      window.prompt('Copy document:', text);
+    }
+  };
+
+  return (
+    <main className="solo-public-auth public-legal-page">
+      <section className="public-legal-card">
+        <div className="public-legal-top">
+          <div>
+            <Pill tone="purple"><ShieldCheck size={14} /> Public Policy</Pill>
+            <h1>{doc.title}</h1>
+            <p>Status: {doc.status}. These starter policies support the SoloHub MVP and should be reviewed before full commercial launch.</p>
+          </div>
+
+          <div className="public-legal-actions">
+            <button type="button" className="mini-action" onClick={() => setPage('home')}>
+              Back to Login
+            </button>
+
+            <button type="button" className="affiliate-action-btn" onClick={copyDocument}>
+              Copy document
+            </button>
+          </div>
+        </div>
+
+        <pre className="public-legal-text">{doc.body}</pre>
+      </section>
+
+      <section className="public-legal-links">
+        <button type="button" className={page === 'publicTerms' ? 'active' : ''} onClick={() => setPage('publicTerms')}>
+          Terms
+        </button>
+
+        <button type="button" className={page === 'publicPrivacy' ? 'active' : ''} onClick={() => setPage('publicPrivacy')}>
+          Privacy
+        </button>
+
+        <button type="button" className={page === 'publicPayoutRules' ? 'active' : ''} onClick={() => setPage('publicPayoutRules')}>
+          Payout Rules
+        </button>
+
+        <button type="button" className={page === 'publicFraudPolicy' ? 'active' : ''} onClick={() => setPage('publicFraudPolicy')}>
+          Fraud Policy
+        </button>
+      </section>
+    </main>
+  );
+}
+
+function PublicLegalLinks({ setPage }) {
+  return (
+    <section className="public-legal-mini-links">
+      <button type="button" onClick={() => setPage('publicTerms')}>Terms</button>
+      <button type="button" onClick={() => setPage('publicPrivacy')}>Privacy</button>
+      <button type="button" onClick={() => setPage('publicPayoutRules')}>Payout Rules</button>
+      <button type="button" onClick={() => setPage('publicFraudPolicy')}>Fraud Policy</button>
+    </section>
+  );
+}
+
 function PublicHowItWorks() {
   return (
     <section className="public-how-section">
@@ -1456,7 +1637,7 @@ function PublicHowItWorks() {
   );
 }
 
-function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, inviteRole, cloudMode }) {
+function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, inviteRole, cloudMode, setPage }) {
   return (
     <main className="solo-public-auth">
       <section className="solo-login-zone">
@@ -1483,13 +1664,19 @@ function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, 
       </section>
 
       <PublicHowItWorks />
+
+      <PublicLegalLinks setPage={setPage} />
     </main>
   );
 }
 
-function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode, inviteRole }) {
+function HomePage({ page, setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode, inviteRole }) {
   const liveCampaigns = campaigns.filter((c) => c.status === 'Live').length;
   const pendingSubmissions = submissions.filter((s) => s.status === 'Pending Review').length;
+
+  if (!user && ['publicTerms', 'publicPrivacy', 'publicPayoutRules', 'publicFraudPolicy'].includes(page)) {
+    return <PublicLegalPage page={page} setPage={setPage} />;
+  }
 
   if (!user) {
     return (
@@ -1501,6 +1688,7 @@ function HomePage({ setRole, setPage, campaigns, submissions, cloudMode, user, p
         referralCode={referralCode}
         inviteRole={inviteRole}
         cloudMode={cloudMode}
+        setPage={setPage}
       />
     );
   }
@@ -6333,6 +6521,7 @@ const content = useMemo(() => {
 
     const home = (
       <HomePage
+        page={page}
         setRole={setRole}
         setPage={setPage}
         campaigns={campaigns}
