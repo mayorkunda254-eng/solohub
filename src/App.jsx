@@ -808,8 +808,8 @@ const navs = {
     ['adminAffiliates', Coins, 'Affiliates'],
     ['adminPayouts', Coins, 'Payouts'],
     ['adminReports', FileVideo, 'Reports'],
-    ['adminReadiness', CheckCircle2, 'MVP Checklist'],
-    ['adminDemo', FileVideo, 'Demo Script'],
+    ['adminReadiness', CheckCircle2, 'Beta Checklist'],
+    ['adminDemo', FileVideo, 'Sales Script'],
     ['adminCompliance', ShieldCheck, 'Compliance'],
     ['adminAudit', ShieldCheck, 'Audit Log'],
     ['adminAnnouncements', Megaphone, 'Manage Announcements'],
@@ -1436,7 +1436,7 @@ function Hero({ setRole, setPage, cloudMode }) {
 const PUBLIC_LEGAL_DOCS = {
   publicTerms: {
     title: 'Terms and Conditions',
-    status: 'MVP Draft',
+    status: 'Private Beta Draft',
     body: [
       '1. Overview',
       'SoloHub is a content rewards platform that helps creators launch clipping campaigns, receive submissions, verify performance, and track payouts.',
@@ -1466,7 +1466,7 @@ const PUBLIC_LEGAL_DOCS = {
 
   publicPrivacy: {
     title: 'Privacy Policy',
-    status: 'MVP Draft',
+    status: 'Private Beta Draft',
     body: [
       '1. Information Collected',
       'SoloHub may collect names, emails, account roles, campaign records, submission links, payout details, M-Pesa contact information, and activity records.',
@@ -1493,7 +1493,7 @@ const PUBLIC_LEGAL_DOCS = {
 
   publicPayoutRules: {
     title: 'Clipper Payout Rules',
-    status: 'MVP Draft',
+    status: 'Private Beta Draft',
     body: [
       '1. Eligible Submissions',
       'Clippers must submit public TikTok, Instagram Reels, YouTube Shorts, Facebook Reels, or other approved post links.',
@@ -1520,7 +1520,7 @@ const PUBLIC_LEGAL_DOCS = {
 
   publicFraudPolicy: {
     title: 'Content and Fraud Policy',
-    status: 'MVP Draft',
+    status: 'Private Beta Draft',
     body: [
       '1. Content Standards',
       'All campaign content and clip submissions should be lawful, respectful, and aligned with campaign instructions.',
@@ -2127,7 +2127,7 @@ function PublicLegalPage({ page, setPage }) {
           <div>
             <Pill tone="purple"><ShieldCheck size={14} /> Public Policy</Pill>
             <h1>{doc.title}</h1>
-            <p>Status: {doc.status}. These starter policies support the SoloHub MVP and should be reviewed before full commercial launch.</p>
+            <p>Status: {doc.status}. These starter policies support the SoloHub Private Beta and should be reviewed before full public launch.</p>
           </div>
 
           <div className="public-legal-actions">
@@ -2252,7 +2252,7 @@ function PublicHowItWorks() {
 
       <div className="public-trust-strip">
         <div>
-          <strong>Built for MVP growth</strong>
+          <strong>Built for private beta growth</strong>
           <span>Creators, clippers, affiliates, deposits, submissions, payouts, and reporting are already structured.</span>
         </div>
 
@@ -2275,7 +2275,7 @@ function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, 
     <main className="solo-public-auth">
       <section className="solo-login-zone">
         <div className="solo-login-intro">
-          <Pill tone="green"><Sparkles size={14} /> SoloHub MVP</Pill>
+          <Pill tone="green"><Sparkles size={14} /> SoloHub Private Beta</Pill>
           <h1>Launch campaigns. Track clips. Pay creators.</h1>
           <p>Manage creator campaigns, clipping submissions, deposits, payouts, and affiliates from one clean dashboard.</p>
         </div>
@@ -5535,18 +5535,18 @@ function AdminDemoScriptPage({ campaigns = [], submissions = [], setPage }) {
     <section className="demo-script-page">
       <div className="section-head">
         <div>
-          <Pill tone="green"><FileVideo size={14} /> Live Demo Script</Pill>
-          <h2>Run a confident 5-minute SoloHub demo.</h2>
-          <p>Use this page when showing SoloHub to investors, creators, schools, agencies, or potential partners.</p>
+          <Pill tone="green"><FileVideo size={14} /> Sales Script</Pill>
+          <h2>Run a confident 5-minute SoloHub sales walkthrough.</h2>
+          <p>Use this page when pitching SoloHub to creators, agencies, brands, schools, businesses, or potential partners.</p>
         </div>
 
-        <button type="button" className="affiliate-action-btn" onClick={() => copyText(demoPitch, 'Investor demo pitch')}>
-          Copy investor pitch
+        <button type="button" className="affiliate-action-btn" onClick={() => copyText(demoPitch, 'Client sales pitch')}>
+          Copy client pitch
         </button>
       </div>
 
       <div className="stats-grid">
-        <StatCard icon={CheckCircle2} label="Demo Readiness" value={readinessScore + '%'} helper={completedChecklist + ' of ' + demoChecklist.length + ' checks'} />
+        <StatCard icon={CheckCircle2} label="Sales Readiness" value={readinessScore + '%'} helper={completedChecklist + ' of ' + demoChecklist.length + ' checks'} />
         <StatCard icon={Megaphone} label="Live Campaigns" value={liveCampaigns.length} helper="Visible to clippers" />
         <StatCard icon={ShieldCheck} label="Pending Reviews" value={pendingSubmissions.length} helper="Admin action" />
         <StatCard icon={Wallet} label="Paid Records" value={paidSubmissions.length} helper="Payout proof" />
@@ -5586,7 +5586,7 @@ function AdminDemoScriptPage({ campaigns = [], submissions = [], setPage }) {
 
       <div className="demo-layout">
         <div className="demo-timeline-card">
-          <h3>5-minute click-by-click script</h3>
+          <h3>5-minute click-by-click sales flow</h3>
 
           <div className="demo-timeline">
             {demoSteps.map((step, index) => (
@@ -5611,8 +5611,8 @@ function AdminDemoScriptPage({ campaigns = [], submissions = [], setPage }) {
           <div className="demo-copy-card">
             <h3>Copyable pitches</h3>
 
-            <button type="button" className="affiliate-action-btn" onClick={() => copyText(demoPitch, 'Investor pitch')}>
-              Copy investor pitch
+            <button type="button" className="affiliate-action-btn" onClick={() => copyText(demoPitch, 'Client pitch')}>
+              Copy client pitch
             </button>
 
             <button type="button" className="mini-action" onClick={() => copyText(creatorPitch, 'Creator pitch')}>
@@ -5625,7 +5625,7 @@ function AdminDemoScriptPage({ campaigns = [], submissions = [], setPage }) {
           </div>
 
           <div className="demo-checklist-card">
-            <h3>Pre-demo checklist</h3>
+            <h3>Pre-sales checklist</h3>
 
             <div className="demo-checklist">
               {demoChecklist.map((item) => (
@@ -6443,7 +6443,7 @@ function AdminComplianceCenter() {
     clipperRules: {
       title: 'Clipper Payout Rules',
       status: 'Draft',
-      body: 'SOLOHUB CLIPPER PAYOUT RULES\n\n1. Eligible Submissions\nClippers must submit public TikTok, Instagram Reels, YouTube Shorts, Facebook Reels, or other approved post links.\n\n2. Real Views Only\nArtificial views, bot traffic, paid fake engagement, view manipulation, or misleading traffic are not allowed.\n\n3. Campaign Compliance\nClips must follow campaign instructions, approved platforms, hashtags, content rules, and deadlines.\n\n4. Review Process\nSubmissions remain pending until admin reviews the post and approved views.\n\n5. Payout Calculation\nPayouts are calculated using approved views, not submitted views. Admin may approve fewer views than submitted if verification requires adjustment.\n\n6. Payment Timing\nPayouts are manual for MVP. Payment status may show Pending, Approved, or Paid depending on admin records.\n\n7. Rejections\nSubmissions may be rejected for broken links, private posts, duplicate content, reused content, fake views, or rule violations.'
+      body: 'SOLOHUB CLIPPER PAYOUT RULES\n\n1. Eligible Submissions\nClippers must submit public TikTok, Instagram Reels, YouTube Shorts, Facebook Reels, or other approved post links.\n\n2. Real Views Only\nArtificial views, bot traffic, paid fake engagement, view manipulation, or misleading traffic are not allowed.\n\n3. Campaign Compliance\nClips must follow campaign instructions, approved platforms, hashtags, content rules, and deadlines.\n\n4. Review Process\nSubmissions remain pending until admin reviews the post and approved views.\n\n5. Payout Calculation\nPayouts are calculated using approved views, not submitted views. Admin may approve fewer views than submitted if verification requires adjustment.\n\n6. Payment Timing\nPayouts are manual for private beta. Payment status may show Pending, Approved, or Paid depending on admin records.\n\n7. Rejections\nSubmissions may be rejected for broken links, private posts, duplicate content, reused content, fake views, or rule violations.'
     },
     fraudPolicy: {
       title: 'Content and Fraud Policy',
@@ -6453,7 +6453,7 @@ function AdminComplianceCenter() {
     refundPolicy: {
       title: 'Refund and Deposit Policy',
       status: 'Draft',
-      body: 'SOLOHUB REFUND AND DEPOSIT POLICY\n\n1. Campaign Deposits\nCreators may be required to deposit campaign funds before campaigns go live. Deposits may be tracked manually using payment references.\n\n2. Approval Before Spend\nCampaigns should only go live after admin confirms payment status and campaign details.\n\n3. Unused Budget\nUnused campaign budget may be carried forward, refunded, or settled manually depending on the agreement between SoloHub and the creator.\n\n4. Rejected Campaigns\nIf a campaign is rejected before going live, admin may review whether the deposit should be refunded or adjusted.\n\n5. Completed Campaigns\nCompleted campaigns should show payout records, approved submissions, and remaining balance where applicable.\n\n6. Manual Records\nDuring MVP, payment and refund tracking depends on admin-entered records and references.'
+      body: 'SOLOHUB REFUND AND DEPOSIT POLICY\n\n1. Campaign Deposits\nCreators may be required to deposit campaign funds before campaigns go live. Deposits may be tracked manually using payment references.\n\n2. Approval Before Spend\nCampaigns should only go live after admin confirms payment status and campaign details.\n\n3. Unused Budget\nUnused campaign budget may be carried forward, refunded, or settled manually depending on the agreement between SoloHub and the creator.\n\n4. Rejected Campaigns\nIf a campaign is rejected before going live, admin may review whether the deposit should be refunded or adjusted.\n\n5. Completed Campaigns\nCompleted campaigns should show payout records, approved submissions, and remaining balance where applicable.\n\n6. Manual Records\nDuring private beta, payment and refund tracking depends on admin-entered records and references.'
     }
   };
 
@@ -6536,8 +6536,8 @@ function AdminComplianceCenter() {
       <div className="section-head">
         <div>
           <Pill tone="purple"><ShieldCheck size={14} /> Compliance Center</Pill>
-          <h2>Prepare SoloHub policies before full commercial launch.</h2>
-          <p>Use these starter drafts for MVP structure, investor demos, and internal planning. Review professionally before scaling payments.</p>
+          <h2>Prepare SoloHub policies before full public launch.</h2>
+          <p>Use these starter drafts for private beta structure, client sales calls, and internal planning. Review professionally before scaling payments.</p>
         </div>
 
         <button type="button" className="affiliate-action-btn" onClick={copyDoc}>
@@ -6675,7 +6675,7 @@ function AdminMvpReadiness({ campaigns = [], submissions = [], cloudMode, setPag
         { title: 'Manual M-Pesa tracking', done: hasManualPayments, note: 'Till/Paybill section and payout records prepared.' },
         { title: 'Affiliate program', done: hasAffiliate, note: 'Affiliate creation and referral records added.' },
         { title: 'CSV report exports', done: hasReports, note: 'Campaigns, submissions, deposits, and payouts export.' },
-        { title: 'Investor summary copy', done: true, note: 'Admin can copy MVP summary from this page.' }
+        { title: 'Sales summary copy', done: true, note: 'Admin can copy MVP summary from this page.' }
       ]
     },
     {
@@ -6696,11 +6696,11 @@ function AdminMvpReadiness({ campaigns = [], submissions = [], cloudMode, setPag
 
   const copyInvestorSummary = async () => {
     const text = [
-      'SOLOHUB MVP READINESS SUMMARY',
+      'SOLOHUB PRIVATE BETA READINESS SUMMARY',
       '',
       'SoloHub is a content rewards platform for creators, clippers, affiliates, and admin-managed payout operations.',
       '',
-      'Current MVP capabilities:',
+      'Current private beta capabilities:',
       '- Role-based dashboards for admin, creators, and clippers',
       '- Campaign creation and lifecycle management',
       '- Creator-managed and admin-managed campaigns',
@@ -6721,7 +6721,7 @@ function AdminMvpReadiness({ campaigns = [], submissions = [], cloudMode, setPag
       '- Approved submissions: ' + approvedSubmissions.length,
       '- Paid submissions: ' + paidSubmissions.length,
       '',
-      'Pending before full commercial launch:',
+      'Pending before full public launch:',
       '- Terms and Conditions',
       '- Privacy Policy',
       '- Creator campaign agreement',
@@ -6732,9 +6732,9 @@ function AdminMvpReadiness({ campaigns = [], submissions = [], cloudMode, setPag
 
     try {
       await navigator.clipboard.writeText(text);
-      alert('Investor MVP summary copied.');
+      alert('Sales readiness summary copied.');
     } catch (err) {
-      window.prompt('Copy investor MVP summary:', text);
+      window.prompt('Copy sales readiness summary:', text);
     }
   };
 
@@ -6742,19 +6742,19 @@ function AdminMvpReadiness({ campaigns = [], submissions = [], cloudMode, setPag
     <section className="mvp-readiness-page">
       <div className="section-head">
         <div>
-          <Pill tone="green"><CheckCircle2 size={14} /> MVP Readiness</Pill>
-          <h2>Track what is investor-ready and what is pending.</h2>
-          <p>Use this page before demos, investor conversations, creator onboarding, and launch planning.</p>
+          <Pill tone="green"><CheckCircle2 size={14} /> Beta Readiness</Pill>
+          <h2>Track what is launch-ready, revenue-ready, and still pending.</h2>
+          <p>Use this page before creator onboarding, sales calls, partner conversations, and launch planning.</p>
         </div>
 
         <button type="button" className="affiliate-action-btn" onClick={copyInvestorSummary}>
-          Copy investor summary
+          Copy sales summary
         </button>
       </div>
 
       <div className="mvp-score-card">
         <div>
-          <span>MVP completion</span>
+          <span>Beta completion</span>
           <strong>{progress}%</strong>
           <p>{doneCount} of {totalCount} readiness items completed.</p>
         </div>
@@ -6768,7 +6768,7 @@ function AdminMvpReadiness({ campaigns = [], submissions = [], cloudMode, setPag
         <StatCard icon={Megaphone} label="Campaigns" value={campaigns.length} helper="Total records" />
         <StatCard icon={ShieldCheck} label="Pending reviews" value={pendingSubmissions.length} helper="Need admin action" />
         <StatCard icon={Wallet} label="Storage" value={cloudMode ? 'Cloud' : 'Local'} helper={cloudMode ? 'Supabase mode' : 'Browser mode'} />
-        <StatCard icon={CheckCircle2} label="MVP status" value={progress + '%'} helper="Readiness score" />
+        <StatCard icon={CheckCircle2} label="Beta status" value={progress + '%'} helper="Readiness score" />
       </div>
 
       <div className="mvp-action-grid">
@@ -6953,7 +6953,7 @@ function AdminReports({ campaigns = [], submissions = [] }) {
       <div className="section-head">
         <div>
           <Pill tone="purple"><FileVideo size={14} /> Reports Center</Pill>
-          <h2>Export SoloHub data and investor-ready summaries.</h2>
+          <h2>Export SoloHub data and revenue-ready summaries.</h2>
           <p>Download CSV files for operations, payouts, deposits, and campaign tracking.</p>
         </div>
 
