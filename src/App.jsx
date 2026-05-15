@@ -899,10 +899,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
 
   useEffect(() => {
     const invited = cleanInviteRole(inviteRole);
-
-    if (invited) {
-      setAccountRole(invited);
-    }
+    if (invited) setAccountRole(invited);
   }, [inviteRole]);
 
   useEffect(() => {
@@ -920,9 +917,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
       }
     });
 
-    return () => {
-      data?.subscription?.unsubscribe?.();
-    };
+    return () => data?.subscription?.unsubscribe?.();
   }, []);
 
   const signIn = async (e) => {
@@ -1059,9 +1054,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
     setAuthMessage('Updating password...');
 
     try {
-      const { error } = await supabase.auth.updateUser({
-        password: newPassword
-      });
+      const { error } = await supabase.auth.updateUser({ password: newPassword });
 
       if (error) throw error;
 
@@ -1094,54 +1087,52 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
     const displayRole = roleForUser(user, profile, profile?.role || accountRole || 'clipper');
 
     return (
-      <div className="auth-panel">
+      <div className="solo-auth-card">
         <Pill tone="green"><UserRound size={14} /> Logged in</Pill>
         <h2>{user.email}</h2>
         <p><strong>Email:</strong> {user.email}</p>
         <p><strong>Account type:</strong> {displayRole}</p>
-        <p className="form-note">Your dashboard and menu are based on your saved SoloHub role.</p>
 
-        <div className="auth-actions-row">
-          <Button type="button" className="small" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
-            <LayoutDashboard size={15} /> Continue
-          </Button>
+        <div className="solo-auth-actions">
+          <button type="button" className="affiliate-action-btn" onClick={() => window.scrollTo({ top: 0, behavior: 'smooth' })}>
+            Continue
+          </button>
 
-          <Button type="button" variant="ghost" className="small" onClick={onLogout}>
-            <LogOut size={15} /> Logout
-          </Button>
+          <button type="button" className="mini-action ghost" onClick={onLogout}>
+            Logout
+          </button>
         </div>
       </div>
     );
   }
 
+  const title = mode === 'signup'
+    ? 'Create account.'
+    : mode === 'forgot'
+      ? 'Reset password.'
+      : mode === 'reset'
+        ? 'New password.'
+        : 'Login to SoloHub.';
+
+  const description = mode === 'signup'
+    ? 'Choose your account type and start using SoloHub.'
+    : mode === 'forgot'
+      ? 'Enter your email and we will send a password reset link.'
+      : mode === 'reset'
+        ? 'Enter a new password for your SoloHub account.'
+        : 'Access your campaigns, submissions, approvals, and payouts.';
+
   return (
-    <div className="auth-panel auth-panel-premium">
+    <div className="solo-auth-card">
       <Pill tone="green"><UserRound size={14} /> SoloHub Account</Pill>
 
-      <h2>
-        {mode === 'signup'
-          ? 'Create your SoloHub account.'
-          : mode === 'forgot'
-            ? 'Reset your password.'
-            : mode === 'reset'
-              ? 'Create a new password.'
-              : 'Login to SoloHub.'}
-      </h2>
+      <h2>{title}</h2>
+      <p>{description}</p>
 
-      <p>
-        {mode === 'signup'
-          ? 'Choose your account type and start using SoloHub.'
-          : mode === 'forgot'
-            ? 'Enter your email and we will send a password reset link.'
-            : mode === 'reset'
-              ? 'Enter a new password for your SoloHub account.'
-              : 'Access your campaigns, submissions, approvals, and payouts.'}
-      </p>
-
-      {authMessage && <div className="auth-status-message">{authMessage}</div>}
+      {authMessage && <div className="solo-auth-message">{authMessage}</div>}
 
       {mode !== 'forgot' && mode !== 'reset' && (
-        <div className="auth-tabs">
+        <div className="solo-auth-tabs">
           <button type="button" className={mode === 'login' ? 'active' : ''} onClick={() => setMode('login')}>
             Login
           </button>
@@ -1152,7 +1143,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
         </div>
       )}
 
-      <form className="auth-form auth-form-wide" onSubmit={formHandler}>
+      <form className="solo-auth-form" onSubmit={formHandler}>
         {referralCode && mode === 'signup' && (
           <div className="referral-banner">
             Referral code applied: <strong>{referralCode}</strong>
@@ -1210,7 +1201,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
           </>
         )}
 
-        <button type="submit" className="affiliate-action-btn auth-submit-btn" disabled={loading}>
+        <button type="submit" className="solo-auth-submit" disabled={loading}>
           {loading
             ? 'Please wait...'
             : mode === 'signup'
@@ -1223,7 +1214,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
         </button>
       </form>
 
-      <div className="auth-secondary-actions">
+      <div className="solo-auth-links">
         {mode === 'login' && (
           <button type="button" onClick={() => setMode('forgot')}>
             Forgot password?
@@ -1247,15 +1238,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
       </div>
 
       {mode === 'signup' && (
-        <p className="form-note">
-          Admin accounts are assigned by the platform owner from SoloHub admin tools.
-        </p>
-      )}
-
-      {mode === 'forgot' && (
-        <p className="form-note">
-          Check your email inbox and spam folder. The reset link will bring you back to SoloHub.
-        </p>
+        <p className="solo-auth-note">Admin accounts are assigned by the platform owner.</p>
       )}
     </div>
   );
@@ -1377,30 +1360,128 @@ function Hero({ setRole, setPage, cloudMode }) {
   );
 }
 
-function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, inviteRole, cloudMode }) {
+function PublicHowItWorks() {
   return (
-    <section className="logged-out-auth-page simple-auth-page">
-      <div className="simple-auth-intro">
-        <Pill tone="green"><Sparkles size={14} /> SoloHub MVP</Pill>
-        <h1>Launch campaigns. Track clips. Pay creators.</h1>
-        <p>Login to manage clipping campaigns, submissions, deposits, payouts, affiliates, and creator activity.</p>
+    <section className="public-how-section">
+      <div className="public-section-head">
+        <Pill tone="purple"><Sparkles size={14} /> How SoloHub Works</Pill>
+        <h2>One platform for creator campaigns, clip submissions, and payout tracking.</h2>
+        <p>
+          SoloHub connects creators who need short-form distribution with clippers who can post,
+          grow views, and get paid after admin verification.
+        </p>
       </div>
 
-      <AuthBox
-        user={user}
-        profile={profile}
-        onAuthUser={onAuthUser}
-        onLogout={onLogout}
-        referralCode={referralCode}
-        inviteRole={inviteRole}
-      />
+      <div className="public-flow-grid">
+        <article>
+          <div className="public-flow-icon"><Megaphone size={22} /></div>
+          <span>01</span>
+          <h3>Creators launch campaigns</h3>
+          <p>Creators set campaign budgets, payout rates, platforms, hashtags, rules, images, and resource folders.</p>
+        </article>
 
-      <div className="simple-auth-points">
-        <span><ShieldCheck size={15} /> Verified submissions</span>
-        <span><Wallet size={15} /> M-Pesa payout tracking</span>
-        <span><Megaphone size={15} /> Creator campaigns</span>
+        <article>
+          <div className="public-flow-icon"><Upload size={22} /></div>
+          <span>02</span>
+          <h3>Clippers submit public posts</h3>
+          <p>Clippers choose live campaigns, create clips, paste their TikTok/Reels/Shorts links, and submit views.</p>
+        </article>
+
+        <article>
+          <div className="public-flow-icon"><ShieldCheck size={22} /></div>
+          <span>03</span>
+          <h3>Admin verifies performance</h3>
+          <p>SoloHub reviews submitted views, checks fraud signals, approves valid clips, and rejects suspicious traffic.</p>
+        </article>
+
+        <article>
+          <div className="public-flow-icon"><Wallet size={22} /></div>
+          <span>04</span>
+          <h3>Payouts are tracked</h3>
+          <p>Approved payouts are recorded with M-Pesa/manual payment references, receipts, and reporting exports.</p>
+        </article>
+      </div>
+
+      <div className="public-audience-grid">
+        <div className="public-audience-card">
+          <h3>For creators</h3>
+          <p>Launch campaigns, track deposits, monitor submissions, review approved views, and export reports.</p>
+          <ul>
+            <li>Campaign manager</li>
+            <li>Payment summaries</li>
+            <li>Submission performance</li>
+          </ul>
+        </div>
+
+        <div className="public-audience-card featured">
+          <h3>For clippers</h3>
+          <p>Discover campaigns, save opportunities, submit clips, track reviews, and view payout receipts.</p>
+          <ul>
+            <li>Saved campaigns</li>
+            <li>Smart submission form</li>
+            <li>M-Pesa payout profile</li>
+          </ul>
+        </div>
+
+        <div className="public-audience-card">
+          <h3>For SoloHub admin</h3>
+          <p>Manage users, approve campaigns, verify clips, confirm deposits, export reports, and control platform settings.</p>
+          <ul>
+            <li>Admin dashboard</li>
+            <li>Fraud controls</li>
+            <li>CSV reports</li>
+          </ul>
+        </div>
+      </div>
+
+      <div className="public-trust-strip">
+        <div>
+          <strong>Built for MVP growth</strong>
+          <span>Creators, clippers, affiliates, deposits, submissions, payouts, and reporting are already structured.</span>
+        </div>
+
+        <div>
+          <strong>Manual-first payments</strong>
+          <span>Designed for M-Pesa/Till/Paybill confirmation before automated payments are added later.</span>
+        </div>
+
+        <div>
+          <strong>Verification-focused</strong>
+          <span>Approved views and payout records are controlled through admin review instead of blind auto-pay.</span>
+        </div>
       </div>
     </section>
+  );
+}
+
+function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, inviteRole, cloudMode }) {
+  return (
+    <main className="solo-public-auth">
+      <section className="solo-login-zone">
+        <div className="solo-login-intro">
+          <Pill tone="green"><Sparkles size={14} /> SoloHub MVP</Pill>
+          <h1>Launch campaigns. Track clips. Pay creators.</h1>
+          <p>Manage creator campaigns, clipping submissions, deposits, payouts, and affiliates from one clean dashboard.</p>
+        </div>
+
+        <AuthBox
+          user={user}
+          profile={profile}
+          onAuthUser={onAuthUser}
+          onLogout={onLogout}
+          referralCode={referralCode}
+          inviteRole={inviteRole}
+        />
+
+        <div className="solo-login-points">
+          <span><ShieldCheck size={15} /> Verified submissions</span>
+          <span><Wallet size={15} /> M-Pesa payout tracking</span>
+          <span><Megaphone size={15} /> Creator campaigns</span>
+        </div>
+      </section>
+
+      <PublicHowItWorks />
+    </main>
   );
 }
 
