@@ -5407,3 +5407,138 @@ body.solohub-logged-out main {
     display: grid;
   }
 }
+
+/* =========================================================
+   Phase 50 Admin Compliance Center
+   ========================================================= */
+
+.compliance-page {
+  display: grid;
+  gap: 24px;
+}
+
+.compliance-layout {
+  display: grid;
+  grid-template-columns: 280px minmax(0, 1fr);
+  gap: 20px;
+}
+
+.compliance-doc-list {
+  display: grid;
+  gap: 10px;
+  align-content: start;
+  padding: 16px;
+  border-radius: 24px;
+  background:
+    radial-gradient(circle at top right, rgba(35, 209, 139, 0.08), transparent 34%),
+    linear-gradient(145deg, rgba(20,20,20,0.96), rgba(8,10,12,0.96));
+  border: 1px solid rgba(255,255,255,0.08);
+  box-shadow: 0 22px 65px rgba(0,0,0,0.28);
+}
+
+.compliance-doc-list button {
+  display: grid;
+  gap: 6px;
+  text-align: left;
+  padding: 14px;
+  border-radius: 16px;
+  background: rgba(255,255,255,0.035);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #f8fafc;
+  cursor: pointer;
+}
+
+.compliance-doc-list button.active {
+  border-color: rgba(35, 209, 139, 0.35);
+  background: rgba(35, 209, 139, 0.10);
+}
+
+.compliance-doc-list span {
+  font-weight: 1000;
+}
+
+.compliance-doc-list small {
+  color: #9aa6b2;
+  font-weight: 900;
+}
+
+.compliance-editor,
+.compliance-warning-card {
+  padding: 24px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(245, 196, 83, 0.08), transparent 35%),
+    linear-gradient(145deg, rgba(20,20,20,0.96), rgba(8,10,12,0.96));
+  border: 1px solid rgba(245, 196, 83, 0.16);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.30);
+}
+
+.compliance-editor {
+  display: grid;
+  gap: 16px;
+}
+
+.compliance-editor-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+
+.compliance-editor-head h3 {
+  margin: 12px 0 0;
+  font-size: 30px;
+}
+
+.compliance-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.compliance-editor label {
+  display: grid;
+  gap: 8px;
+  color: #e5edf5;
+  font-weight: 900;
+}
+
+.compliance-textarea {
+  min-height: 520px;
+  padding: 18px !important;
+  line-height: 1.65;
+  font-family: Consolas, 'Courier New', monospace;
+  resize: vertical;
+}
+
+.compliance-warning-card h3 {
+  margin: 12px 0 8px;
+  font-size: 28px;
+}
+
+.compliance-warning-card p {
+  max-width: 850px;
+}
+
+@media (max-width: 950px) {
+  .compliance-layout {
+    grid-template-columns: 1fr;
+  }
+
+  .compliance-editor-head {
+    display: grid;
+  }
+
+  .compliance-actions {
+    display: grid;
+    grid-template-columns: 1fr;
+  }
+
+  .compliance-actions button {
+    width: 100%;
+  }
+
+  .compliance-textarea {
+    min-height: 380px;
+  }
+}

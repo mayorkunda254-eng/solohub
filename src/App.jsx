@@ -768,6 +768,7 @@ const navs = {
     ['adminPayouts', Coins, 'Payouts'],
     ['adminReports', FileVideo, 'Reports'],
     ['adminReadiness', CheckCircle2, 'MVP Checklist'],
+    ['adminCompliance', ShieldCheck, 'Compliance'],
     ['adminSettings', Wallet, 'Settings']
   ]
 };
@@ -4105,6 +4106,205 @@ function InviteLinkPanel() {
   );
 }
 
+function AdminComplianceCenter() {
+  const defaultDocs = {
+    terms: {
+      title: 'Terms and Conditions',
+      status: 'Draft',
+      body: 'SOLOHUB TERMS AND CONDITIONS\n\n1. Overview\nSoloHub is a content rewards platform that connects creators, clippers, affiliates, and platform administrators for campaign-based content distribution.\n\n2. User Roles\nUsers may operate as clippers, creators, affiliates, or administrators depending on account approval and assigned permissions.\n\n3. Campaigns\nCreators or administrators may create campaigns with budgets, rules, payout rates, platform requirements, hashtags, and deadlines. Campaigns may be approved, paused, completed, or rejected by SoloHub admin.\n\n4. Submissions\nClippers submit public post links for review. Submitted content must be original, accessible, and compliant with campaign rules.\n\n5. Verification\nSoloHub may review submitted views, post authenticity, fraud signals, and campaign compliance before approving payouts.\n\n6. Payments\nPayments are currently tracked manually. Approved payouts are not final until confirmed by admin records and payment references.\n\n7. Prohibited Activity\nFake views, bot traffic, duplicate content, stolen content, misleading links, or manipulation of campaign performance may lead to rejection or account restriction.\n\n8. Changes\nSoloHub may update these terms as the platform grows.'
+    },
+    privacy: {
+      title: 'Privacy Policy',
+      status: 'Draft',
+      body: 'SOLOHUB PRIVACY POLICY\n\n1. Information Collected\nSoloHub may collect user names, emails, account roles, campaign records, submission links, payout details, M-Pesa contact information, and activity records.\n\n2. Use of Information\nInformation is used to manage accounts, verify submissions, track campaigns, process manual payouts, prevent fraud, and improve the platform.\n\n3. Payment Information\nSoloHub may store payout contact details and payment references for reconciliation and reporting.\n\n4. Sharing\nSoloHub does not sell user data. Limited information may be visible to admins, creators, or clippers where needed for campaign operations.\n\n5. Security\nSoloHub uses Supabase and platform-level access controls to help protect account data. Users should keep login details private.\n\n6. Data Updates\nUsers may request correction of inaccurate account or payout details.\n\n7. Policy Updates\nThis policy may be updated as SoloHub adds new features or payment integrations.'
+    },
+    creatorAgreement: {
+      title: 'Creator Campaign Agreement',
+      status: 'Draft',
+      body: 'SOLOHUB CREATOR CAMPAIGN AGREEMENT\n\n1. Campaign Funding\nCreators are responsible for funding campaigns before or during approval according to SoloHub payment instructions.\n\n2. Campaign Rules\nCreators must provide clear requirements, payout rates, content resources, platforms, deadlines, hashtags, and restrictions.\n\n3. Approval\nSoloHub admin may approve, reject, pause, or complete campaigns depending on payment status, clarity, compliance, or risk.\n\n4. Content Rights\nCreators should only provide content and resources they own or are allowed to use for promotional campaigns.\n\n5. Payout Liability\nCampaign budgets and payout rates define expected payout obligations. SoloHub may track payouts manually before automation.\n\n6. Disputes\nDisputes about submissions, views, or payouts will be reviewed using available campaign records and admin notes.\n\n7. Fraud Protection\nSoloHub may reject suspicious submissions to protect campaign funds.'
+    },
+    clipperRules: {
+      title: 'Clipper Payout Rules',
+      status: 'Draft',
+      body: 'SOLOHUB CLIPPER PAYOUT RULES\n\n1. Eligible Submissions\nClippers must submit public TikTok, Instagram Reels, YouTube Shorts, Facebook Reels, or other approved post links.\n\n2. Real Views Only\nArtificial views, bot traffic, paid fake engagement, view manipulation, or misleading traffic are not allowed.\n\n3. Campaign Compliance\nClips must follow campaign instructions, approved platforms, hashtags, content rules, and deadlines.\n\n4. Review Process\nSubmissions remain pending until admin reviews the post and approved views.\n\n5. Payout Calculation\nPayouts are calculated using approved views, not submitted views. Admin may approve fewer views than submitted if verification requires adjustment.\n\n6. Payment Timing\nPayouts are manual for MVP. Payment status may show Pending, Approved, or Paid depending on admin records.\n\n7. Rejections\nSubmissions may be rejected for broken links, private posts, duplicate content, reused content, fake views, or rule violations.'
+    },
+    fraudPolicy: {
+      title: 'Content and Fraud Policy',
+      status: 'Draft',
+      body: 'SOLOHUB CONTENT AND FRAUD POLICY\n\n1. Content Standards\nAll campaign content and clip submissions should be lawful, respectful, and aligned with campaign instructions.\n\n2. Not Allowed\nFake engagement, stolen content, impersonation, harmful content, misleading claims, spam links, or bot-generated traffic are not allowed.\n\n3. Verification Signals\nSoloHub may review post accessibility, view patterns, platform quality, duplicate URLs, timing, and admin notes.\n\n4. Admin Review\nAdmin may mark submissions as clear, suspicious, rejected, approved, or paid depending on evidence.\n\n5. Account Action\nRepeated suspicious activity may lead to suspension, blocked payouts, or removal from campaigns.\n\n6. Creator Protection\nThis policy protects creator budgets from invalid or manipulated traffic.'
+    },
+    refundPolicy: {
+      title: 'Refund and Deposit Policy',
+      status: 'Draft',
+      body: 'SOLOHUB REFUND AND DEPOSIT POLICY\n\n1. Campaign Deposits\nCreators may be required to deposit campaign funds before campaigns go live. Deposits may be tracked manually using payment references.\n\n2. Approval Before Spend\nCampaigns should only go live after admin confirms payment status and campaign details.\n\n3. Unused Budget\nUnused campaign budget may be carried forward, refunded, or settled manually depending on the agreement between SoloHub and the creator.\n\n4. Rejected Campaigns\nIf a campaign is rejected before going live, admin may review whether the deposit should be refunded or adjusted.\n\n5. Completed Campaigns\nCompleted campaigns should show payout records, approved submissions, and remaining balance where applicable.\n\n6. Manual Records\nDuring MVP, payment and refund tracking depends on admin-entered records and references.'
+    }
+  };
+
+  const storageKey = 'solohub_compliance_docs_v1';
+
+  const [docs, setDocs] = useState(() => {
+    try {
+      const saved = localStorage.getItem(storageKey);
+      return saved ? { ...defaultDocs, ...JSON.parse(saved) } : defaultDocs;
+    } catch {
+      return defaultDocs;
+    }
+  });
+
+  const [activeKey, setActiveKey] = useState('terms');
+
+  const activeDoc = docs[activeKey];
+
+  const updateDoc = (field, value) => {
+    setDocs((prev) => {
+      const next = {
+        ...prev,
+        [activeKey]: {
+          ...prev[activeKey],
+          [field]: value
+        }
+      };
+
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const copyDoc = async () => {
+    const text = activeDoc.title + '\n\nStatus: ' + activeDoc.status + '\n\n' + activeDoc.body;
+
+    try {
+      await navigator.clipboard.writeText(text);
+      alert(activeDoc.title + ' copied.');
+    } catch (err) {
+      window.prompt('Copy document:', text);
+    }
+  };
+
+  const downloadDoc = () => {
+    const text = activeDoc.title + '\n\nStatus: ' + activeDoc.status + '\n\n' + activeDoc.body;
+    const blob = new Blob([text], { type: 'text/plain;charset=utf-8;' });
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+
+    link.href = url;
+    link.download = activeDoc.title.toLowerCase().replaceAll(' ', '-') + '.txt';
+    link.click();
+
+    URL.revokeObjectURL(url);
+  };
+
+  const resetDoc = () => {
+    if (!confirm('Reset this document to the starter draft?')) return;
+
+    setDocs((prev) => {
+      const next = {
+        ...prev,
+        [activeKey]: defaultDocs[activeKey]
+      };
+
+      localStorage.setItem(storageKey, JSON.stringify(next));
+      return next;
+    });
+  };
+
+  const docsList = Object.entries(docs);
+
+  const completedDocs = docsList.filter(([, doc]) => doc.status === 'Ready').length;
+  const reviewDocs = docsList.filter(([, doc]) => doc.status === 'Review Needed').length;
+  const draftDocs = docsList.filter(([, doc]) => doc.status === 'Draft').length;
+
+  return (
+    <section className="compliance-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="purple"><ShieldCheck size={14} /> Compliance Center</Pill>
+          <h2>Prepare SoloHub policies before full commercial launch.</h2>
+          <p>Use these starter drafts for MVP structure, investor demos, and internal planning. Review professionally before scaling payments.</p>
+        </div>
+
+        <button type="button" className="affiliate-action-btn" onClick={copyDoc}>
+          Copy active document
+        </button>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard icon={FileVideo} label="Documents" value={docsList.length} helper="Starter policies" />
+        <StatCard icon={CheckCircle2} label="Ready" value={completedDocs} helper="Marked ready" />
+        <StatCard icon={ShieldCheck} label="Review Needed" value={reviewDocs} helper="Needs checking" />
+        <StatCard icon={XCircle} label="Draft" value={draftDocs} helper="Still draft" />
+      </div>
+
+      <div className="compliance-layout">
+        <aside className="compliance-doc-list">
+          {docsList.map(([key, doc]) => (
+            <button
+              type="button"
+              key={key}
+              className={key === activeKey ? 'active' : ''}
+              onClick={() => setActiveKey(key)}
+            >
+              <span>{doc.title}</span>
+              <small>{doc.status}</small>
+            </button>
+          ))}
+        </aside>
+
+        <article className="compliance-editor">
+          <div className="compliance-editor-head">
+            <div>
+              <Pill tone={activeDoc.status === 'Ready' ? 'green' : activeDoc.status === 'Review Needed' ? 'yellow' : 'purple'}>
+                {activeDoc.status}
+              </Pill>
+              <h3>{activeDoc.title}</h3>
+            </div>
+
+            <div className="compliance-actions">
+              <button type="button" className="mini-action" onClick={copyDoc}>Copy</button>
+              <button type="button" className="mini-action" onClick={downloadDoc}>Download</button>
+              <button type="button" className="mini-action ghost" onClick={resetDoc}>Reset</button>
+            </div>
+          </div>
+
+          <label>
+            Document title
+            <input value={activeDoc.title} onChange={(e) => updateDoc('title', e.target.value)} />
+          </label>
+
+          <label>
+            Status
+            <select value={activeDoc.status} onChange={(e) => updateDoc('status', e.target.value)}>
+              <option>Draft</option>
+              <option>Review Needed</option>
+              <option>Ready</option>
+            </select>
+          </label>
+
+          <label>
+            Policy text
+            <textarea
+              className="compliance-textarea"
+              value={activeDoc.body}
+              onChange={(e) => updateDoc('body', e.target.value)}
+            />
+          </label>
+        </article>
+      </div>
+
+      <div className="compliance-warning-card">
+        <div>
+          <Pill tone="yellow">Important</Pill>
+          <h3>Before taking real payments at scale, review these policies.</h3>
+          <p>
+            This center gives SoloHub structure. The next step is to align these documents with your actual payment setup,
+            Kenyan business registration, tax approach, data handling, and creator/clipper payout process.
+          </p>
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function AdminMvpReadiness({ campaigns = [], submissions = [], cloudMode, setPage }) {
   const liveCampaigns = campaigns.filter((campaign) => campaign.status === 'Live');
   const pendingCampaigns = campaigns.filter((campaign) => campaign.status === 'Pending Approval');
@@ -6234,6 +6434,10 @@ const content = useMemo(() => {
 
     if (page === 'creatorSubmissions') {
       return <CreatorSubmissionsPage submissions={ownCreatorSubmissions} campaigns={ownCampaigns} />;
+    }
+
+    if (page === 'adminCompliance') {
+      return isAdmin ? <AdminComplianceCenter /> : home;
     }
 
     if (page === 'adminReadiness') {
