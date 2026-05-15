@@ -5935,3 +5935,134 @@ body.solohub-logged-out main {
     width: 100%;
   }
 }
+
+/* =========================================================
+   Phase 55 Announcements Center
+   ========================================================= */
+
+.announcements-page,
+.admin-announcements-page {
+  display: grid;
+  gap: 24px;
+}
+
+.announcement-feed,
+.announcement-management-feed {
+  display: grid;
+  gap: 16px;
+}
+
+.announcement-card,
+.announcement-management-card,
+.announcement-form-card {
+  padding: 24px;
+  border-radius: 26px;
+  background:
+    radial-gradient(circle at top right, rgba(35, 209, 139, 0.08), transparent 35%),
+    linear-gradient(145deg, rgba(20,20,20,0.96), rgba(8,10,12,0.96));
+  border: 1px solid rgba(35, 209, 139, 0.16);
+  box-shadow: 0 24px 70px rgba(0,0,0,0.30);
+}
+
+.announcement-card.priority-urgent,
+.announcement-management-card:has(.pill.red) {
+  border-color: rgba(255, 99, 99, 0.30);
+}
+
+.announcement-card-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: start;
+  gap: 16px;
+}
+
+.announcement-card h3,
+.announcement-management-card h3,
+.announcement-form-card h3 {
+  margin: 12px 0 10px;
+  font-size: 26px;
+}
+
+.announcement-card p,
+.announcement-management-card p {
+  margin: 0;
+  line-height: 1.7;
+}
+
+.announcement-meta {
+  display: grid;
+  justify-items: end;
+  gap: 5px;
+  min-width: 120px;
+}
+
+.announcement-meta span {
+  color: #fff4bf;
+  font-weight: 1000;
+}
+
+.announcement-meta small {
+  color: #9aa6b2;
+  font-weight: 900;
+}
+
+.announcements-admin-layout {
+  display: grid;
+  grid-template-columns: minmax(300px, 0.75fr) minmax(420px, 1.25fr);
+  gap: 22px;
+  align-items: start;
+}
+
+.announcement-form-card {
+  display: grid;
+  gap: 15px;
+}
+
+.announcement-form-card label {
+  display: grid;
+  gap: 8px;
+  color: #e5edf5;
+  font-weight: 900;
+}
+
+.announcement-form-card textarea {
+  min-height: 150px;
+}
+
+.announcement-form-grid {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(0, 1fr));
+  gap: 12px;
+}
+
+.announcement-management-actions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 16px;
+  padding-top: 14px;
+  border-top: 1px solid rgba(255,255,255,0.08);
+}
+
+@media (max-width: 1000px) {
+  .announcements-admin-layout,
+  .announcement-form-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .announcement-card-head {
+    display: grid;
+  }
+
+  .announcement-meta {
+    justify-items: start;
+  }
+
+  .announcement-management-actions {
+    display: grid;
+  }
+
+  .announcement-management-actions button {
+    width: 100%;
+  }
+}

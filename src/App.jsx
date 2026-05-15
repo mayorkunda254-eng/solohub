@@ -739,6 +739,7 @@ const navs = {
     ['home', Home, 'Home'],
     ['onboarding', CheckCircle2, 'Getting Started'],
     ['activity', ShieldCheck, 'Activity'],
+    ['announcements', Megaphone, 'Announcements'],
     ['profile', UserRound, 'Profile'],
     ['discover', Search, 'Discover'],
     ['savedCampaigns', BookOpen, 'Saved Campaigns'],
@@ -751,6 +752,7 @@ const navs = {
     ['home', Home, 'Home'],
     ['onboarding', CheckCircle2, 'Getting Started'],
     ['activity', ShieldCheck, 'Activity'],
+    ['announcements', Megaphone, 'Announcements'],
     ['profile', UserRound, 'Profile'],
     ['creatorDashboard', LayoutDashboard, 'Dashboard'],
     ['createCampaign', Plus, 'Create Campaign'],
@@ -762,6 +764,7 @@ const navs = {
     ['adminOverview', LayoutDashboard, 'Overview'],
     ['adminUsers', UserRound, 'Users'],
     ['activity', ShieldCheck, 'Activity'],
+    ['announcements', Megaphone, 'Announcements'],
     ['profile', UserRound, 'Profile'],
     ['onboarding', CheckCircle2, 'Getting Started'],
     ['createCampaign', Plus, 'Create Managed Campaign'],
@@ -773,6 +776,7 @@ const navs = {
     ['adminReadiness', CheckCircle2, 'MVP Checklist'],
     ['adminCompliance', ShieldCheck, 'Compliance'],
     ['adminAudit', ShieldCheck, 'Audit Log'],
+    ['adminAnnouncements', Megaphone, 'Manage Announcements'],
     ['adminSettings', Wallet, 'Settings']
   ]
 };
@@ -4503,6 +4507,435 @@ function InviteLinkPanel() {
   );
 }
 
+function announcementTone(priority) {
+  if (priority === 'Urgent') return 'red';
+  if (priority === 'Important') return 'yellow';
+  return 'green';
+}
+
+function fallbackAnnouncements() {
+  try {
+    const saved = localStorage.getItem('solohub_announcements_fallback_v1');
+    return saved ? JSON.parse(saved) : [];
+  } catch {
+    return [];
+  }
+}
+
+function saveFallbackAnnouncements(items = []) {
+  localStorage.setItem('solohub_announcements_fallback_v1', JSON.stringify(items));
+}
+
+function AnnouncementsPage({ currentRole }) {
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('Loading announcements...');
+
+  const loadAnnouncements = async () => {
+    setLoading(true);
+    setMessage('Loading announcements...');
+
+    try {
+      const role = cleanRole(currentRole || 'clipper');
+
+      if (!supabase) {
+        const localItems = fallbackAnnouncements().filter((item) =>
+          item.status === 'Published' && ['All', role].includes(item.audience)
+        );
+
+        setAnnouncements(localItems);
+        setMessage('Loaded local announcements.');
+        return;
+      }
+
+      const request = supabase
+        .from('announcements')
+        .select('*')
+        .eq('status', 'Published')
+        .in('audience', ['All', role])
+        .order('created_at', { ascending: false });
+
+      const { data, error } = typeof withSupabaseTimeout === 'function'
+        ? await withSupabaseTimeout(request, 'Load announcements', 15000)
+        : await request;
+
+      if (error) throw error;
+
+      setAnnouncements(data || []);
+      setMessage((data || []).length ? 'Announcements loaded.' : 'No announcements yet.');
+    } catch (err) {
+      console.error('Announcements load failed:', err);
+      const localItems = fallbackAnnouncements().filter((item) =>
+        item.status === 'Published' && ['All', cleanRole(currentRole || 'clipper')].includes(item.audience)
+      );
+
+      setAnnouncements(localItems);
+      setMessage('Could not load cloud announcements. Showing local fallback if available.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAnnouncements();
+  }, [currentRole]);
+
+  return (
+    <section className="announcements-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="green"><Megaphone size={14} /> Announcements</Pill>
+          <h2>Platform updates and important notices.</h2>
+          <p>Check campaign updates, payout notices, platform changes, and admin messages.</p>
+          {message && <p className="form-note affiliate-message">{message}</p>}
+        </div>
+
+        <button type="button" className="affiliate-action-btn secondary" onClick={loadAnnouncements} disabled={loading}>
+          {loading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+
+      <div className="announcement-feed">
+        {announcements.map((item) => (
+          <article key={item.id} className={'announcement-card priority-' + String(item.priority || 'Normal').toLowerCase()}>
+            <div className="announcement-card-head">
+              <div>
+                <Pill tone={announcementTone(item.priority)}>{item.priority || 'Normal'}</Pill>
+                <h3>{item.title}</h3>
+              </div>
+
+              <div className="announcement-meta">
+                <span>{item.audience || 'All'}</span>
+                <small>{item.created_at ? String(item.created_at).slice(0, 10) : 'Today'}</small>
+              </div>
+            </div>
+
+            <p>{item.body}</p>
+          </article>
+        ))}
+
+        {!announcements.length && (
+          <div className="panel">
+            <Pill tone="yellow">No Updates</Pill>
+            <h3>No announcements found.</h3>
+            <p>Admin announcements will appear here when published.</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function AdminAnnouncementsPage({ user }) {
+  const [announcements, setAnnouncements] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('Create updates for clippers, creators, admins, or everyone.');
+  const [form, setForm] = useState({
+    title: '',
+    body: '',
+    audience: 'All',
+    priority: 'Normal',
+    status: 'Published'
+  });
+
+  const update = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const loadAdminAnnouncements = async () => {
+    setLoading(true);
+    setMessage('Loading announcements...');
+
+    try {
+      if (!supabase) {
+        setAnnouncements(fallbackAnnouncements());
+        setMessage('Loaded local announcements.');
+        return;
+      }
+
+      const request = supabase
+        .from('announcements')
+        .select('*')
+        .order('created_at', { ascending: false });
+
+      const { data, error } = typeof withSupabaseTimeout === 'function'
+        ? await withSupabaseTimeout(request, 'Load admin announcements', 15000)
+        : await request;
+
+      if (error) throw error;
+
+      setAnnouncements(data || []);
+      setMessage('Announcements loaded.');
+    } catch (err) {
+      console.error('Admin announcements load failed:', err);
+      setAnnouncements(fallbackAnnouncements());
+      setMessage('Cloud load failed. Showing local fallback if available.');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  useEffect(() => {
+    loadAdminAnnouncements();
+  }, []);
+
+  const createAnnouncement = async (e) => {
+    e.preventDefault();
+
+    if (!form.title.trim() || !form.body.trim()) {
+      alert('Add title and announcement body.');
+      return;
+    }
+
+    setLoading(true);
+    setMessage('Saving announcement...');
+
+    const payload = {
+      title: form.title.trim(),
+      body: form.body.trim(),
+      audience: form.audience,
+      priority: form.priority,
+      status: form.status,
+      created_by: user?.id || null,
+      updated_at: new Date().toISOString()
+    };
+
+    try {
+      if (!supabase) {
+        const item = {
+          ...payload,
+          id: 'local-' + Date.now(),
+          created_at: new Date().toISOString()
+        };
+
+        const next = [item, ...fallbackAnnouncements()];
+        saveFallbackAnnouncements(next);
+        setAnnouncements(next);
+      } else {
+        const request = supabase
+          .from('announcements')
+          .insert(payload)
+          .select('*')
+          .single();
+
+        const { data, error } = typeof withSupabaseTimeout === 'function'
+          ? await withSupabaseTimeout(request, 'Create announcement', 15000)
+          : await request;
+
+        if (error) throw error;
+
+        setAnnouncements((prev) => [data, ...prev]);
+      }
+
+      setForm({
+        title: '',
+        body: '',
+        audience: 'All',
+        priority: 'Normal',
+        status: 'Published'
+      });
+
+      setMessage('Announcement saved.');
+      alert('Announcement saved.');
+    } catch (err) {
+      console.error('Announcement save failed:', err);
+      setMessage('Announcement save failed: ' + (err?.message || err));
+      alert('Announcement save failed: ' + (err?.message || err));
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateAnnouncementStatus = async (item, status) => {
+    setMessage('Updating announcement...');
+
+    try {
+      if (!supabase || String(item.id).startsWith('local-')) {
+        const next = announcements.map((announcement) =>
+          announcement.id === item.id ? { ...announcement, status, updated_at: new Date().toISOString() } : announcement
+        );
+
+        saveFallbackAnnouncements(next);
+        setAnnouncements(next);
+      } else {
+        const request = supabase
+          .from('announcements')
+          .update({ status, updated_at: new Date().toISOString() })
+          .eq('id', item.id)
+          .select('*')
+          .single();
+
+        const { data, error } = typeof withSupabaseTimeout === 'function'
+          ? await withSupabaseTimeout(request, 'Update announcement', 15000)
+          : await request;
+
+        if (error) throw error;
+
+        setAnnouncements((prev) => prev.map((announcement) => announcement.id === item.id ? data : announcement));
+      }
+
+      setMessage('Announcement updated.');
+    } catch (err) {
+      console.error('Announcement update failed:', err);
+      setMessage('Announcement update failed: ' + (err?.message || err));
+      alert('Announcement update failed: ' + (err?.message || err));
+    }
+  };
+
+  const deleteAnnouncement = async (item) => {
+    if (!confirm('Delete this announcement?')) return;
+
+    try {
+      if (!supabase || String(item.id).startsWith('local-')) {
+        const next = announcements.filter((announcement) => announcement.id !== item.id);
+        saveFallbackAnnouncements(next);
+        setAnnouncements(next);
+      } else {
+        const request = supabase
+          .from('announcements')
+          .delete()
+          .eq('id', item.id);
+
+        const { error } = typeof withSupabaseTimeout === 'function'
+          ? await withSupabaseTimeout(request, 'Delete announcement', 15000)
+          : await request;
+
+        if (error) throw error;
+
+        setAnnouncements((prev) => prev.filter((announcement) => announcement.id !== item.id));
+      }
+
+      setMessage('Announcement deleted.');
+    } catch (err) {
+      console.error('Announcement delete failed:', err);
+      setMessage('Announcement delete failed: ' + (err?.message || err));
+      alert('Announcement delete failed: ' + (err?.message || err));
+    }
+  };
+
+  const publishedCount = announcements.filter((item) => item.status === 'Published').length;
+  const draftCount = announcements.filter((item) => item.status === 'Draft').length;
+  const urgentCount = announcements.filter((item) => item.priority === 'Urgent').length;
+
+  return (
+    <section className="admin-announcements-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="purple"><Megaphone size={14} /> Manage Announcements</Pill>
+          <h2>Post updates for creators, clippers, and admins.</h2>
+          <p>Use this for payout dates, new campaign alerts, policy changes, and platform notices.</p>
+          {message && <p className="form-note affiliate-message">{message}</p>}
+        </div>
+
+        <button type="button" className="affiliate-action-btn secondary" onClick={loadAdminAnnouncements} disabled={loading}>
+          {loading ? 'Refreshing...' : 'Refresh'}
+        </button>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard icon={Megaphone} label="Total" value={announcements.length} helper="All announcements" />
+        <StatCard icon={CheckCircle2} label="Published" value={publishedCount} helper="Visible to users" />
+        <StatCard icon={FileVideo} label="Drafts" value={draftCount} helper="Not visible yet" />
+        <StatCard icon={XCircle} label="Urgent" value={urgentCount} helper="High priority" />
+      </div>
+
+      <div className="announcements-admin-layout">
+        <form className="announcement-form-card" onSubmit={createAnnouncement}>
+          <h3>Create announcement</h3>
+
+          <label>
+            Title
+            <input value={form.title} onChange={(e) => update('title', e.target.value)} placeholder="Example: Payouts processing Friday" />
+          </label>
+
+          <label>
+            Body
+            <textarea value={form.body} onChange={(e) => update('body', e.target.value)} placeholder="Write the full update here." />
+          </label>
+
+          <div className="announcement-form-grid">
+            <label>
+              Audience
+              <select value={form.audience} onChange={(e) => update('audience', e.target.value)}>
+                <option>All</option>
+                <option>clipper</option>
+                <option>creator</option>
+                <option>admin</option>
+              </select>
+            </label>
+
+            <label>
+              Priority
+              <select value={form.priority} onChange={(e) => update('priority', e.target.value)}>
+                <option>Normal</option>
+                <option>Important</option>
+                <option>Urgent</option>
+              </select>
+            </label>
+
+            <label>
+              Status
+              <select value={form.status} onChange={(e) => update('status', e.target.value)}>
+                <option>Published</option>
+                <option>Draft</option>
+                <option>Archived</option>
+              </select>
+            </label>
+          </div>
+
+          <button type="submit" className="affiliate-action-btn" disabled={loading}>
+            {loading ? 'Saving...' : 'Save announcement'}
+          </button>
+        </form>
+
+        <div className="announcement-management-feed">
+          {announcements.map((item) => (
+            <article key={item.id} className="announcement-management-card">
+              <div className="announcement-card-head">
+                <div>
+                  <Pill tone={announcementTone(item.priority)}>{item.priority}</Pill>
+                  <h3>{item.title}</h3>
+                  <p>{item.body}</p>
+                </div>
+
+                <div className="announcement-meta">
+                  <span>{item.status}</span>
+                  <small>{item.audience}</small>
+                </div>
+              </div>
+
+              <div className="announcement-management-actions">
+                <button type="button" className="mini-action" onClick={() => updateAnnouncementStatus(item, 'Published')}>
+                  Publish
+                </button>
+
+                <button type="button" className="mini-action" onClick={() => updateAnnouncementStatus(item, 'Draft')}>
+                  Draft
+                </button>
+
+                <button type="button" className="mini-action ghost" onClick={() => updateAnnouncementStatus(item, 'Archived')}>
+                  Archive
+                </button>
+
+                <button type="button" className="mini-action ghost" onClick={() => deleteAnnouncement(item)}>
+                  Delete
+                </button>
+              </div>
+            </article>
+          ))}
+
+          {!announcements.length && (
+            <div className="panel">
+              <h3>No announcements yet.</h3>
+              <p>Create your first announcement for SoloHub users.</p>
+            </div>
+          )}
+        </div>
+      </div>
+    </section>
+  );
+}
+
 function AdminAuditLog({ campaigns = [], submissions = [], user }) {
   const storageKey = 'solohub_manual_audit_notes_v1';
 
@@ -7092,6 +7525,10 @@ const content = useMemo(() => {
 
     if (page === 'home') return home;
 
+    if (page === 'announcements') {
+      return <AnnouncementsPage currentRole={currentRole} />;
+    }
+
     if (page === 'profile') {
       return <UserProfilePage user={user} profile={profile} currentRole={currentRole} onProfileSaved={setProfile} />;
     }
@@ -7152,6 +7589,10 @@ const content = useMemo(() => {
 
     if (page === 'creatorSubmissions') {
       return <CreatorSubmissionsPage submissions={ownCreatorSubmissions} campaigns={ownCampaigns} />;
+    }
+
+    if (page === 'adminAnnouncements') {
+      return isAdmin ? <AdminAnnouncementsPage user={user} /> : home;
     }
 
     if (page === 'adminAudit') {
