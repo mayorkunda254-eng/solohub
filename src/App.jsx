@@ -767,6 +767,7 @@ const navs = {
     ['adminAffiliates', Coins, 'Affiliates'],
     ['adminPayouts', Coins, 'Payouts'],
     ['adminReports', FileVideo, 'Reports'],
+    ['adminReadiness', CheckCircle2, 'MVP Checklist'],
     ['adminSettings', Wallet, 'Settings']
   ]
 };
@@ -4104,6 +4105,218 @@ function InviteLinkPanel() {
   );
 }
 
+function AdminMvpReadiness({ campaigns = [], submissions = [], cloudMode, setPage }) {
+  const liveCampaigns = campaigns.filter((campaign) => campaign.status === 'Live');
+  const pendingCampaigns = campaigns.filter((campaign) => campaign.status === 'Pending Approval');
+  const completedCampaigns = campaigns.filter((campaign) => campaign.status === 'Completed');
+  const pendingSubmissions = submissions.filter((submission) => submission.status === 'Pending Review');
+  const approvedSubmissions = submissions.filter((submission) => submission.status === 'Approved');
+  const paidSubmissions = submissions.filter((submission) => submission.status === 'Paid');
+
+  const hasCampaigns = campaigns.length > 0;
+  const hasSubmissions = submissions.length > 0;
+  const hasReports = true;
+  const hasPwa = true;
+  const hasForgotPassword = true;
+  const hasPublicAbout = true;
+  const hasAffiliate = true;
+  const hasCreatorTools = true;
+  const hasClipperTools = true;
+  const hasManualPayments = true;
+
+  const checklist = [
+    {
+      group: 'Core platform',
+      items: [
+        { title: 'Role-based dashboards', done: true, note: 'Admin, creator, and clipper experiences exist.' },
+        { title: 'Public login and signup', done: true, note: 'Auth UI is cleaned and isolated.' },
+        { title: 'Forgot password flow', done: hasForgotPassword, note: 'Supabase reset password flow added.' },
+        { title: 'Public How It Works section', done: hasPublicAbout, note: 'Explains SoloHub before signup.' }
+      ]
+    },
+    {
+      group: 'Campaign operations',
+      items: [
+        { title: 'Admin managed campaigns', done: true, note: 'Admin can create and manage campaigns.' },
+        { title: 'Creator managed campaigns', done: hasCreatorTools, note: 'Creators can manage their own campaigns.' },
+        { title: 'Campaign lifecycle controls', done: true, note: 'Pending, Live, Paused, Completed, Rejected.' },
+        { title: 'Campaign share links', done: true, note: 'Campaign links can be copied and shared.' }
+      ]
+    },
+    {
+      group: 'Clipper workflow',
+      items: [
+        { title: 'Discover marketplace', done: true, note: 'Search, filters, and sorting added.' },
+        { title: 'Saved campaigns', done: hasClipperTools, note: 'Clippers can save opportunities.' },
+        { title: 'Smart clip submission', done: true, note: 'Platform detection, checklist, rules, hashtags.' },
+        { title: 'Submission review flow', done: hasSubmissions || true, note: 'Admin can approve/reject submissions.' }
+      ]
+    },
+    {
+      group: 'Money and reporting',
+      items: [
+        { title: 'Manual M-Pesa tracking', done: hasManualPayments, note: 'Till/Paybill section and payout records prepared.' },
+        { title: 'Affiliate program', done: hasAffiliate, note: 'Affiliate creation and referral records added.' },
+        { title: 'CSV report exports', done: hasReports, note: 'Campaigns, submissions, deposits, and payouts export.' },
+        { title: 'Investor summary copy', done: true, note: 'Admin can copy MVP summary from this page.' }
+      ]
+    },
+    {
+      group: 'Launch readiness',
+      items: [
+        { title: 'PWA install support', done: hasPwa, note: 'Manifest, service worker, and install button added.' },
+        { title: 'Mobile navigation', done: true, note: 'Mobile/tablet drawer behavior fixed.' },
+        { title: 'Favicon and app branding', done: true, note: 'SoloHub browser tab branding added.' },
+        { title: 'Compliance documents', done: false, note: 'Terms, Privacy, payout rules, and content policy still pending.' }
+      ]
+    }
+  ];
+
+  const flatItems = checklist.flatMap((section) => section.items);
+  const doneCount = flatItems.filter((item) => item.done).length;
+  const totalCount = flatItems.length;
+  const progress = Math.round((doneCount / totalCount) * 100);
+
+  const copyInvestorSummary = async () => {
+    const text = [
+      'SOLOHUB MVP READINESS SUMMARY',
+      '',
+      'SoloHub is a content rewards platform for creators, clippers, affiliates, and admin-managed payout operations.',
+      '',
+      'Current MVP capabilities:',
+      '- Role-based dashboards for admin, creators, and clippers',
+      '- Campaign creation and lifecycle management',
+      '- Creator-managed and admin-managed campaigns',
+      '- Clipper discovery, saved campaigns, and smart clip submission',
+      '- Admin verification for submissions and payout records',
+      '- Manual M-Pesa/Till/Paybill tracking structure',
+      '- Affiliate/referral management',
+      '- CSV reports for campaigns, submissions, deposits, and payouts',
+      '- Public login, signup, forgot password, PWA install support, and How It Works section',
+      '',
+      'Current metrics:',
+      '- Campaigns: ' + campaigns.length,
+      '- Live campaigns: ' + liveCampaigns.length,
+      '- Pending campaigns: ' + pendingCampaigns.length,
+      '- Completed campaigns: ' + completedCampaigns.length,
+      '- Submissions: ' + submissions.length,
+      '- Pending reviews: ' + pendingSubmissions.length,
+      '- Approved submissions: ' + approvedSubmissions.length,
+      '- Paid submissions: ' + paidSubmissions.length,
+      '',
+      'Pending before full commercial launch:',
+      '- Terms and Conditions',
+      '- Privacy Policy',
+      '- Creator campaign agreement',
+      '- Clipper payout rules',
+      '- Content/fraud policy',
+      '- Formal payment provider setup'
+    ].join('\n');
+
+    try {
+      await navigator.clipboard.writeText(text);
+      alert('Investor MVP summary copied.');
+    } catch (err) {
+      window.prompt('Copy investor MVP summary:', text);
+    }
+  };
+
+  return (
+    <section className="mvp-readiness-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="green"><CheckCircle2 size={14} /> MVP Readiness</Pill>
+          <h2>Track what is investor-ready and what is pending.</h2>
+          <p>Use this page before demos, investor conversations, creator onboarding, and launch planning.</p>
+        </div>
+
+        <button type="button" className="affiliate-action-btn" onClick={copyInvestorSummary}>
+          Copy investor summary
+        </button>
+      </div>
+
+      <div className="mvp-score-card">
+        <div>
+          <span>MVP completion</span>
+          <strong>{progress}%</strong>
+          <p>{doneCount} of {totalCount} readiness items completed.</p>
+        </div>
+
+        <div className="whop-progress">
+          <i style={{ width: progress + '%' }} />
+        </div>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard icon={Megaphone} label="Campaigns" value={campaigns.length} helper="Total records" />
+        <StatCard icon={ShieldCheck} label="Pending reviews" value={pendingSubmissions.length} helper="Need admin action" />
+        <StatCard icon={Wallet} label="Storage" value={cloudMode ? 'Cloud' : 'Local'} helper={cloudMode ? 'Supabase mode' : 'Browser mode'} />
+        <StatCard icon={CheckCircle2} label="MVP status" value={progress + '%'} helper="Readiness score" />
+      </div>
+
+      <div className="mvp-action-grid">
+        <button type="button" onClick={() => setPage('adminCampaigns')}>
+          <Megaphone size={18} />
+          <span>Campaigns</span>
+        </button>
+
+        <button type="button" onClick={() => setPage('adminSubmissions')}>
+          <ShieldCheck size={18} />
+          <span>Submissions</span>
+        </button>
+
+        <button type="button" onClick={() => setPage('adminReports')}>
+          <FileVideo size={18} />
+          <span>Reports</span>
+        </button>
+
+        <button type="button" onClick={() => setPage('adminSettings')}>
+          <Wallet size={18} />
+          <span>Settings</span>
+        </button>
+      </div>
+
+      <div className="mvp-checklist-grid">
+        {checklist.map((section) => (
+          <article key={section.group} className="mvp-checklist-card">
+            <h3>{section.group}</h3>
+
+            <div className="mvp-checklist-items">
+              {section.items.map((item) => (
+                <div key={item.title} className={item.done ? 'mvp-check-item done' : 'mvp-check-item pending'}>
+                  <div className="mvp-check-icon">
+                    {item.done ? <CheckCircle2 size={18} /> : <XCircle size={18} />}
+                  </div>
+
+                  <div>
+                    <strong>{item.title}</strong>
+                    <p>{item.note}</p>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </article>
+        ))}
+      </div>
+
+      <div className="mvp-next-card">
+        <div>
+          <Pill tone="yellow">Recommended next step</Pill>
+          <h3>Prepare compliance and commercial launch documents.</h3>
+          <p>
+            The product flow is now strong enough for demos. Before taking real payments at scale,
+            prepare Terms, Privacy Policy, payout rules, creator agreement, and content/fraud policy.
+          </p>
+        </div>
+
+        <button type="button" className="mini-action" onClick={() => setPage('adminSettings')}>
+          Open Settings
+        </button>
+      </div>
+    </section>
+  );
+}
+
 function AdminReports({ campaigns = [], submissions = [] }) {
   const liveCampaigns = campaigns.filter((campaign) => campaign.status === 'Live');
   const pendingCampaigns = campaigns.filter((campaign) => campaign.status === 'Pending Approval');
@@ -6021,6 +6234,10 @@ const content = useMemo(() => {
 
     if (page === 'creatorSubmissions') {
       return <CreatorSubmissionsPage submissions={ownCreatorSubmissions} campaigns={ownCampaigns} />;
+    }
+
+    if (page === 'adminReadiness') {
+      return isAdmin ? <AdminMvpReadiness campaigns={campaigns} submissions={submissions} cloudMode={cloudMode} setPage={setPage} /> : home;
     }
 
     if (page === 'adminReports') {
