@@ -7,3 +7,15 @@ dist/
 test-auth-signup.mjs
 test-supabase-insert.mjs
 fix-*.cjs
+
+# Local cleanup / generated patch files
+_local_cleanup_archive/
+*.before-*.jsx
+*.before-*.html
+*.backup.jsx
+phase*.cjs
+fix-*.cjs
+polish-*.cjs
+force-*.cjs
+cleanup-local-archive.cjs
+solohub-*.zip
