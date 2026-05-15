@@ -789,6 +789,7 @@ const navs = {
     ['creatorDashboard', LayoutDashboard, 'Dashboard'],
     ['createCampaign', Plus, 'Create Campaign'],
     ['creatorCampaigns', Megaphone, 'My Campaigns'],
+    ['creatorDeposits', Wallet, 'Deposits'],
     ['creatorSubmissions', ShieldCheck, 'Submissions']
   ],
 
@@ -801,6 +802,7 @@ const navs = {
     ['onboarding', CheckCircle2, 'Getting Started'],
     ['createCampaign', Plus, 'Create Managed Campaign'],
     ['adminCampaigns', Megaphone, 'Campaigns'],
+    ['adminDeposits', Wallet, 'Deposit Proofs'],
     ['adminSubmissions', ShieldCheck, 'Submissions'],
     ['adminAffiliates', Coins, 'Affiliates'],
     ['adminPayouts', Coins, 'Payouts'],
@@ -4690,6 +4692,318 @@ function AnnouncementsPage({ currentRole, onUnreadChange }) {
   );
 }
 
+function campaignDepositStatus(campaign) {
+  return campaign.depositStatus || campaign.deposit_status || 'Pending';
+}
+
+function campaignDepositReviewStatus(campaign) {
+  return campaign.depositReviewStatus || campaign.deposit_review_status || 'Not Submitted';
+}
+
+function campaignDepositAmount(campaign) {
+  return Number(campaign.depositAmount || campaign.deposit_amount || 0);
+}
+
+function campaignPaymentReference(campaign) {
+  return campaign.paymentReference || campaign.payment_reference || '';
+}
+
+function CampaignDepositProofForm({ campaign, onCampaignFundingUpdate }) {
+  const [form, setForm] = useState(() => ({
+    deposit_amount: campaignDepositAmount(campaign) || '',
+    payment_reference: campaignPaymentReference(campaign),
+    deposit_payer_name: campaign.depositPayerName || campaign.deposit_payer_name || '',
+    deposit_payer_phone: campaign.depositPayerPhone || campaign.deposit_payer_phone || '',
+    deposit_proof_url: campaign.depositProofUrl || campaign.deposit_proof_url || '',
+    deposit_review_notes: campaign.depositReviewNotes || campaign.deposit_review_notes || ''
+  }));
+
+  useEffect(() => {
+    setForm({
+      deposit_amount: campaignDepositAmount(campaign) || '',
+      payment_reference: campaignPaymentReference(campaign),
+      deposit_payer_name: campaign.depositPayerName || campaign.deposit_payer_name || '',
+      deposit_payer_phone: campaign.depositPayerPhone || campaign.deposit_payer_phone || '',
+      deposit_proof_url: campaign.depositProofUrl || campaign.deposit_proof_url || '',
+      deposit_review_notes: campaign.depositReviewNotes || campaign.deposit_review_notes || ''
+    });
+  }, [campaign.id]);
+
+  const update = (key, value) => {
+    setForm((prev) => ({ ...prev, [key]: value }));
+  };
+
+  const submitProof = async (e) => {
+    e.preventDefault();
+
+    if (!form.deposit_amount || Number(form.deposit_amount) <= 0) {
+      alert('Enter amount paid.');
+      return;
+    }
+
+    if (!form.payment_reference.trim()) {
+      alert('Enter the M-Pesa reference.');
+      return;
+    }
+
+    if (!form.deposit_payer_phone.trim()) {
+      alert('Enter the phone number used to pay.');
+      return;
+    }
+
+    await onCampaignFundingUpdate?.(campaign.id, {
+      deposit_method: 'M-Pesa',
+      deposit_status: 'Pending Review',
+      deposit_review_status: 'Submitted',
+      deposit_amount: Number(form.deposit_amount || 0),
+      payment_reference: form.payment_reference.trim(),
+      deposit_payer_name: form.deposit_payer_name.trim(),
+      deposit_payer_phone: form.deposit_payer_phone.trim(),
+      deposit_proof_url: form.deposit_proof_url.trim(),
+      deposit_review_notes: form.deposit_review_notes.trim(),
+      deposit_submitted_at: new Date().toISOString()
+    });
+
+    alert('Deposit proof submitted for admin review.');
+  };
+
+  return (
+    <form className="deposit-proof-form" onSubmit={submitProof}>
+      <div className="deposit-proof-form-head">
+        <div>
+          <h3>{campaign.title}</h3>
+          <p>{campaign.creator || campaign.clientName || campaign.client_name || 'Creator campaign'}</p>
+        </div>
+
+        <Pill tone={campaignDepositStatus(campaign) === 'Paid' ? 'green' : campaignDepositStatus(campaign) === 'Rejected' ? 'red' : 'yellow'}>
+          {campaignDepositStatus(campaign)}
+        </Pill>
+      </div>
+
+      <div className="deposit-proof-grid">
+        <label>
+          Amount paid
+          <input type="number" value={form.deposit_amount} onChange={(e) => update('deposit_amount', e.target.value)} placeholder="Example: 2500" />
+        </label>
+
+        <label>
+          M-Pesa reference
+          <input value={form.payment_reference} onChange={(e) => update('payment_reference', e.target.value.toUpperCase())} placeholder="Example: TQ45ABCD12" />
+        </label>
+
+        <label>
+          Payer name
+          <input value={form.deposit_payer_name} onChange={(e) => update('deposit_payer_name', e.target.value)} placeholder="Name used to pay" />
+        </label>
+
+        <label>
+          Payer phone
+          <input value={form.deposit_payer_phone} onChange={(e) => update('deposit_payer_phone', e.target.value)} placeholder="07XXXXXXXX" />
+        </label>
+      </div>
+
+      <label>
+        Proof screenshot / receipt link
+        <input value={form.deposit_proof_url} onChange={(e) => update('deposit_proof_url', e.target.value)} placeholder="Paste Google Drive/WhatsApp image link or receipt URL" />
+      </label>
+
+      <label>
+        Notes for admin
+        <textarea value={form.deposit_review_notes} onChange={(e) => update('deposit_review_notes', e.target.value)} placeholder="Any payment details admin should know." />
+      </label>
+
+      <button type="submit" className="affiliate-action-btn">
+        Submit deposit proof
+      </button>
+    </form>
+  );
+}
+
+function CreatorDepositsPage({ campaigns = [], onCampaignFundingUpdate }) {
+  return (
+    <section className="deposits-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="green"><Wallet size={14} /> Campaign Deposits</Pill>
+          <h2>Submit payment proof for your campaigns.</h2>
+          <p>After paying via M-Pesa, add the reference, amount, phone number, and receipt link for admin review.</p>
+        </div>
+      </div>
+
+      <div className="payment-instructions-box">
+        <Pill tone="yellow">Payment Instructions</Pill>
+        <h3>Pay to SoloHub M-Pesa Till/Paybill</h3>
+        <p>Use the official SoloHub payment details shown in Admin Settings once the Till is ready. For now, submit the exact reference and receipt details after payment.</p>
+      </div>
+
+      <div className="deposit-proof-list">
+        {campaigns.map((campaign) => (
+          <CampaignDepositProofForm
+            key={campaign.id}
+            campaign={campaign}
+            onCampaignFundingUpdate={onCampaignFundingUpdate}
+          />
+        ))}
+
+        {!campaigns.length && (
+          <div className="panel">
+            <Pill tone="yellow">No campaigns</Pill>
+            <h3>No creator campaigns found.</h3>
+            <p>Create a campaign first, then submit deposit proof here.</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
+function AdminDepositProofsPage({ campaigns = [], onCampaignFundingUpdate, onCampaignStatus }) {
+  const [filter, setFilter] = useState('All');
+  const [reviewNotes, setReviewNotes] = useState({});
+
+  const getNote = (id, fallback = '') => reviewNotes[id] ?? fallback;
+
+  const updateNote = (id, value) => {
+    setReviewNotes((prev) => ({ ...prev, [id]: value }));
+  };
+
+  const visibleCampaigns = campaigns.filter((campaign) => {
+    if (filter === 'All') return true;
+    return campaignDepositStatus(campaign) === filter || campaignDepositReviewStatus(campaign) === filter;
+  });
+
+  const reviewDeposit = async (campaign, nextStatus, nextReviewStatus, makeLive = false) => {
+    const note = getNote(campaign.id, campaign.depositReviewNotes || campaign.deposit_review_notes || '');
+
+    await onCampaignFundingUpdate?.(campaign.id, {
+      deposit_status: nextStatus,
+      deposit_review_status: nextReviewStatus,
+      deposit_review_notes: note,
+      admin_notes: note,
+      updated_at: new Date().toISOString()
+    });
+
+    if (makeLive) {
+      await onCampaignStatus?.(campaign.id, 'Live');
+    }
+
+    alert('Deposit review updated.');
+  };
+
+  const submittedCount = campaigns.filter((campaign) => campaignDepositReviewStatus(campaign) === 'Submitted').length;
+  const paidCount = campaigns.filter((campaign) => campaignDepositStatus(campaign) === 'Paid').length;
+  const partialCount = campaigns.filter((campaign) => campaignDepositStatus(campaign) === 'Partial').length;
+  const rejectedCount = campaigns.filter((campaign) => campaignDepositStatus(campaign) === 'Rejected').length;
+
+  return (
+    <section className="admin-deposits-page">
+      <div className="section-head">
+        <div>
+          <Pill tone="purple"><Wallet size={14} /> Deposit Proofs</Pill>
+          <h2>Review creator payment proof and campaign funding.</h2>
+          <p>Confirm M-Pesa references, receipt links, payment amounts, and decide whether campaigns are funded enough to go live.</p>
+        </div>
+      </div>
+
+      <div className="stats-grid">
+        <StatCard icon={Wallet} label="Submitted" value={submittedCount} helper="Awaiting review" />
+        <StatCard icon={CheckCircle2} label="Paid" value={paidCount} helper="Confirmed full deposit" />
+        <StatCard icon={Coins} label="Partial" value={partialCount} helper="Part payment" />
+        <StatCard icon={XCircle} label="Rejected" value={rejectedCount} helper="Needs correction" />
+      </div>
+
+      <div className="deposit-filter-row">
+        <label>
+          Filter deposits
+          <select value={filter} onChange={(e) => setFilter(e.target.value)}>
+            <option>All</option>
+            <option>Pending</option>
+            <option>Pending Review</option>
+            <option>Submitted</option>
+            <option>Partial</option>
+            <option>Paid</option>
+            <option>Rejected</option>
+            <option>Needs Correction</option>
+          </select>
+        </label>
+
+        <span>{visibleCampaigns.length} campaign{visibleCampaigns.length === 1 ? '' : 's'} shown</span>
+      </div>
+
+      <div className="admin-deposit-list">
+        {visibleCampaigns.map((campaign) => {
+          const proofUrl = campaign.depositProofUrl || campaign.deposit_proof_url || '';
+          const note = getNote(campaign.id, campaign.depositReviewNotes || campaign.deposit_review_notes || '');
+
+          return (
+            <article key={campaign.id} className="admin-deposit-card">
+              <div className="admin-deposit-head">
+                <div>
+                  <Pill tone={campaignDepositStatus(campaign) === 'Paid' ? 'green' : campaignDepositStatus(campaign) === 'Rejected' ? 'red' : 'yellow'}>
+                    {campaignDepositStatus(campaign)}
+                  </Pill>
+
+                  <h3>{campaign.title}</h3>
+                  <p>{campaign.creator || campaign.clientName || campaign.client_name || 'Creator/client'}</p>
+                </div>
+
+                <div className="admin-deposit-money">
+                  <span>Amount paid</span>
+                  <strong>{money(campaignDepositAmount(campaign))}</strong>
+                  <small>{campaignDepositReviewStatus(campaign)}</small>
+                </div>
+              </div>
+
+              <div className="admin-deposit-details">
+                <div><span>Reference</span><strong>{campaignPaymentReference(campaign) || '-'}</strong></div>
+                <div><span>Payer name</span><strong>{campaign.depositPayerName || campaign.deposit_payer_name || '-'}</strong></div>
+                <div><span>Payer phone</span><strong>{campaign.depositPayerPhone || campaign.deposit_payer_phone || '-'}</strong></div>
+                <div><span>Submitted</span><strong>{campaign.depositSubmittedAt || campaign.deposit_submitted_at ? String(campaign.depositSubmittedAt || campaign.deposit_submitted_at).slice(0, 16).replace('T', ' ') : '-'}</strong></div>
+              </div>
+
+              {proofUrl && (
+                <a className="deposit-proof-link" href={proofUrl} target="_blank" rel="noreferrer">
+                  Open proof / receipt link
+                </a>
+              )}
+
+              <label className="admin-review-note">
+                Admin review note
+                <textarea value={note} onChange={(e) => updateNote(campaign.id, e.target.value)} placeholder="Write confirmation notes, correction request, or rejection reason." />
+              </label>
+
+              <div className="admin-deposit-actions">
+                <button type="button" className="affiliate-action-btn" onClick={() => reviewDeposit(campaign, 'Paid', 'Approved', true)}>
+                  Confirm Paid + Make Live
+                </button>
+
+                <button type="button" className="mini-action" onClick={() => reviewDeposit(campaign, 'Partial', 'Approved', false)}>
+                  Mark Partial
+                </button>
+
+                <button type="button" className="mini-action" onClick={() => reviewDeposit(campaign, 'Pending', 'Needs Correction', false)}>
+                  Needs Correction
+                </button>
+
+                <button type="button" className="mini-action ghost" onClick={() => reviewDeposit(campaign, 'Rejected', 'Rejected', false)}>
+                  Reject Proof
+                </button>
+              </div>
+            </article>
+          );
+        })}
+
+        {!visibleCampaigns.length && (
+          <div className="panel">
+            <h3>No deposit proofs found.</h3>
+            <p>Change the filter or wait for creators to submit payment proof.</p>
+          </div>
+        )}
+      </div>
+    </section>
+  );
+}
+
 function AdminAnnouncementsPage({ user }) {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -7699,6 +8013,12 @@ const content = useMemo(() => {
       return <CreateCampaignPage onCreateCampaign={createCampaign} />;
     }
 
+    if (page === 'creatorDeposits') {
+      return currentRole === 'creator'
+        ? <CreatorDepositsPage campaigns={ownCampaigns} onCampaignFundingUpdate={handleCampaignFundingUpdate} />
+        : home;
+    }
+
     if (page === 'creatorCampaigns') {
       return <CreatorCampaigns campaigns={ownCampaigns} submissions={ownCreatorSubmissions} onCreatorCampaignUpdate={updateCreatorCampaign} />;
     }
@@ -7733,6 +8053,12 @@ const content = useMemo(() => {
 
     if (page === 'adminOverview') {
       return isAdmin ? <AdminOverview campaigns={campaigns} submissions={submissions} cloudMode={cloudMode} /> : home;
+    }
+
+    if (page === 'adminDeposits') {
+      return isAdmin
+        ? <AdminDepositProofsPage campaigns={campaigns} onCampaignFundingUpdate={handleCampaignFundingUpdate} onCampaignStatus={handleCampaignStatus} />
+        : home;
     }
 
     if (page === 'adminCampaigns') {
