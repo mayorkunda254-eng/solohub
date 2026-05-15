@@ -898,6 +898,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
   const [resetEmailSent, setResetEmailSent] = useState(false);
   const [authMessage, setAuthMessage] = useState('');
   const [loading, setLoading] = useState(false);
+  const [acceptedTerms, setAcceptedTerms] = useState(false);
 
   useEffect(() => {
     const invited = cleanInviteRole(inviteRole);
@@ -967,6 +968,11 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
       return;
     }
 
+    if (!acceptedTerms) {
+      alert('Please accept the SoloHub terms, privacy policy, payout rules, and fraud policy before creating an account.');
+      return;
+    }
+
     setLoading(true);
     setAuthMessage('Creating account...');
 
@@ -978,7 +984,10 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
           data: {
             full_name: fullName,
             role: accountRole,
-            referral_code: referralCode || ''
+            referral_code: referralCode || '',
+            terms_accepted: true,
+            terms_accepted_at: new Date().toISOString(),
+            accepted_documents: ['Terms and Conditions', 'Privacy Policy', 'Clipper Payout Rules', 'Content and Fraud Policy']
           }
         }
       });
@@ -1186,6 +1195,19 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
           <label>
             Password
             <input type="password" value={password} onChange={(e) => setPassword(e.target.value)} placeholder="Your password" required />
+          </label>
+        )}
+
+        {mode === 'signup' && (
+          <label className="solo-terms-check">
+            <input
+              type="checkbox"
+              checked={acceptedTerms}
+              onChange={(e) => setAcceptedTerms(e.target.checked)}
+            />
+            <span>
+              I agree to SoloHub Terms, Privacy Policy, Clipper Payout Rules, and Content/Fraud Policy.
+            </span>
           </label>
         )}
 
