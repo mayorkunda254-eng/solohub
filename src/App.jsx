@@ -1032,7 +1032,7 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
         setAuthMessage?.('Login successful. Opening your dashboard...');
         setTimeout(() => {
           window.location.reload();
-        }, 350);
+        }, 20);
         return;
       }
 
@@ -8960,7 +8960,7 @@ const content = useMemo(() => {
 
     if (page === 'creatorDeposits') {
       return currentRole === 'creator'
-        ? <CreatorDepositsPage campaigns={ownCampaigns} onCampaignFundingUpdate={handleCampaignFundingUpdate} />
+        ? <CreatorDepositsPage campaigns={ownCampaigns} onCampaignFundingUpdate={updateCampaignFunding} />
         : home;
     }
 
@@ -9010,7 +9010,7 @@ const content = useMemo(() => {
 
     if (page === 'adminDeposits') {
       return isAdmin
-        ? <AdminDepositProofsPage campaigns={campaigns} onCampaignFundingUpdate={handleCampaignFundingUpdate} onCampaignStatus={handleCampaignStatus} />
+        ? <AdminDepositProofsPage campaigns={campaigns} onCampaignFundingUpdate={updateCampaignFunding} onCampaignStatus={handleCampaignStatus} />
         : home;
     }
 

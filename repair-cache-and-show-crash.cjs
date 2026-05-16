@@ -1,21 +1,12 @@
+﻿const fs = require("fs");
 
-if (typeof window !== "undefined" && !window.__soloHubForceUnregisterSw) {
-  window.__soloHubForceUnregisterSw = true;
+const file = "src/main.jsx";
+let code = fs.readFileSync(file, "utf8");
 
-  if ("serviceWorker" in navigator) {
-    navigator.serviceWorker.getRegistrations()
-      .then((registrations) => registrations.forEach((registration) => registration.unregister()))
-      .catch(() => {});
-  }
+fs.writeFileSync("src/main.before-cache-crash-repair.jsx", code);
 
-  if ("caches" in window) {
-    caches.keys()
-      .then((keys) => Promise.all(keys.map((key) => caches.delete(key))))
-      .catch(() => {});
-  }
-}
-
-
+if (!code.includes("__solohubCrashRepair")) {
+  const patch = `
 if (typeof window !== "undefined" && !window.__solohubCrashRepair) {
   window.__solohubCrashRepair = true;
 
@@ -27,7 +18,6 @@ if (typeof window !== "undefined" && !window.__solohubCrashRepair) {
 
   const showCrash = (title, message, stack = "") => {
     setTimeout(() => {
-      if (window.__solohubLoginRefreshFix) return;
       if (!document.body) return;
 
       document.body.innerHTML =
@@ -36,10 +26,10 @@ if (typeof window !== "undefined" && !window.__solohubCrashRepair) {
         '<h1 style="margin-top:0;color:#facc15;">SoloHub runtime error</h1>' +
         '<p>The app did not load cleanly. Copy this message and send it for fixing.</p>' +
         '<pre style="white-space:pre-wrap;background:#020617;padding:16px;border-radius:14px;overflow:auto;color:#bbf7d0;">' +
-        safeText(title + "\n\n" + message + "\n\n" + stack) +
+        safeText(title + "\\n\\n" + message + "\\n\\n" + stack) +
         '</pre>' +
         '</div></div>';
-    }, 1500);
+    }, 50);
   };
 
   window.addEventListener("error", (event) => {
@@ -93,52 +83,11 @@ if (typeof window !== "undefined" && !window.__solohubCrashRepair) {
   });
 }
 
+`;
 
-import React from 'react';
-import { createRoot } from 'react-dom/client';
-import App from './App.jsx';
-import './styles.css';
-
-createRoot(document.getElementById('root')).render(
-  <React.StrictMode>
-    <App />
-  </React.StrictMode>
-);
-
-
-
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
-    navigator.serviceWorker
-      .register('/solohub-sw.js')
-      .catch((error) => console.warn('SoloHub service worker registration failed:', error));
-  });
+  code = patch + "\n" + code;
 }
 
+fs.writeFileSync(file, code, "utf8");
 
-// SoloHub production-only service worker.
-// In development, unregister service workers so localhost does not serve stale cached code.
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', async () => {
-    const isLocalDev =
-      location.hostname === 'localhost' ||
-      location.hostname === '127.0.0.1' ||
-      location.hostname.startsWith('192.168.') ||
-      location.hostname.startsWith('10.') ||
-      location.hostname.startsWith('172.');
-
-    if (import.meta.env.PROD && !isLocalDev) {
-      navigator.serviceWorker
-        .register('/solohub-sw.js')
-        .catch((error) => console.warn('SoloHub service worker registration failed:', error));
-    } else {
-      const registrations = await navigator.serviceWorker.getRegistrations();
-      await Promise.all(registrations.map((registration) => registration.unregister()));
-
-      if ('caches' in window) {
-        const keys = await caches.keys();
-        await Promise.all(keys.filter((key) => key.includes('solohub')).map((key) => caches.delete(key)));
-      }
-    }
-  });
-}
+console.log("✅ Added cache repair and crash reporter to src/main.jsx");

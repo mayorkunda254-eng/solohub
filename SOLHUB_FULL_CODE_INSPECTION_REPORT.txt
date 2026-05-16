@@ -1,0 +1,923 @@
+SOLOHUB FULL CODE INSPECTION REPORT
+Generated: 2026-05-16T04:03:29.177Z
+Root: C:\Users\MarkMo\Documents\solohub-phase3-fixed
+
+============================================================
+1. PROJECT FILE SUMMARY
+============================================================
+add-admin-managed-campaign.cjs | 0.7 KB
+announcements-local-fallback.cjs | 5.2 KB
+cleanup-css-safe.cjs | 7.4 KB
+cleanup-local-archive.cjs | 1.5 KB
+cleanup-solohub-project.cjs | 3.5 KB
+fix-login-whitepage-refresh.cjs | 1.2 KB
+index.html | 0.8 KB
+inspect-whole-solohub-code.cjs | 8.2 KB
+package-lock.json | 32.6 KB
+package.json | 0.4 KB
+phase63-cloud-safe-wording.cjs | 2.9 KB
+public/manifest.webmanifest | 0.6 KB
+public/solohub-sw.js | 1.2 KB
+repair-css-utf8.cjs | 0.8 KB
+solohub-cleanup-report.json | 5.9 KB
+src/App.backup.jsx | 41.4 KB
+src/App.before-announcements-local-fallback.jsx | 333.8 KB
+src/App.before-cloud-safe-cleanup.jsx | 335.0 KB
+src/App.before-login-refresh-fix.jsx | 333.5 KB
+src/App.jsx | 335.0 KB
+src/data.js | 4.4 KB
+src/main.before-dev-sw-fix.jsx | 0.5 KB
+src/main.before-pwa.jsx | 0.2 KB
+src/main.jsx | 1.5 KB
+src/styles.before-utf8-repair.css | 149.2 KB
+src/styles.css | 149.2 KB
+src/supabaseClient.js | 0.3 KB
+_local_cleanup_archive/fix-admin-role-final.cjs | 4.0 KB
+_local_cleanup_archive/fix-admin-role-overwrite.cjs | 1.4 KB
+_local_cleanup_archive/fix-admin-users-direct.cjs | 5.3 KB
+_local_cleanup_archive/fix-admin-users-rpc.cjs | 2.6 KB
+_local_cleanup_archive/fix-admin-users-timeout-ui.cjs | 1.5 KB
+_local_cleanup_archive/fix-affiliate-autocreate-referral.cjs | 2.4 KB
+_local_cleanup_archive/fix-affiliate-buttons-direct.cjs | 1.8 KB
+_local_cleanup_archive/fix-affiliate-dropdown-select.cjs | 2.3 KB
+_local_cleanup_archive/fix-affiliate-page-after-inspection.cjs | 17.2 KB
+_local_cleanup_archive/fix-affiliate-timeout-upsert.cjs | 3.5 KB
+_local_cleanup_archive/fix-approve-buttons-safe.cjs | 2.4 KB
+_local_cleanup_archive/fix-approve-buttons.cjs | 2.6 KB
+_local_cleanup_archive/fix-auth-final.cjs | 0.5 KB
+_local_cleanup_archive/fix-blank-page.cjs | 0.8 KB
+_local_cleanup_archive/fix-campaign-approve-rest.cjs | 3.1 KB
+_local_cleanup_archive/fix-campaign-rest-insert.cjs | 2.2 KB
+_local_cleanup_archive/fix-clip-submit-rest-v2.cjs | 4.0 KB
+_local_cleanup_archive/fix-clip-submit-rest.cjs | 3.2 KB
+_local_cleanup_archive/fix-dev-service-worker-cache.cjs | 1.6 KB
+_local_cleanup_archive/fix-fast-admin-users.cjs | 1.5 KB
+_local_cleanup_archive/fix-header-actions-small.cjs | 1.6 KB
+_local_cleanup_archive/fix-header-buttons.cjs | 2.9 KB
+_local_cleanup_archive/fix-inspected-admin-role.cjs | 9.1 KB
+_local_cleanup_archive/fix-login-buttons.cjs | 1.8 KB
+_local_cleanup_archive/fix-logout.cjs | 2.0 KB
+_local_cleanup_archive/fix-mark-paid-rest.cjs | 3.3 KB
+_local_cleanup_archive/fix-missing-goactivity.cjs | 1.1 KB
+_local_cleanup_archive/fix-mobile-menu-duplicates.cjs | 3.5 KB
+_local_cleanup_archive/fix-owner-admin-override.cjs | 4.3 KB
+_local_cleanup_archive/fix-owner-users-rpc.cjs | 0.8 KB
+_local_cleanup_archive/fix-profile-role.cjs | 1.2 KB
+_local_cleanup_archive/fix-pwa-white-page-icon.cjs | 0.6 KB
+_local_cleanup_archive/fix-real-auth-layout.cjs | 8.6 KB
+_local_cleanup_archive/fix-review-submission-rest.cjs | 3.1 KB
+_local_cleanup_archive/fix-role-final.cjs | 2.2 KB
+_local_cleanup_archive/fix-role-profile.cjs | 6.6 KB
+_local_cleanup_archive/fix-sidebar-final-mobile.cjs | 4.6 KB
+_local_cleanup_archive/fix-sidebar-hard-close.cjs | 2.2 KB
+_local_cleanup_archive/fix-sidebar-unmount-mobile.cjs | 5.3 KB
+_local_cleanup_archive/fix-simple-centered-auth.cjs | 2.2 KB
+_local_cleanup_archive/fix-submission-review-rest-v2.cjs | 4.6 KB
+_local_cleanup_archive/fix-submission-review-rest.cjs | 4.5 KB
+_local_cleanup_archive/fix-submit-timeout.cjs | 2.4 KB
+_local_cleanup_archive/fix-white-page-notification.cjs | 4.0 KB
+_local_cleanup_archive/fix-wizard-submit.cjs | 2.3 KB
+_local_cleanup_archive/force-close-sidebar-on-page.cjs | 0.7 KB
+_local_cleanup_archive/phase11-authenticated-rest.cjs | 1.3 KB
+_local_cleanup_archive/phase15-whop-style-campaigns.cjs | 14.8 KB
+_local_cleanup_archive/phase15-whop-style-safe-v2.cjs | 10.0 KB
+_local_cleanup_archive/phase16-create-campaign-media.cjs | 10.7 KB
+_local_cleanup_archive/phase17-supabase-storage-images.cjs | 4.8 KB
+_local_cleanup_archive/phase18-affiliate-program.cjs | 15.8 KB
+_local_cleanup_archive/phase19-referral-links.cjs | 8.3 KB
+_local_cleanup_archive/phase20-public-landing.cjs | 5.8 KB
+_local_cleanup_archive/phase21-campaign-funding.cjs | 9.7 KB
+_local_cleanup_archive/phase22-payment-instructions.cjs | 4.3 KB
+_local_cleanup_archive/phase23-admin-deposit-controls.cjs | 10.3 KB
+_local_cleanup_archive/phase24-client-invoice.cjs | 8.7 KB
+_local_cleanup_archive/phase25-clipper-payout-profile.cjs | 12.5 KB
+_local_cleanup_archive/phase26-creator-campaign-manager.cjs | 18.0 KB
+_local_cleanup_archive/phase27-creator-submissions-page.cjs | 6.7 KB
+_local_cleanup_archive/phase28-activity-center.cjs | 10.6 KB
+_local_cleanup_archive/phase29-platform-settings.cjs | 9.7 KB
+_local_cleanup_archive/phase30-notification-bell.cjs | 5.0 KB
+_local_cleanup_archive/phase31-admin-users.cjs | 6.9 KB
+_local_cleanup_archive/phase32-admin-invite-links.cjs | 8.6 KB
+_local_cleanup_archive/phase33-onboarding-checklist.cjs | 9.9 KB
+_local_cleanup_archive/phase34-discover-filters.cjs | 8.9 KB
+_local_cleanup_archive/phase35-saved-campaigns.cjs | 8.5 KB
+_local_cleanup_archive/phase36-campaign-share-links.cjs | 5.4 KB
+_local_cleanup_archive/phase37-smart-submit.cjs | 10.7 KB
+_local_cleanup_archive/phase38-reports-center.cjs | 11.2 KB
+_local_cleanup_archive/phase39-campaign-lifecycle.cjs | 4.6 KB
+_local_cleanup_archive/phase41-forgot-password.cjs | 13.4 KB
+_local_cleanup_archive/phase42-auth-standard-layout.cjs | 3.6 KB
+_local_cleanup_archive/phase42b-auth-layout-class.cjs | 0.9 KB
+_local_cleanup_archive/phase43-create-pwa-files.cjs | 3.2 KB
+_local_cleanup_archive/phase43-register-sw.cjs | 0.5 KB
+_local_cleanup_archive/phase44-pwa-install-button.cjs | 3.1 KB
+_local_cleanup_archive/phase44-safer-service-worker.cjs | 1.3 KB
+_local_cleanup_archive/phase6-ownership.cjs | 1.2 KB
+_local_cleanup_archive/phase7-access-filtering-v2.cjs | 5.4 KB
+_local_cleanup_archive/phase7-access-filtering-v3.cjs | 5.8 KB
+_local_cleanup_archive/phase7-access-filtering.cjs | 6.5 KB
+_local_cleanup_archive/phase8-clean-auth-ui-safe.cjs | 8.0 KB
+_local_cleanup_archive/phase8-clean-auth-ui.cjs | 7.9 KB
+_local_cleanup_archive/phase9-clean-homepage-copy.cjs | 1.3 KB
+_local_cleanup_archive/polish-auth-copy.cjs | 0.7 KB
+
+============================================================
+2. PACKAGE.JSON
+============================================================
+{
+  "name": "solohub-mvp-starter",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "dev": "vite --host 0.0.0.0",
+    "build": "vite build",
+    "preview": "vite preview --host 0.0.0.0"
+  },
+  "dependencies": {
+    "@vitejs/plugin-react": "latest",
+    "vite": "latest",
+    "react": "latest",
+    "react-dom": "latest",
+    "lucide-react": "latest",
+    "@supabase/supabase-js": "latest"
+  },
+  "devDependencies": {}
+}
+
+============================================================
+3. MAIN FILE SIZES
+============================================================
+src/App.jsx exists: true
+src/App.jsx lines: 9298
+src/styles.css exists: true
+src/styles.css lines: 7051
+index.html exists: true
+manifest exists: true
+
+============================================================
+4. APP IMPORTS
+============================================================
+1 | import React, { useEffect, useMemo, useState } from 'react';
+2 | import {
+24 | import { academyLessons, seedCampaigns, seedSubmissions } from './data.js';
+25 | import { isSupabaseConfigured, supabase } from './supabaseClient.js';
+
+============================================================
+5. FUNCTION / COMPONENT MAP
+============================================================
+   27 | const arrow  | money
+   30 | const arrow  | defaultPageForRole
+   31 | const arrow  | cleanRole
+   38 | const arrow  | isOwnerEmail
+   40 | const arrow  | roleForUser
+   68 | function     | cleanAffiliateDisplayMessage
+   82 | function     | getActivityCountForRole
+  131 | function     | getStoredPaymentDetails
+  142 | function     | normalizePaymentDetails
+  153 | function     | applyPaymentDetails
+  164 | function     | fetchPlatformPaymentDetails
+  191 | function     | savePlatformPaymentDetails
+  223 | const arrow  | cleanInviteRole
+  228 | function     | captureInviteRoleFromUrl
+  241 | function     | clearInviteRole
+  247 | function     | buildInviteLink
+  266 | const arrow  | cleanReferralCode
+  273 | function     | captureReferralCodeFromUrl
+  287 | function     | claimStoredReferralCode
+  326 | function     | withSupabaseTimeout
+  343 | function     | useLocalState
+  353 | const arrow  | update
+  362 | const arrow  | toCampaign
+  406 | const arrow  | toCampaignDb
+  439 | const arrow  | toSubmission
+  455 | const arrow  | toSubmissionDb
+  469 | function     | Pill
+  473 | function     | Button
+  477 | function     | StatCard
+  493 | function     | getSavedCampaignIds
+  503 | function     | saveCampaignIds
+  510 | function     | getCampaignIdFromUrl
+  517 | function     | buildCampaignShareLink
+  530 | function     | copyCampaignShareLink
+  546 | function     | clearCampaignIdFromUrl
+  558 | function     | csvEscape
+  566 | function     | rowsToCsv
+  577 | function     | downloadCsv
+  596 | function     | getPasswordResetRedirectUrl
+  604 | function     | isPasswordResetUrl
+  613 | function     | clearPasswordResetUrl
+  626 | function     | PwaInstallButton
+  639 | const arrow  | handleBeforeInstallPrompt
+  644 | const arrow  | handleInstalled
+  658 | const arrow  | installApp
+  683 | function     | getReadAnnouncementIds
+  693 | function     | saveReadAnnouncementIds
+  699 | function     | markAnnouncementsRead
+  704 | function     | getUnreadAnnouncementCount
+  712 | function     | Header
+  715 | const arrow  | goDashboard
+  728 | const arrow  | goLogin
+  745 | const arrow  | goActivity
+  857 | function     | Sidebar
+  867 | const arrow  | update
+  884 | const arrow  | closeMenu
+  888 | const arrow  | goToPage
+  975 | function     | AuthBox
+ 1011 | const arrow  | signIn
+ 1052 | const arrow  | signUp
+ 1105 | const arrow  | sendPasswordReset
+ 1140 | const arrow  | updatePassword
+ 1365 | function     | Hero
+ 1366 | const arrow  | goClipper
+ 1372 | const arrow  | goCreator
+ 1378 | const arrow  | goSignup
+ 1592 | function     | getLocalCampaignRequests
+ 1601 | function     | saveLocalCampaignRequests
+ 1605 | function     | PublicCampaignRequestPage
+ 1623 | const arrow  | update
+ 1627 | const arrow  | togglePlatform
+ 1640 | const arrow  | submitRequest
+ 1822 | function     | CampaignRequestCta
+ 1838 | function     | AdminCampaignRequestsPage
+ 1845 | const arrow  | loadRequests
+ 1886 | const arrow  | updateStatus
+ 1927 | const arrow  | deleteRequest
+ 1957 | const arrow  | copyWhatsAppFollowUp
+ 1986 | const arrow  | copyCampaignBrief
+ 2155 | function     | PublicLegalPage
+ 2158 | const arrow  | copyDocument
+ 2214 | function     | PublicLegalLinks
+ 2225 | function     | PublicHowItWorks
+ 2319 | function     | LoggedOutAuthPage
+ 2354 | function     | HomePage
+ 2414 | function     | CampaignCard
+ 2444 | function     | SavedCampaignsPage
+ 2449 | const arrow  | openCampaign
+ 2530 | function     | DiscoverPage
+ 2579 | const arrow  | openCampaign
+ 2745 | function     | CampaignModal
+ 2769 | function     | SubmitPage
+ 2787 | const arrow  | detectPlatform
+ 2798 | const arrow  | updatePostUrl
+ 2808 | const arrow  | update
+ 2812 | const arrow  | updateCheck
+ 2816 | const arrow  | copyHashtags
+ 2833 | const arrow  | copyRules
+ 2854 | const arrow  | submit
+ 3075 | function     | UserProfilePage
+ 3097 | const arrow  | update
+ 3101 | const arrow  | saveProfile
+ 3258 | function     | OnboardingChecklist
+ 3449 | function     | ActivityCenter
+ 3543 | const arrow  | copyEvent
+ 3552 | const arrow  | copyFullReport
+ 3652 | function     | CreatorSubmissionsPage
+ 3671 | const arrow  | copyCreatorReport
+ 3700 | const arrow  | statusTone
+ 3807 | function     | SubmissionsPage
+ 3833 | function     | EarningsPage
+ 3858 | const arrow  | update
+ 3862 | const arrow  | saveProfile
+ 3866 | const arrow  | buildReceipt
+ 3893 | const arrow  | copyReceipt
+ 4027 | function     | AcademyPage
+ 4036 | function     | CreatorDashboard
+ 4051 | function     | CreateCampaignPage
+ 4083 | const arrow  | update
+ 4087 | const arrow  | handleImageUpload
+ 4107 | const arrow  | submit
+ 4425 | function     | CreatorCampaigns
+ 4429 | const arrow  | getCampaignSubmissions
+ 4436 | const arrow  | getStats
+ 4463 | const arrow  | getDraft
+ 4480 | const arrow  | updateDraft
+ 4490 | const arrow  | saveCampaign
+ 4514 | const arrow  | buildPaymentSummary
+ 4541 | const arrow  | copyPaymentSummary
+ 4739 | function     | AdminOverview
+ 4753 | function     | AdminCampaigns
+ 4757 | const arrow  | depositTone
+ 4764 | const arrow  | getDraft
+ 4775 | const arrow  | updateDraft
+ 4785 | const arrow  | saveDeposit
+ 4796 | const arrow  | buildClientPaymentSummary
+ 4830 | const arrow  | copyPaymentSummary
+ 4842 | const arrow  | escapeHtml
+ 4851 | const arrow  | printClientInvoice
+ 5081 | function     | AdminSubmissions
+ 5082 | const arrow  | review
+ 5117 | function     | InviteLinkPanel
+ 5120 | const arrow  | copyLink
+ 5165 | function     | announcementTone
+ 5171 | function     | fallbackAnnouncements
+ 5180 | function     | saveFallbackAnnouncements
+ 5185 | function     | getLocalAnnouncementsData
+ 5210 | function     | saveLocalAnnouncementsData
+ 5214 | function     | AnnouncementsPage
+ 5220 | const arrow  | loadAnnouncements
+ 5271 | const arrow  | markAllAnnouncementsRead
+ 5342 | function     | campaignDepositStatus
+ 5346 | function     | campaignDepositReviewStatus
+ 5350 | function     | campaignDepositAmount
+ 5354 | function     | campaignPaymentReference
+ 5358 | function     | CampaignDepositProofForm
+ 5379 | const arrow  | update
+ 5383 | const arrow  | submitProof
+ 5469 | function     | CreatorDepositsPage
+ 5507 | function     | AdminDemoScriptPage
+ 5534 | const arrow  | copyText
+ 5729 | function     | AdminDepositProofsPage
+ 5733 | const arrow  | getNote
+ 5735 | const arrow  | updateNote
+ 5744 | const arrow  | reviewDeposit
+ 5876 | function     | AdminAnnouncementsPage
+ 5888 | const arrow  | update
+ 5892 | const arrow  | loadAdminAnnouncements
+ 5936 | const arrow  | createAnnouncement
+ 6003 | const arrow  | updateAnnouncementStatus
+ 6039 | const arrow  | deleteAnnouncement
+ 6193 | function     | AdminAuditLog
+ 6212 | const arrow  | saveManualNotes
+ 6217 | const arrow  | addManualNote
+ 6247 | const arrow  | removeManualNote
+ 6354 | const arrow  | copyAuditSummary
+ 6385 | const arrow  | severityTone
+ 6509 | function     | AdminComplianceCenter
+ 6558 | const arrow  | updateDoc
+ 6573 | const arrow  | copyDoc
+ 6584 | const arrow  | downloadDoc
+ 6597 | const arrow  | resetDoc
+ 6708 | function     | AdminMvpReadiness
+ 6780 | const arrow  | copyInvestorSummary
+ 6920 | function     | AdminReports
+ 7004 | const arrow  | copySummaryReport
+ 7105 | function     | AdminUsers
+ 7110 | const arrow  | loadProfiles
+ 7165 | const arrow  | updateUserRole
+ 7311 | function     | AdminPlatformSettings
+ 7316 | const arrow  | update
+ 7320 | const arrow  | loadSettings
+ 7333 | const arrow  | saveSettings
+ 7454 | function     | getLocalAffiliateData
+ 7468 | function     | saveLocalAffiliateData
+ 7473 | function     | AdminAffiliates
+ 7502 | const arrow  | loadAffiliateData
+ 7552 | const arrow  | updateAffiliate
+ 7556 | const arrow  | updateReferral
+ 7560 | const arrow  | createAffiliate
+ 7652 | const arrow  | calculateCommission
+ 7670 | const arrow  | createReferral
+ 7777 | const arrow  | updateReferralStatus
+ 7995 | function     | AdminPayouts
+ 8020 | function     | App
+ 8037 | const arrow  | loadProfile
+ 8102 | const arrow  | handleAuthUser
+ 8182 | const arrow  | updateProfileRole
+ 8221 | const arrow  | logout
+ 8239 | const arrow  | removeMatchingKeys
+ 8276 | const arrow  | loadCloudData
+ 8321 | const arrow  | createCampaign
+ 8377 | const arrow  | updateCampaignFunding
+ 8437 | const arrow  | campaignStatus
+ 8474 | const arrow  | submitClip
+ 8527 | const arrow  | reviewSubmission
+ 8569 | const arrow  | markPaid
+ 8622 | const arrow  | updatePayoutProfile
+ 8673 | const arrow  | updateCreatorCampaign
+ 8755 | const arrow  | toggleSavedCampaign
+ 8800 | const arrow  | refreshAnnouncementUnreadCount
+ 9059 | function     | updateCampaignDirect
+ 9085 | function     | insertSubmissionDirect
+ 9111 | function     | updateSubmissionDirect
+ 9137 | function     | insertPayoutDirect
+ 9163 | function     | getSupabaseAuthHeaders
+ 9183 | function     | uploadCampaignImageFile
+ 9230 | function     | fetchAffiliateDataDirect
+ 9251 | function     | insertAffiliateDirect
+ 9267 | function     | insertReferralDirect
+ 9283 | function     | updateReferralDirect
+
+============================================================
+6. DUPLICATE FUNCTION NAMES
+============================================================
+update: 10
+openCampaign: 2
+submit: 2
+saveProfile: 2
+getDraft: 2
+updateDraft: 2
+copyPaymentSummary: 2
+
+============================================================
+7. PAGE ROUTES DETECTED
+============================================================
+ 2194 | publicTerms
+ 2198 | publicPrivacy
+ 2202 | publicPayoutRules
+ 2206 | publicFraudPolicy
+ 2358 | publicCampaignRequest
+ 8901 | home
+ 8903 | announcements
+ 8907 | profile
+ 8911 | onboarding
+ 8917 | activity
+ 8923 | savedCampaigns
+ 8935 | discover
+ 8939 | submit
+ 8943 | submissions
+ 8947 | earnings
+ 8951 | academy
+ 8953 | creatorDashboard
+ 8957 | createCampaign
+ 8961 | creatorDeposits
+ 8967 | creatorCampaigns
+ 8971 | creatorSubmissions
+ 8975 | adminAnnouncements
+ 8979 | adminAudit
+ 8983 | adminCompliance
+ 8987 | adminDemo
+ 8991 | adminReadiness
+ 8995 | adminReports
+ 8999 | adminUsers
+ 9003 | adminOverview
+ 9007 | adminRequests
+ 9011 | adminDeposits
+ 9017 | adminCampaigns
+ 9021 | adminSubmissions
+ 9025 | adminSettings
+ 9029 | adminAffiliates
+ 9033 | adminPayouts
+
+============================================================
+8. SIDEBAR / MENU ITEMS
+============================================================
+  808 | home | Home | Home
+  809 | onboarding | Getting Started | CheckCircle2
+  810 | activity | Activity | ShieldCheck
+  811 | announcements | Announcements | Megaphone
+  812 | profile | Profile | UserRound
+  813 | discover | Discover | Search
+  814 | savedCampaigns | Saved Campaigns | BookOpen
+  815 | submissions | My Submissions | FileVideo
+  816 | earnings | Earnings | Wallet
+  817 | academy | Academy | BookOpen
+  821 | home | Home | Home
+  822 | onboarding | Getting Started | CheckCircle2
+  823 | activity | Activity | ShieldCheck
+  824 | announcements | Announcements | Megaphone
+  825 | profile | Profile | UserRound
+  826 | creatorDashboard | Dashboard | LayoutDashboard
+  827 | createCampaign | Create Campaign | Plus
+  828 | creatorCampaigns | My Campaigns | Megaphone
+  829 | creatorDeposits | Deposits | Wallet
+  830 | creatorSubmissions | Submissions | ShieldCheck
+  834 | adminOverview | Overview | LayoutDashboard
+  835 | adminUsers | Users | UserRound
+  836 | activity | Activity | ShieldCheck
+  837 | announcements | Announcements | Megaphone
+  838 | profile | Profile | UserRound
+  839 | onboarding | Getting Started | CheckCircle2
+  840 | createCampaign | Create Managed Campaign | Plus
+  841 | adminCampaigns | Campaigns | Megaphone
+  842 | adminDeposits | Deposit Proofs | Wallet
+  843 | adminRequests | Campaign Requests | Megaphone
+  844 | adminSubmissions | Submissions | ShieldCheck
+  845 | adminAffiliates | Affiliates | Coins
+  846 | adminPayouts | Payouts | Coins
+  847 | adminReports | Reports | FileVideo
+  848 | adminReadiness | Beta Checklist | CheckCircle2
+  849 | adminDemo | Sales Script | FileVideo
+  850 | adminCompliance | Compliance | ShieldCheck
+  851 | adminAudit | Audit Log | ShieldCheck
+  852 | adminAnnouncements | Manage Announcements | Megaphone
+  853 | adminSettings | Settings | Wallet
+
+============================================================
+9. SUPABASE TABLES USED
+============================================================
+affiliates
+announcements
+campaign-assets
+campaign_requests
+campaigns
+platform_settings
+profiles
+referrals
+submissions
+
+============================================================
+10. SUPABASE RPC FUNCTIONS USED
+============================================================
+claim_referral_code
+solohub_affiliate_dashboard
+
+============================================================
+11. SUPABASE TIMEOUT CALLS
+============================================================
+175 | withSupabaseTimeout(request, 'Load payment settings')
+
+211 | withSupabaseTimeout(request, 'Save payment settings')
+
+311 | withSupabaseTimeout(request, 'Claim referral code')
+
+326 | withSupabaseTimeout(request, label = 'Supabase request', ms = 15000)
+
+1696 | withSupabaseTimeout(request, 'Submit campaign request', 15000)
+
+1862 | withSupabaseTimeout(request, 'Load campaign requests', 15000)
+
+1912 | withSupabaseTimeout(request, 'Update campaign request', 15000)
+
+1942 | withSupabaseTimeout(request, 'Delete campaign request', 15000)
+
+3136 | withSupabaseTimeout(request, 'Save profile', 15000)
+
+5240 | withSupabaseTimeout(request, 'Load announcements', 8000)
+
+5907 | withSupabaseTimeout(request, 'Load admin announcements', 8000)
+
+5976 | withSupabaseTimeout(request, 'Create announcement', 15000)
+
+6023 | withSupabaseTimeout(request, 'Update announcement', 15000)
+
+6054 | withSupabaseTimeout(request, 'Delete announcement', 15000)
+
+7147 | withSupabaseTimeout(request, 'Load users', 20000)
+
+7193 | withSupabaseTimeout(request, 'Update user role', 20000)
+
+7595 | withSupabaseTimeout( supabase .from('affiliates')
+
+7706 | withSupabaseTimeout( supabase .from('affiliates')
+
+7742 | withSupabaseTimeout( supabase .from('referrals')
+
+8825 | withSupabaseTimeout(request, 'Load announcement unread count', 10000)
+
+============================================================
+12. RISKY / IMPORTANT PATTERNS
+============================================================
+window.location.reload: 1 | lines: 1034
+window.alert: 136 | lines: 534, 540, 579, 660, 1015, 1046, 1056, 1061, 1066, 1099, 1109, 1114, 1130, 1134, 1144, 1149, 1154, 1171, 1177, 1644, 1649, 1654, 1659, 1715, 1718, 1923, 1953, 1980, 2004, 2163, 2821, 2827, 2848, 2858, 2863, 2868, 2873, 2878, 2885, 3105
+dangerouslySetInnerHTML: 0
+localStorage: 31 | lines: 133, 158, 235, 238, 243, 281, 284, 290, 296, 322, 346, 356, 495, 505, 685, 695, 1594, 1602, 5173, 5181, 5187, 5211, 6199, 6213, 6547, 6568, 6606, 7456, 7457, 7469, 7470
+setTimeout: 10 | lines: 330, 723, 734, 751, 892, 1033, 1380, 4913, 8230, 8271
+catch error messages: 55 | lines: 185, 541, 1043, 1096, 1131, 1174, 1716, 1869, 1921, 1951, 1981, 2005, 2164, 2828, 2849, 3144, 3547, 3573, 3695, 3899, 4098, 4547, 4836, 5126, 5256, 5538, 5923, 5994, 6032, 6063, 6378, 6579, 6819, 7027, 7154, 7204, 7327, 7341, 7538, 7622
+white-page likely direct JSON.parse: 20 | lines: 134, 347, 496, 686, 1595, 5174, 5187, 6200, 6548, 7456, 7457, 9080, 9106, 9132, 9158, 9246, 9247, 9263, 9279, 9295
+
+============================================================
+13. AUTH FLOW REFERENCES
+============================================================
+600 | resetPassword
+610 | resetPassword
+617 | resetPassword
+999 | onAuthStateChange
+1001 | onAuthStateChange
+1023 | signInWithPassword
+1052 | signUp
+1074 | signUp
+1122 | resetPassword
+1162 | updateUser
+1184 | signUp
+7165 | updateUser
+7282 | updateUser
+7286 | updateUser
+7290 | updateUser
+8225 | signOut
+8226 | signOut
+8233 | signOut
+8235 | signOut
+8303 | getSession
+8310 | onAuthStateChange
+9168 | getSession
+
+============================================================
+14. FALLBACK / LOCAL STORAGE REFERENCES
+============================================================
+40 | fallback
+42 | fallback
+343 | fallback
+347 | fallback
+349 | fallback
+1594 | fallback
+1602 | fallback
+1872 | local fallback
+4380 | fallback
+4590 | fallback
+5171 | fallback
+5173 | fallback
+5180 | Fallback
+5181 | fallback
+5187 | fallback
+5192 | fallback
+5193 | fallback
+5211 | fallback
+5243 | cloud sync
+5253 | cloud sync
+5257 | local fallback
+5733 | fallback
+5733 | fallback
+5910 | cloud sync
+5920 | cloud sync
+5924 | local fallback
+5965 | fallback
+5966 | Fallback
+6012 | Fallback
+6045 | Fallback
+7135 | locally
+7136 | locally
+7456 | fallback
+7457 | fallback
+7469 | fallback
+7470 | fallback
+7513 | fallback
+7515 | locally
+7522 | cloud sync
+7535 | cloud sync
+7539 | fallback
+7540 | Cloud sync
+7643 | locally
+7643 | cloud sync
+7644 | locally
+8363 | locally
+8364 | locally
+8426 | locally
+8516 | locally
+8613 | locally
+8664 | locally
+8665 | locally
+8746 | locally
+8747 | locally
+8810 | fallback
+8836 | fallback
+
+============================================================
+15. WORDING / PLACEHOLDER FLAGS
+============================================================
+46 | undefined
+204 | null
+229 | undefined
+274 | undefined
+418 | null
+456 | null
+511 | undefined
+518 | undefined
+547 | undefined
+597 | undefined
+605 | undefined
+614 | undefined
+627 | null
+646 | null
+666 | null
+670 | null
+780 | demo mode
+859 | undefined
+864 | undefined
+1030 | undefined
+1040 | undefined
+1449 | Browser demo mode
+1560 | MVP
+1831 | null
+2746 | null
+4426 | null
+4511 | null
+4610 | null
+5156 | undefined
+5159 | undefined
+5519 | MVP
+5584 | MVP
+5659 | MVP
+5953 | null
+6436 | Investor
+6708 | Mvp
+6761 | MVP
+6780 | Investor
+6825 | mvp
+6833 | Investor
+6838 | mvp
+6857 | mvp
+6879 | mvp
+6881 | mvp
+6884 | mvp
+6886 | mvp
+6886 | mvp
+6887 | mvp
+6902 | mvp
+7591 | null
+7702 | null
+7738 | null
+8024 | null
+8025 | null
+8028 | null
+8038 | null
+8051 | null
+8104 | null
+8109 | null
+8122 | null
+8178 | null
+8227 | null
+8230 | null
+8263 | null
+8264 | null
+8265 | null
+8304 | null
+8311 | null
+8314 | null
+8324 | null
+8478 | null
+8597 | null
+8784 | undefined
+8853 | null
+8992 | Mvp
+9050 | null
+9050 | null
+
+============================================================
+16. BROAD HEADER CSS SELECTORS
+============================================================
+6827 | header [class*="brand"]
+6828 | header [class*="logo"]
+6829 | header [class*="mark"]
+6830 | header [class*="badge"]
+6831 | header [class*="avatar"]
+6832 | header [class*="initial"]
+6838 | header [class*="brand"]
+6839 | header [class*="logo"]
+6840 | header [class*="mark"]
+6841 | header [class*="badge"]
+6842 | header [class*="avatar"]
+6843 | header [class*="initial"]
+6862 | header [class*="brand"]
+6863 | header [class*="logo"]
+6864 | header [class*="mark"]
+6865 | header [class*="badge"]
+6866 | header [class*="avatar"]
+6867 | header [class*="initial"]
+6883 | header [class*="brand"]
+6884 | header [class*="logo"]
+6885 | header [class*="mark"]
+6886 | header [class*="badge"]
+6887 | header [class*="avatar"]
+6888 | header [class*="initial"]
+6923 | header [class*="brand"]
+6924 | header [class*="logo"]
+6925 | header [class*="mark"]
+6926 | header [class*="badge"]
+6927 | header [class*="avatar"]
+6928 | header [class*="initial"]
+6946 | header [class*="brand"]
+6947 | header [class*="logo"]
+6948 | header [class*="mark"]
+6949 | header [class*="badge"]
+6950 | header [class*="avatar"]
+6951 | header [class*="initial"]
+6968 | header [class*="brand"]
+6969 | header [class*="logo"]
+6970 | header [class*="mark"]
+6971 | header [class*="badge"]
+6972 | header [class*="avatar"]
+6973 | header [class*="initial"]
+
+============================================================
+17. CSS HEALTH
+============================================================
+Total !important usages: 779
+Total CSS lines: 7051
+Contains logo asset CSS: true
+Contains cloud safe CSS: true
+
+============================================================
+18. INDEX.HTML INSPECTION
+============================================================
+Title: SoloHub - Creator Campaigns & Clipping Rewards
+favicon.ico linked: true
+manifest linked: true
+theme-color present: true
+
+============================================================
+19. MANIFEST INSPECTION
+============================================================
+{
+  "name": "SoloHub",
+  "short_name": "SoloHub",
+  "description": "Creator campaigns and clipping rewards platform",
+  "start_url": "/",
+  "scope": "/",
+  "display": "standalone",
+  "orientation": "portrait-primary",
+  "background_color": "#071018",
+  "theme_color": "#071018",
+  "icons": [
+    {
+      "src": "/brand/solohub-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
+      "purpose": "any maskable"
+    },
+    {
+      "src": "/brand/solohub-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
+    }
+  ]
+}
+
+============================================================
+20. BACKUP / ARCHIVE FILES VISIBLE
+============================================================
+src/App.before-announcements-local-fallback.jsx
+src/App.before-cloud-safe-cleanup.jsx
+src/App.before-login-refresh-fix.jsx
+src/main.before-dev-sw-fix.jsx
+src/main.before-pwa.jsx
+src/styles.before-utf8-repair.css
+_local_cleanup_archive/fix-admin-role-final.cjs
+_local_cleanup_archive/fix-admin-role-overwrite.cjs
+_local_cleanup_archive/fix-admin-users-direct.cjs
+_local_cleanup_archive/fix-admin-users-rpc.cjs
+_local_cleanup_archive/fix-admin-users-timeout-ui.cjs
+_local_cleanup_archive/fix-affiliate-autocreate-referral.cjs
+_local_cleanup_archive/fix-affiliate-buttons-direct.cjs
+_local_cleanup_archive/fix-affiliate-dropdown-select.cjs
+_local_cleanup_archive/fix-affiliate-page-after-inspection.cjs
+_local_cleanup_archive/fix-affiliate-timeout-upsert.cjs
+_local_cleanup_archive/fix-approve-buttons-safe.cjs
+_local_cleanup_archive/fix-approve-buttons.cjs
+_local_cleanup_archive/fix-auth-final.cjs
+_local_cleanup_archive/fix-blank-page.cjs
+_local_cleanup_archive/fix-campaign-approve-rest.cjs
+_local_cleanup_archive/fix-campaign-rest-insert.cjs
+_local_cleanup_archive/fix-clip-submit-rest-v2.cjs
+_local_cleanup_archive/fix-clip-submit-rest.cjs
+_local_cleanup_archive/fix-dev-service-worker-cache.cjs
+_local_cleanup_archive/fix-fast-admin-users.cjs
+_local_cleanup_archive/fix-header-actions-small.cjs
+_local_cleanup_archive/fix-header-buttons.cjs
+_local_cleanup_archive/fix-inspected-admin-role.cjs
+_local_cleanup_archive/fix-login-buttons.cjs
+_local_cleanup_archive/fix-logout.cjs
+_local_cleanup_archive/fix-mark-paid-rest.cjs
+_local_cleanup_archive/fix-missing-goactivity.cjs
+_local_cleanup_archive/fix-mobile-menu-duplicates.cjs
+_local_cleanup_archive/fix-owner-admin-override.cjs
+_local_cleanup_archive/fix-owner-users-rpc.cjs
+_local_cleanup_archive/fix-profile-role.cjs
+_local_cleanup_archive/fix-pwa-white-page-icon.cjs
+_local_cleanup_archive/fix-real-auth-layout.cjs
+_local_cleanup_archive/fix-review-submission-rest.cjs
+_local_cleanup_archive/fix-role-final.cjs
+_local_cleanup_archive/fix-role-profile.cjs
+_local_cleanup_archive/fix-sidebar-final-mobile.cjs
+_local_cleanup_archive/fix-sidebar-hard-close.cjs
+_local_cleanup_archive/fix-sidebar-unmount-mobile.cjs
+_local_cleanup_archive/fix-simple-centered-auth.cjs
+_local_cleanup_archive/fix-submission-review-rest-v2.cjs
+_local_cleanup_archive/fix-submission-review-rest.cjs
+_local_cleanup_archive/fix-submit-timeout.cjs
+_local_cleanup_archive/fix-white-page-notification.cjs
+_local_cleanup_archive/fix-wizard-submit.cjs
+_local_cleanup_archive/force-close-sidebar-on-page.cjs
+_local_cleanup_archive/phase11-authenticated-rest.cjs
+_local_cleanup_archive/phase15-whop-style-campaigns.cjs
+_local_cleanup_archive/phase15-whop-style-safe-v2.cjs
+_local_cleanup_archive/phase16-create-campaign-media.cjs
+_local_cleanup_archive/phase17-supabase-storage-images.cjs
+_local_cleanup_archive/phase18-affiliate-program.cjs
+_local_cleanup_archive/phase19-referral-links.cjs
+_local_cleanup_archive/phase20-public-landing.cjs
+_local_cleanup_archive/phase21-campaign-funding.cjs
+_local_cleanup_archive/phase22-payment-instructions.cjs
+_local_cleanup_archive/phase23-admin-deposit-controls.cjs
+_local_cleanup_archive/phase24-client-invoice.cjs
+_local_cleanup_archive/phase25-clipper-payout-profile.cjs
+_local_cleanup_archive/phase26-creator-campaign-manager.cjs
+_local_cleanup_archive/phase27-creator-submissions-page.cjs
+_local_cleanup_archive/phase28-activity-center.cjs
+_local_cleanup_archive/phase29-platform-settings.cjs
+_local_cleanup_archive/phase30-notification-bell.cjs
+_local_cleanup_archive/phase31-admin-users.cjs
+_local_cleanup_archive/phase32-admin-invite-links.cjs
+_local_cleanup_archive/phase33-onboarding-checklist.cjs
+_local_cleanup_archive/phase34-discover-filters.cjs
+_local_cleanup_archive/phase35-saved-campaigns.cjs
+_local_cleanup_archive/phase36-campaign-share-links.cjs
+_local_cleanup_archive/phase37-smart-submit.cjs
+_local_cleanup_archive/phase38-reports-center.cjs
+_local_cleanup_archive/phase39-campaign-lifecycle.cjs
+_local_cleanup_archive/phase41-forgot-password.cjs
+_local_cleanup_archive/phase42-auth-standard-layout.cjs
+_local_cleanup_archive/phase42b-auth-layout-class.cjs
+_local_cleanup_archive/phase43-create-pwa-files.cjs
+_local_cleanup_archive/phase43-register-sw.cjs
+_local_cleanup_archive/phase44-pwa-install-button.cjs
+_local_cleanup_archive/phase44-safer-service-worker.cjs
+_local_cleanup_archive/phase6-ownership.cjs
+_local_cleanup_archive/phase7-access-filtering-v2.cjs
+_local_cleanup_archive/phase7-access-filtering-v3.cjs
+_local_cleanup_archive/phase7-access-filtering.cjs
+_local_cleanup_archive/phase8-clean-auth-ui-safe.cjs
+_local_cleanup_archive/phase8-clean-auth-ui.cjs
+_local_cleanup_archive/phase9-clean-homepage-copy.cjs
+_local_cleanup_archive/polish-auth-copy.cjs

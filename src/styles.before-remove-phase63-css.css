@@ -7025,3 +7025,26 @@ header small {
   color: #aeb9c5 !important;
 }
 
+/* =========================================================
+   Phase 63 Cloud-Safe Fallback Polish
+   ========================================================= */
+
+.form-note.affiliate-message,
+.affiliate-message {
+  max-width: 980px;
+  padding: 10px 14px;
+  border-radius: 14px;
+  background: rgba(35, 209, 139, 0.08);
+  border: 1px solid rgba(35, 209, 139, 0.18);
+  color: #9fffd1 !important;
+  line-height: 1.5;
+}
+
+.cloud-safe-note {
+  padding: 12px 14px;
+  border-radius: 16px;
+  background: rgba(35, 209, 139, 0.08);
+  border: 1px solid rgba(35, 209, 139, 0.18);
+  color: #9fffd1;
+  font-weight: 900;
+}
