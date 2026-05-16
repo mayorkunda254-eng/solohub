@@ -5181,6 +5181,36 @@ function saveFallbackAnnouncements(items = []) {
   localStorage.setItem('solohub_announcements_fallback_v1', JSON.stringify(items));
 }
 
+
+function getLocalAnnouncementsData() {
+  try {
+    const saved = JSON.parse(localStorage.getItem('solohub_announcements_fallback_v1') || '[]');
+
+    if (Array.isArray(saved) && saved.length) return saved;
+  } catch {}
+
+  if (typeof fallbackAnnouncements === 'function') {
+    return fallbackAnnouncements();
+  }
+
+  return [
+    {
+      id: 'local-welcome-announcement',
+      title: 'Welcome to SoloHub Private Beta',
+      body: 'SoloHub announcements are active. Campaign updates, payout notices, and platform changes will appear here.',
+      audience: 'All',
+      priority: 'Normal',
+      status: 'Published',
+      created_at: new Date().toISOString(),
+      updated_at: new Date().toISOString()
+    }
+  ];
+}
+
+function saveLocalAnnouncementsData(items = []) {
+  localStorage.setItem('solohub_announcements_fallback_v1', JSON.stringify(Array.isArray(items) ? items : []));
+}
+
 function AnnouncementsPage({ currentRole, onUnreadChange }) {
   const [announcements, setAnnouncements] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -5189,44 +5219,44 @@ function AnnouncementsPage({ currentRole, onUnreadChange }) {
 
   const loadAnnouncements = async () => {
     setLoading(true);
-    setMessage('Loading announcements...');
 
     try {
       const role = cleanRole(currentRole || 'clipper');
-
-      if (!supabase) {
-        const localItems = fallbackAnnouncements().filter((item) =>
-          item.status === 'Published' && ['All', role].includes(item.audience)
-        );
-
-        setAnnouncements(localItems);
-        setMessage('Loaded local announcements.');
-        return;
-      }
-
-      const request = supabase
-        .from('announcements')
-        .select('*')
-        .eq('status', 'Published')
-        .in('audience', ['All', role])
-        .order('created_at', { ascending: false });
-
-      const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Load announcements', 15000)
-        : await request;
-
-      if (error) throw error;
-
-      setAnnouncements(data || []);
-      setMessage((data || []).length ? 'Announcements loaded.' : 'No announcements yet.');
-    } catch (err) {
-      console.error('Announcements load failed:', err);
-      const localItems = fallbackAnnouncements().filter((item) =>
-        item.status === 'Published' && ['All', cleanRole(currentRole || 'clipper')].includes(item.audience)
+      const localItems = getLocalAnnouncementsData().filter((item) =>
+        item.status === 'Published' && ['All', role].includes(item.audience)
       );
 
       setAnnouncements(localItems);
-      setMessage('Could not load cloud announcements. Showing local fallback if available.');
+      setMessage(localItems.length ? 'Announcements loaded.' : 'No announcements yet.');
+
+      if (supabase) {
+        const request = supabase
+          .from('announcements')
+          .select('*')
+          .eq('status', 'Published')
+          .in('audience', ['All', role])
+          .order('created_at', { ascending: false });
+
+        withSupabaseTimeout(request, 'Load announcements', 8000)
+          .then(({ data, error }) => {
+            if (error) {
+              console.warn('Announcement cloud sync skipped:', error);
+              return;
+            }
+
+            const cloudItems = Array.isArray(data) ? data : [];
+            setAnnouncements(cloudItems);
+            saveLocalAnnouncementsData(cloudItems);
+            setMessage(cloudItems.length ? 'Announcements loaded.' : 'No announcements yet.');
+          })
+          .catch((err) => {
+            console.warn('Announcement cloud sync skipped:', err);
+          });
+      }
+    } catch (err) {
+      console.error('Announcements local fallback failed:', err);
+      setAnnouncements([]);
+      setMessage('No announcements yet.');
     } finally {
       setLoading(false);
     }
@@ -5861,32 +5891,39 @@ function AdminAnnouncementsPage({ user }) {
 
   const loadAdminAnnouncements = async () => {
     setLoading(true);
-    setMessage('Loading announcements...');
 
     try {
-      if (!supabase) {
-        setAnnouncements(fallbackAnnouncements());
-        setMessage('Loaded local announcements.');
-        return;
+      const localItems = getLocalAnnouncementsData();
+
+      setAnnouncements(localItems);
+      setMessage(localItems.length ? 'Announcements loaded.' : 'No announcements yet.');
+
+      if (supabase) {
+        const request = supabase
+          .from('announcements')
+          .select('*')
+          .order('created_at', { ascending: false });
+
+        withSupabaseTimeout(request, 'Load admin announcements', 8000)
+          .then(({ data, error }) => {
+            if (error) {
+              console.warn('Admin announcement cloud sync skipped:', error);
+              return;
+            }
+
+            const cloudItems = Array.isArray(data) ? data : [];
+            setAnnouncements(cloudItems);
+            saveLocalAnnouncementsData(cloudItems);
+            setMessage('Announcements loaded.');
+          })
+          .catch((err) => {
+            console.warn('Admin announcement cloud sync skipped:', err);
+          });
       }
-
-      const request = supabase
-        .from('announcements')
-        .select('*')
-        .order('created_at', { ascending: false });
-
-      const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Load admin announcements', 15000)
-        : await request;
-
-      if (error) throw error;
-
-      setAnnouncements(data || []);
-      setMessage('Announcements loaded.');
     } catch (err) {
-      console.error('Admin announcements load failed:', err);
-      setAnnouncements(fallbackAnnouncements());
-      setMessage('Cloud load failed. Showing local fallback if available.');
+      console.error('Admin announcements local fallback failed:', err);
+      setAnnouncements([]);
+      setMessage('No announcements yet.');
     } finally {
       setLoading(false);
     }
