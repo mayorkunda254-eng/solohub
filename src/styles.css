@@ -6707,3 +6707,320 @@ body.solohub-logged-out main {
     width: 100%;
   }
 }
+
+
+/* =========================================================
+   SoloHub Installed Logo Assets
+   ========================================================= */
+
+.brand-mark,
+.brand-badge,
+.logo-mark,
+.logo-badge,
+.solohub-mark,
+.app-mark {
+  background-image: url('/brand/solohub-icon-192x192.png') !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  overflow: hidden !important;
+}
+
+.brand-mark img,
+.brand-badge img,
+.logo-mark img,
+.logo-badge img,
+.solohub-mark img,
+.app-mark img,
+.solohub-header-logo-img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+}
+
+.solohub-logo-dark {
+  content: url('/brand/solohub-logo-dark.png');
+}
+
+.solohub-logo-light {
+  content: url('/brand/solohub-logo-light.png');
+}
+
+/* =========================================================
+   Top-left SoloHub Logo Fix
+   ========================================================= */
+
+.solohub-top-logo-img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+}
+
+.brand-logo,
+.brand-mark,
+.brand-badge,
+.brand-icon,
+.logo-mark,
+.logo-badge,
+.logo-icon,
+.app-logo,
+.app-mark,
+.solohub-logo,
+.solohub-mark {
+  background-image: url('/brand/solohub-icon-192x192.png') !important;
+  background-position: center !important;
+  background-size: cover !important;
+  background-repeat: no-repeat !important;
+  color: transparent !important;
+  font-size: 0 !important;
+  text-indent: -9999px !important;
+  overflow: hidden !important;
+}
+
+.brand-logo *,
+.brand-mark *,
+.brand-badge *,
+.brand-icon *,
+.logo-mark *,
+.logo-badge *,
+.logo-icon *,
+app-logo *,
+.app-mark *,
+.solohub-logo *,
+.solohub-mark * {
+  text-indent: 0 !important;
+}
+
+/* Header-specific fallback */
+header .brand-logo,
+header .brand-mark,
+header .brand-badge,
+header .brand-icon,
+header .logo-mark,
+header .logo-badge,
+header .logo-icon,
+header .app-logo,
+header .app-mark,
+header .solohub-logo,
+header .solohub-mark {
+  background-image: url('/brand/solohub-icon-192x192.png') !important;
+}
+
+/* =========================================================
+   Force SoloHub Top-left Header Logo
+   ========================================================= */
+
+.solohub-top-left-logo-img {
+  width: 100% !important;
+  height: 100% !important;
+  display: block !important;
+  object-fit: cover !important;
+  border-radius: inherit !important;
+}
+
+header [class*="brand"] img.solohub-top-left-logo-img,
+header [class*="logo"] img.solohub-top-left-logo-img,
+header [class*="mark"] img.solohub-top-left-logo-img,
+header [class*="badge"] img.solohub-top-left-logo-img,
+header [class*="avatar"] img.solohub-top-left-logo-img,
+header [class*="initial"] img.solohub-top-left-logo-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+}
+
+header [class*="brand"],
+header [class*="logo"],
+header [class*="mark"],
+header [class*="badge"],
+header [class*="avatar"],
+header [class*="initial"] {
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+}
+
+/* =========================================================
+   Top-left SoloHub Logo Polish
+   ========================================================= */
+
+header img.solohub-top-left-logo-img,
+.solohub-top-left-logo-img {
+  width: 100% !important;
+  height: 100% !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: inherit !important;
+}
+
+header [class*="brand"],
+header [class*="logo"],
+header [class*="mark"],
+header [class*="badge"],
+header [class*="avatar"],
+header [class*="initial"] {
+  background-image: url('/brand/solohub-icon-192x192.png') !important;
+  background-size: cover !important;
+  background-position: center !important;
+  background-repeat: no-repeat !important;
+  color: transparent !important;
+  text-indent: -9999px !important;
+  overflow: hidden !important;
+}
+
+/* =========================================================
+   Final Header Logo Size Fix
+   Stops logo from appearing as huge background
+   ========================================================= */
+
+/* Remove broad logo backgrounds from header containers */
+header [class*="brand"],
+header [class*="logo"],
+header [class*="mark"],
+header [class*="badge"],
+header [class*="avatar"],
+header [class*="initial"] {
+  background-image: none !important;
+  text-indent: 0 !important;
+  overflow: visible !important;
+  font-size: inherit !important;
+}
+
+/* Restore visible header text */
+header h1,
+header h2,
+header h3,
+header p,
+header span,
+header small,
+header strong {
+  color: inherit;
+  text-indent: 0 !important;
+}
+
+/* Only the actual SoloHub logo image should show */
+header img.solohub-top-left-logo-img,
+.solohub-top-left-logo-img {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 16px !important;
+  box-shadow: 0 0 22px rgba(35, 209, 139, 0.16);
+}
+
+/* Logo holder should stay small */
+header [class*="brand"]:has(img.solohub-top-left-logo-img),
+header [class*="logo"]:has(img.solohub-top-left-logo-img),
+header [class*="mark"]:has(img.solohub-top-left-logo-img),
+header [class*="badge"]:has(img.solohub-top-left-logo-img),
+header [class*="avatar"]:has(img.solohub-top-left-logo-img),
+header [class*="initial"]:has(img.solohub-top-left-logo-img) {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  border-radius: 16px !important;
+  background: transparent !important;
+}
+
+/* =========================================================
+   Final SoloHub Header Brand Repair
+   ========================================================= */
+
+/* Reset any broad logo styling that affected the full header brand area */
+header [class*="brand"]:has(img.solohub-top-left-logo-img),
+header [class*="logo"]:has(img.solohub-top-left-logo-img),
+header [class*="mark"]:has(img.solohub-top-left-logo-img),
+header [class*="badge"]:has(img.solohub-top-left-logo-img),
+header [class*="avatar"]:has(img.solohub-top-left-logo-img),
+header [class*="initial"]:has(img.solohub-top-left-logo-img) {
+  width: auto !important;
+  height: auto !important;
+  min-width: 0 !important;
+  max-width: none !important;
+  min-height: 0 !important;
+  max-height: none !important;
+  padding: initial !important;
+  overflow: visible !important;
+  background-image: none !important;
+  background: transparent !important;
+  text-indent: 0 !important;
+  color: inherit !important;
+  font-size: inherit !important;
+}
+
+/* Only the direct image holder should be small */
+header [class*="brand"]:has(> img.solohub-top-left-logo-img),
+header [class*="logo"]:has(> img.solohub-top-left-logo-img),
+header [class*="mark"]:has(> img.solohub-top-left-logo-img),
+header [class*="badge"]:has(> img.solohub-top-left-logo-img),
+header [class*="avatar"]:has(> img.solohub-top-left-logo-img),
+header [class*="initial"]:has(> img.solohub-top-left-logo-img) {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  padding: 0 !important;
+  display: grid !important;
+  place-items: center !important;
+  overflow: hidden !important;
+  border-radius: 16px !important;
+  background: transparent !important;
+}
+
+/* Actual logo image */
+header img.solohub-top-left-logo-img,
+.solohub-top-left-logo-img {
+  width: 52px !important;
+  height: 52px !important;
+  min-width: 52px !important;
+  max-width: 52px !important;
+  min-height: 52px !important;
+  max-height: 52px !important;
+  object-fit: cover !important;
+  display: block !important;
+  border-radius: 16px !important;
+  text-indent: 0 !important;
+  box-shadow: 0 0 22px rgba(35, 209, 139, 0.18);
+}
+
+/* Force brand text visible */
+header h1,
+header h2,
+header h3,
+header p,
+header span,
+header small,
+header strong,
+header div {
+  text-indent: 0 !important;
+}
+
+header h1,
+header h2,
+header h3,
+header strong {
+  color: #f8fafc !important;
+}
+
+header p,
+header small {
+  color: #aeb9c5 !important;
+}

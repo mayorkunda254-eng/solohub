@@ -1,47 +1,25 @@
 {
   "name": "SoloHub",
   "short_name": "SoloHub",
-  "description": "Content rewards platform for creators, clippers, affiliates, submissions, and payouts.",
+  "description": "Creator campaigns and clipping rewards platform",
   "start_url": "/",
   "scope": "/",
   "display": "standalone",
+  "orientation": "portrait-primary",
   "background_color": "#071018",
   "theme_color": "#071018",
-  "orientation": "portrait-primary",
   "icons": [
     {
-      "src": "/solohub-icon.svg",
-      "sizes": "512x512",
-      "type": "image/svg+xml",
+      "src": "/brand/solohub-icon-192x192.png",
+      "sizes": "192x192",
+      "type": "image/png",
       "purpose": "any maskable"
-    }
-  ],
-  "shortcuts": [
-    {
-      "name": "Discover Campaigns",
-      "short_name": "Discover",
-      "description": "Find live SoloHub campaigns.",
-      "url": "/?page=discover",
-      "icons": [
-        {
-          "src": "/solohub-icon.svg",
-          "sizes": "512x512",
-          "type": "image/svg+xml"
-        }
-      ]
     },
     {
-      "name": "Login",
-      "short_name": "Login",
-      "description": "Login to SoloHub.",
-      "url": "/",
-      "icons": [
-        {
-          "src": "/solohub-icon.svg",
-          "sizes": "512x512",
-          "type": "image/svg+xml"
-        }
-      ]
+      "src": "/brand/solohub-icon-512x512.png",
+      "sizes": "512x512",
+      "type": "image/png",
+      "purpose": "any maskable"
     }
   ]
 }
