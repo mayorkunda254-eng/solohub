@@ -1027,6 +1027,15 @@ function AuthBox({ user, profile, onAuthUser, onLogout, referralCode, inviteRole
 
       if (error) throw error;
 
+      if (data?.user && typeof window !== 'undefined' && !window.__solohubLoginRefreshFix) {
+        window.__solohubLoginRefreshFix = true;
+        setAuthMessage?.('Login successful. Opening your dashboard...');
+        setTimeout(() => {
+          window.location.reload();
+        }, 350);
+        return;
+      }
+
       if (data?.user) {
         await onAuthUser?.(data.user, undefined, fullName);
         setAuthMessage('Logged in successfully.');
