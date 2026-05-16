@@ -323,6 +323,229 @@ async function claimStoredReferralCode(authUser, userRole = 'clipper', fullName 
   return code;
 }
 
+
+
+async function solohubCloudHealth() {
+  const results = [];
+
+  const withTimeout = (promise, label, ms = 12000) =>
+    Promise.race([
+      promise,
+      new Promise((_, reject) =>
+        setTimeout(() => reject(new Error(label + " timed out after " + Math.round(ms / 1000) + " seconds")), ms)
+      )
+    ]);
+
+  const add = (name, ok, detail = "", count = "") => {
+    results.push({ name, ok, detail: String(detail || ""), count });
+  };
+
+  const test = async (name, fn) => {
+    try {
+      const result = await withTimeout(fn(), name, 12000);
+
+      if (result?.error) {
+        throw result.error;
+      }
+
+      const data = result?.data ?? result;
+
+      if (data?.ok === false) {
+        throw new Error(data?.message || "RPC returned ok=false");
+      }
+
+      const count = Array.isArray(data) ? data.length : data ? 1 : 0;
+      add(name, true, "OK", count);
+    } catch (err) {
+      add(name, false, err?.message || JSON.stringify(err) || err, "");
+    }
+  };
+
+  if (!supabase) {
+    add("supabase client", false, "Supabase client is not configured.");
+    console.table(results);
+    return results;
+  }
+
+  await test("auth session", async () => {
+    const res = await supabase.auth.getSession();
+    if (res.error) throw res.error;
+
+    const user = res.data?.session?.user;
+    if (!user?.email) throw new Error("No logged-in user session email found.");
+
+    return { data: { id: user.id, email: user.email }, error: null };
+  });
+
+  await test("profiles read", () =>
+    supabase.from("profiles").select("id,email,role").limit(5)
+  );
+
+  await test("campaigns read", () =>
+    supabase.from("campaigns").select("*").limit(5)
+  );
+
+  await test("submissions read", () =>
+    supabase.from("submissions").select("*").limit(5)
+  );
+
+  await test("announcements read", () =>
+    supabase.from("announcements").select("*").limit(5)
+  );
+
+  await test("campaign_requests read", () =>
+    supabase.from("campaign_requests").select("*").limit(5)
+  );
+
+  await test("platform_settings read", () =>
+    supabase.from("platform_settings").select("*").limit(5)
+  );
+
+  await test("affiliate dashboard rpc", () =>
+    supabase.rpc("solohub_affiliate_dashboard")
+  );
+
+  await test("affiliates read", () =>
+    supabase.from("affiliates").select("*").limit(5)
+  );
+
+  await test("referrals read", () =>
+    supabase.from("referrals").select("*").limit(5)
+  );
+
+  console.table(results);
+  window.__solohubLastCloudHealth = results;
+
+  return results;
+}
+
+if (typeof window !== "undefined") {
+  window.solohubCloudHealth = solohubCloudHealth;
+}
+
+
+
+async function solohubDirectRpc(functionName, payload = {}, ms = 12000) {
+  const env = import.meta.env || {};
+  const url = env.VITE_SUPABASE_URL || supabase?.supabaseUrl;
+  const key = env.VITE_SUPABASE_ANON_KEY || supabase?.supabaseKey || supabase?.anonKey;
+
+  if (!url || !key) {
+    return {
+      data: null,
+      error: new Error("Missing Supabase URL or anon key.")
+    };
+  }
+
+  const getTokenFromLocalStorage = () => {
+    try {
+      for (let i = 0; i < localStorage.length; i++) {
+        const storageKey = localStorage.key(i);
+
+        if (
+          !storageKey ||
+          (!storageKey.includes("auth-token") && !storageKey.startsWith("sb-"))
+        ) {
+          continue;
+        }
+
+        const raw = localStorage.getItem(storageKey);
+        if (!raw) continue;
+
+        const parsed = JSON.parse(raw);
+
+        const token =
+          parsed?.access_token ||
+          parsed?.currentSession?.access_token ||
+          parsed?.session?.access_token;
+
+        if (token) return token;
+      }
+    } catch {}
+
+    return null;
+  };
+
+  const getSessionTokenFast = async () => {
+    const localToken = getTokenFromLocalStorage();
+    if (localToken) return localToken;
+
+    try {
+      const sessionResult = await Promise.race([
+        supabase.auth.getSession(),
+        new Promise((_, reject) =>
+          setTimeout(() => reject(new Error("getSession timed out")), 1500)
+        )
+      ]);
+
+      return sessionResult?.data?.session?.access_token || null;
+    } catch {
+      return null;
+    }
+  };
+
+  const controller = new AbortController();
+  const timeoutId = setTimeout(() => controller.abort(), ms);
+
+  try {
+    const accessToken = await getSessionTokenFast();
+    const bearer = accessToken || key;
+
+    const response = await fetch(url + "/rest/v1/rpc/" + functionName, {
+      method: "POST",
+      headers: {
+        apikey: key,
+        Authorization: "Bearer " + bearer,
+        "Content-Type": "application/json"
+      },
+      body: JSON.stringify(payload || {}),
+      signal: controller.signal
+    });
+
+    const text = await response.text();
+    let data = null;
+
+    try {
+      data = text ? JSON.parse(text) : null;
+    } catch {
+      data = text;
+    }
+
+    if (!response.ok) {
+      const message =
+        data?.message ||
+        data?.error ||
+        text ||
+        functionName + " failed with status " + response.status;
+
+      return {
+        data: null,
+        error: new Error(message)
+      };
+    }
+
+    return {
+      data,
+      error: null
+    };
+  } catch (err) {
+    return {
+      data: null,
+      error: new Error(
+        err?.name === "AbortError"
+          ? functionName + " timed out after " + Math.round(ms / 1000) + " seconds"
+          : err?.message || String(err)
+      )
+    };
+  } finally {
+    clearTimeout(timeoutId);
+  }
+}
+
+if (typeof window !== "undefined") {
+  window.solohubDirectRpc = solohubDirectRpc;
+}
+
 async function withSupabaseTimeout(request, label = 'Supabase request', ms = 15000) {
   let timeoutId;
 
@@ -854,7 +1077,7 @@ const navs = {
   ]
 };
 
-function Sidebar({ role, page, setPage, open, setOpen, cloudMode, announcementUnreadCount = 0 }) {
+function Sidebar({ role, page, setPage, open, setOpen, cloudMode, unreadAnnouncementCount = 0 }) {
   const [isMobileNav, setIsMobileNav] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(max-width: 900px)').matches;
@@ -956,8 +1179,8 @@ function Sidebar({ role, page, setPage, open, setOpen, cloudMode, announcementUn
             >
               <Icon size={18} /> 
             <span className="nav-label-text">{label}</span>
-            {id === 'announcements' && announcementUnreadCount > 0 && (
-              <span className="nav-unread-badge">{announcementUnreadCount > 99 ? '99+' : announcementUnreadCount}</span>
+            {id === 'announcements' && unreadAnnouncementCount > 0 && (
+              <span className="nav-unread-badge">{unreadAnnouncementCount > 99 ? '99+' : unreadAnnouncementCount}</span>
             )}
             </button>
           ))}
@@ -2380,7 +2603,7 @@ function HomePage({ page, setRole, setPage, campaigns, submissions, cloudMode, u
 
   return (
     <>
-      <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
+      <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} unreadAnnouncementCount={unreadAnnouncementCount} />
 
       <AuthBox
         user={user}
@@ -5230,14 +5453,9 @@ function AnnouncementsPage({ currentRole, onUnreadChange }) {
       setMessage(localItems.length ? 'Announcements loaded.' : 'No announcements yet.');
 
       if (supabase) {
-        const request = supabase
-          .from('announcements')
-          .select('*')
-          .eq('status', 'Published')
-          .in('audience', ['All', role])
-          .order('created_at', { ascending: false });
+        const request = solohubDirectRpc('solohub_public_announcements', { p_role: role }, 12000);
 
-        withSupabaseTimeout(request, 'Load announcements', 8000)
+        withSupabaseTimeout(request, 'Load announcements', 15000)
           .then(({ data, error }) => {
             if (error) {
               console.warn('Announcement cloud sync skipped:', error);
@@ -5899,12 +6117,9 @@ function AdminAnnouncementsPage({ user }) {
       setMessage(localItems.length ? 'Announcements loaded.' : 'No announcements yet.');
 
       if (supabase) {
-        const request = supabase
-          .from('announcements')
-          .select('*')
-          .order('created_at', { ascending: false });
+        const request = solohubDirectRpc('solohub_admin_announcements', {}, 12000);
 
-        withSupabaseTimeout(request, 'Load admin announcements', 8000)
+        withSupabaseTimeout(request, 'Load admin announcements', 15000)
           .then(({ data, error }) => {
             if (error) {
               console.warn('Admin announcement cloud sync skipped:', error);
@@ -7137,14 +7352,10 @@ function AdminUsers() {
         return;
       }
 
-      const request = supabase
-        .from('profiles')
-        .select('id,email,full_name,role,mpesa_name,mpesa_phone,backup_phone,payout_notes,updated_at')
-        .order('updated_at', { ascending: false })
-        .limit(100);
+      const request = solohubDirectRpc('solohub_admin_profiles', {}, 12000);
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Load users', 20000)
+        ? await withSupabaseTimeout(request, 'Load users', 15000)
         : await request;
 
       if (error) throw error;
@@ -8034,7 +8245,7 @@ function App() {
   const [inviteRole, setInviteRole] = useState(() => captureInviteRoleFromUrl());
   const [paymentSettingsTick, setPaymentSettingsTick] = useState(0);
   const [savedCampaignIds, setSavedCampaignIds] = useState(() => getSavedCampaignIds());
-  const [announcementUnreadCount, setAnnouncementUnreadCount] = useState(0);  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
+  const [unreadAnnouncementCount, setAnnouncementUnreadCount] = useState(0);  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
     if (!cloudMode || !currentUser) return null;
 
     const ownerAdmin = isOwnerEmail(currentUser.email);
@@ -8815,14 +9026,10 @@ const updateProfileRole = async (nextRole) => {
         return;
       }
 
-      const request = supabase
-        .from('announcements')
-        .select('id,audience,status,created_at')
-        .eq('status', 'Published')
-        .in('audience', ['All', currentRoleForAnnouncements]);
+      const request = solohubDirectRpc('solohub_public_announcements', { p_role: currentRoleForAnnouncements }, 12000);
 
       const { data, error } = typeof withSupabaseTimeout === 'function'
-        ? await withSupabaseTimeout(request, 'Load announcement unread count', 10000)
+        ? await withSupabaseTimeout(request, 'Load announcement unread count', 15000)
         : await request;
 
       if (error) throw error;
@@ -9010,7 +9217,7 @@ const content = useMemo(() => {
 
     if (page === 'adminDeposits') {
       return isAdmin
-        ? <AdminDepositProofsPage campaigns={campaigns} onCampaignFundingUpdate={updateCampaignFunding} onCampaignStatus={handleCampaignStatus} />
+        ? <AdminDepositProofsPage campaigns={campaigns} onCampaignFundingUpdate={updateCampaignFunding} onCampaignStatus={campaignStatus} />
         : home;
     }
 
@@ -9041,7 +9248,7 @@ const content = useMemo(() => {
     <>
       <Header role={roleForUser(user, profile, role)} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} activityCount={getActivityCountForRole(roleForUser(user, profile, role), campaigns || [], submissions || [])} />
       <div className="app-shell">
-        <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
+        <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} unreadAnnouncementCount={unreadAnnouncementCount} />
         <main>
           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
           {cloudMode && user && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : `Logged in as ${profile?.role || role || 'user'}`}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
