@@ -1077,7 +1077,7 @@ const navs = {
   ]
 };
 
-function Sidebar({ role, page, setPage, open, setOpen, cloudMode, unreadAnnouncementCount = 0 }) {
+function Sidebar({ role, page, setPage, open, setOpen, cloudMode, announcementUnreadCount = 0 }) {
   const [isMobileNav, setIsMobileNav] = useState(() => {
     if (typeof window === 'undefined') return false;
     return window.matchMedia('(max-width: 900px)').matches;
@@ -1179,8 +1179,8 @@ function Sidebar({ role, page, setPage, open, setOpen, cloudMode, unreadAnnounce
             >
               <Icon size={18} /> 
             <span className="nav-label-text">{label}</span>
-            {id === 'announcements' && unreadAnnouncementCount > 0 && (
-              <span className="nav-unread-badge">{unreadAnnouncementCount > 99 ? '99+' : unreadAnnouncementCount}</span>
+            {id === 'announcements' && announcementUnreadCount > 0 && (
+              <span className="nav-unread-badge">{announcementUnreadCount > 99 ? '99+' : announcementUnreadCount}</span>
             )}
             </button>
           ))}
@@ -2574,7 +2574,7 @@ function LoggedOutAuthPage({ user, profile, onAuthUser, onLogout, referralCode, 
   );
 }
 
-function HomePage({ page, setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode, inviteRole }) {
+function HomePage({ page, setRole, setPage, campaigns, submissions, cloudMode, user, profile, onAuthUser, onLogout, onRoleChange, referralCode, inviteRole, announcementUnreadCount = 0 }) {
   const liveCampaigns = campaigns.filter((c) => c.status === 'Live').length;
   const pendingSubmissions = submissions.filter((s) => s.status === 'Pending Review').length;
 
@@ -2603,7 +2603,7 @@ function HomePage({ page, setRole, setPage, campaigns, submissions, cloudMode, u
 
   return (
     <>
-      <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} unreadAnnouncementCount={unreadAnnouncementCount} />
+      <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
 
       <AuthBox
         user={user}
@@ -8245,7 +8245,7 @@ function App() {
   const [inviteRole, setInviteRole] = useState(() => captureInviteRoleFromUrl());
   const [paymentSettingsTick, setPaymentSettingsTick] = useState(0);
   const [savedCampaignIds, setSavedCampaignIds] = useState(() => getSavedCampaignIds());
-  const [unreadAnnouncementCount, setAnnouncementUnreadCount] = useState(0);  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
+  const [announcementUnreadCount, setAnnouncementUnreadCount] = useState(0);  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
     if (!cloudMode || !currentUser) return null;
 
     const ownerAdmin = isOwnerEmail(currentUser.email);
@@ -9072,6 +9072,8 @@ const content = useMemo(() => {
         onAuthUser={handleAuthUser}
         onLogout={logout}
         onRoleChange={updateProfileRole}
+      
+        announcementUnreadCount={announcementUnreadCount || 0}
       />
     );
 
@@ -9242,13 +9244,13 @@ const content = useMemo(() => {
     }
 
     return home;
-  }, [page, campaigns, submissions, selectedCampaign, cloudMode, user, profile, role]);
+  }, [page, campaigns, submissions, selectedCampaign, cloudMode, user, profile, role, announcementUnreadCount]);
 
   return (
     <>
       <Header role={roleForUser(user, profile, role)} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} activityCount={getActivityCountForRole(roleForUser(user, profile, role), campaigns || [], submissions || [])} />
       <div className="app-shell">
-        <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} unreadAnnouncementCount={unreadAnnouncementCount} />
+        <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
         <main>
           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
           {cloudMode && user && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : `Logged in as ${profile?.role || role || 'user'}`}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}

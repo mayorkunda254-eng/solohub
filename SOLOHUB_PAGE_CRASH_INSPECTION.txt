@@ -1,0 +1,644 @@
+SOLOHUB PAGE CRASH INSPECTION
+Generated: 2026-05-18T17:50:13.526Z
+File: src/App.jsx
+Total lines: 9505
+
+============================================================
+1. PAGE ROUTES DETECTED
+============================================================
+ 9110 | announcements
+ 9114 | profile
+ 9118 | onboarding
+ 9124 | activity
+ 9130 | savedCampaigns
+ 9142 | discover
+ 9146 | submit
+ 9150 | submissions
+ 9154 | earnings
+ 9160 | creatorDashboard
+ 9164 | createCampaign
+ 9168 | creatorDeposits
+ 9174 | creatorCampaigns
+ 9178 | creatorSubmissions
+ 9182 | adminAnnouncements
+ 9186 | adminAudit
+ 9190 | adminCompliance
+ 9194 | adminDemo
+ 9198 | adminReadiness
+ 9202 | adminReports
+ 9206 | adminUsers
+ 9210 | adminOverview
+ 9214 | adminRequests
+ 9218 | adminDeposits
+ 9224 | adminCampaigns
+ 9228 | adminSubmissions
+ 9232 | adminSettings
+ 9236 | adminAffiliates
+ 9240 | adminPayouts
+
+============================================================
+2. COMPONENTS DETECTED
+============================================================
+  692 | Pill
+  696 | Button
+  700 | StatCard
+  849 | PwaInstallButton
+  935 | Header
+ 1080 | Sidebar
+ 1198 | AuthBox
+ 1588 | Hero
+ 1828 | PublicCampaignRequestPage
+ 2045 | CampaignRequestCta
+ 2061 | AdminCampaignRequestsPage
+ 2378 | PublicLegalPage
+ 2437 | PublicLegalLinks
+ 2448 | PublicHowItWorks
+ 2542 | LoggedOutAuthPage
+ 2577 | HomePage
+ 2637 | CampaignCard
+ 2667 | SavedCampaignsPage
+ 2753 | DiscoverPage
+ 2968 | CampaignModal
+ 2992 | SubmitPage
+ 3298 | UserProfilePage
+ 3481 | OnboardingChecklist
+ 3672 | ActivityCenter
+ 3875 | CreatorSubmissionsPage
+ 4030 | SubmissionsPage
+ 4056 | EarningsPage
+ 4250 | AcademyPage
+ 4259 | CreatorDashboard
+ 4274 | CreateCampaignPage
+ 4648 | CreatorCampaigns
+ 4962 | AdminOverview
+ 4976 | AdminCampaigns
+ 5304 | AdminSubmissions
+ 5340 | InviteLinkPanel
+ 5437 | AnnouncementsPage
+ 5576 | CampaignDepositProofForm
+ 5687 | CreatorDepositsPage
+ 5725 | AdminDemoScriptPage
+ 5947 | AdminDepositProofsPage
+ 6094 | AdminAnnouncementsPage
+ 6408 | AdminAuditLog
+ 6724 | AdminComplianceCenter
+ 6923 | AdminMvpReadiness
+ 7135 | AdminReports
+ 7320 | AdminUsers
+ 7522 | AdminPlatformSettings
+ 7684 | AdminAffiliates
+ 8206 | AdminPayouts
+ 8231 | App
+
+============================================================
+3. KNOWN CRASH / HANDLER NAME REFERENCES
+============================================================
+
+announcementUnreadCount: 9 occurrence(s)
+  line 1080
+  line 1182
+  line 1183
+  line 1183
+  line 2606
+  line 2606
+  line 8248
+  line 9251
+  line 9251
+
+unreadAnnouncementCount: 0 occurrence(s)
+
+setAnnouncementUnreadCount: 6 occurrence(s)
+  line 8248
+  line 9014
+  line 9025
+  line 9037
+  line 9047
+  line 9049
+
+setUnreadAnnouncementCount: 0 occurrence(s)
+
+handleCampaignStatus: 0 occurrence(s)
+
+handleCampaignFundingUpdate: 0 occurrence(s)
+
+campaignStatus: 3 occurrence(s)
+  line 8648
+  line 9220
+  line 9225
+
+updateCampaignFunding: 4 occurrence(s)
+  line 8588
+  line 9170
+  line 9220
+  line 9225
+
+solohubDirectRpc: 7 occurrence(s)
+  line 428
+  line 546
+  line 546
+  line 5456
+  line 6120
+  line 7355
+  line 9029
+
+solohub_public_announcements: 2 occurrence(s)
+  line 5456
+  line 9029
+
+solohub_admin_announcements: 1 occurrence(s)
+  line 6120
+
+solohub_admin_profiles: 1 occurrence(s)
+  line 7355
+
+============================================================
+4. DETAILED CONTEXT FOR LIKELY CRASH NAMES
+============================================================
+
+
+----- announcementUnreadCount (9) -----
+
+ 1076 |     ['adminSettings', Wallet, 'Settings']
+ 1077 |   ]
+ 1078 | };
+ 1079 | 
+ 1080 | function Sidebar({ role, page, setPage, open, setOpen, cloudMode, announcementUnreadCount = 0 }) {
+ 1081 |   const [isMobileNav, setIsMobileNav] = useState(() => {
+ 1082 |     if (typeof window === 'undefined') return false;
+ 1083 |     return window.matchMedia('(max-width: 900px)').matches;
+ 1084 |   });
+ 1085 | 
+ 1086 |   useEffect(() => {
+
+ 1178 |               }}
+ 1179 |             >
+ 1180 |               <Icon size={18} /> 
+ 1181 |             <span className="nav-label-text">{label}</span>
+ 1182 |             {id === 'announcements' && announcementUnreadCount > 0 && (
+ 1183 |               <span className="nav-unread-badge">{announcementUnreadCount > 99 ? '99+' : announcementUnreadCount}</span>
+ 1184 |             )}
+ 1185 |             </button>
+ 1186 |           ))}
+ 1187 | 
+ 1188 |           <div className="side-note">
+
+ 1179 |             >
+ 1180 |               <Icon size={18} /> 
+ 1181 |             <span className="nav-label-text">{label}</span>
+ 1182 |             {id === 'announcements' && announcementUnreadCount > 0 && (
+ 1183 |               <span className="nav-unread-badge">{announcementUnreadCount > 99 ? '99+' : announcementUnreadCount}</span>
+ 1184 |             )}
+ 1185 |             </button>
+ 1186 |           ))}
+ 1187 | 
+ 1188 |           <div className="side-note">
+ 1189 |             <ShieldCheck size={18} />
+
+ 1179 |             >
+ 1180 |               <Icon size={18} /> 
+ 1181 |             <span className="nav-label-text">{label}</span>
+ 1182 |             {id === 'announcements' && announcementUnreadCount > 0 && (
+ 1183 |               <span className="nav-unread-badge">{announcementUnreadCount > 99 ? '99+' : announcementUnreadCount}</span>
+ 1184 |             )}
+ 1185 |             </button>
+ 1186 |           ))}
+ 1187 | 
+ 1188 |           <div className="side-note">
+ 1189 |             <ShieldCheck size={18} />
+
+ 2602 |   }
+ 2603 | 
+ 2604 |   return (
+ 2605 |     <>
+ 2606 |       <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
+ 2607 | 
+ 2608 |       <AuthBox
+ 2609 |         user={user}
+ 2610 |         profile={profile}
+ 2611 |         onAuthUser={onAuthUser}
+ 2612 |         onLogout={onLogout}
+
+ 2602 |   }
+ 2603 | 
+ 2604 |   return (
+ 2605 |     <>
+ 2606 |       <Hero setRole={setRole} setPage={setPage} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
+ 2607 | 
+ 2608 |       <AuthBox
+ 2609 |         user={user}
+ 2610 |         profile={profile}
+ 2611 |         onAuthUser={onAuthUser}
+ 2612 |         onLogout={onLogout}
+
+ 8244 |   const [referralCode, setReferralCode] = useState(() => captureReferralCodeFromUrl());
+ 8245 |   const [inviteRole, setInviteRole] = useState(() => captureInviteRoleFromUrl());
+ 8246 |   const [paymentSettingsTick, setPaymentSettingsTick] = useState(0);
+ 8247 |   const [savedCampaignIds, setSavedCampaignIds] = useState(() => getSavedCampaignIds());
+ 8248 |   const [announcementUnreadCount, setAnnouncementUnreadCount] = useState(0);  const loadProfile = async (currentUser, preferredRole = '', fullName = '') => {
+ 8249 |     if (!cloudMode || !currentUser) return null;
+ 8250 | 
+ 8251 |     const ownerAdmin = isOwnerEmail(currentUser.email);
+ 8252 | 
+ 8253 |     const { data: existing, error: selectError } = await supabase
+ 8254 |       .from('profiles')
+
+ 9247 |   return (
+ 9248 |     <>
+ 9249 |       <Header role={roleForUser(user, profile, role)} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} activityCount={getActivityCountForRole(roleForUser(user, profile, role), campaigns || [], submissions || [])} />
+ 9250 |       <div className="app-shell">
+ 9251 |         <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
+ 9252 |         <main>
+ 9253 |           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
+ 9254 |           {cloudMode && user && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : `Logged in as ${profile?.role || role || 'user'}`}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
+ 9255 |           {content}
+ 9256 |         </main>
+ 9257 |         <CampaignModal campaign={selectedCampaign && page !== 'submit' ? selectedCampaign : null} onClose={() => setSelectedCampaign(null)} />
+
+ 9247 |   return (
+ 9248 |     <>
+ 9249 |       <Header role={roleForUser(user, profile, role)} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} activityCount={getActivityCountForRole(roleForUser(user, profile, role), campaigns || [], submissions || [])} />
+ 9250 |       <div className="app-shell">
+ 9251 |         <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
+ 9252 |         <main>
+ 9253 |           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
+ 9254 |           {cloudMode && user && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : `Logged in as ${profile?.role || role || 'user'}`}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
+ 9255 |           {content}
+ 9256 |         </main>
+ 9257 |         <CampaignModal campaign={selectedCampaign && page !== 'submit' ? selectedCampaign : null} onClose={() => setSelectedCampaign(null)} />
+
+
+----- unreadAnnouncementCount (0) -----
+No references found.
+
+
+----- handleCampaignStatus (0) -----
+No references found.
+
+
+----- handleCampaignFundingUpdate (0) -----
+No references found.
+
+
+============================================================
+5. HOMEPAGE INSPECTION
+============================================================
+HomePage lines: 2577 - 2577
+Unread count references in HomePage: 0
+
+No unread count references inside HomePage.
+
+============================================================
+6. HOMEPAGE RENDER USAGE
+============================================================
+ 9059 |     const currentRole = roleForUser(user, profile, role);
+ 9060 |     const currentUserId = user?.id || null;
+ 9061 | 
+ 9062 |     const home = (
+ 9063 |       <HomePage
+ 9064 |         page={page}
+ 9065 |         setRole={setRole}
+ 9066 |         setPage={setPage}
+ 9067 |         campaigns={campaigns}
+ 9068 |         submissions={submissions}
+ 9069 |         cloudMode={cloudMode}
+ 9070 |         user={user}
+ 9071 |         profile={profile}
+
+============================================================
+7. KEY PAGE COMPONENT RENDER USAGE
+============================================================
+ 9107 | 
+ 9108 |     if (page === 'home') return home;
+ 9109 | 
+ 9110 |     if (page === 'announcements') {
+ 9111 |       return <AnnouncementsPage currentRole={currentRole} onUnreadChange={refreshAnnouncementUnreadCount} />;
+ 9112 |     }
+ 9113 | 
+ 9114 |     if (page === 'profile') {
+ 9115 |       return <UserProfilePage user={user} profile={profile} currentRole={currentRole} onProfileSaved={setProfile} />;
+ 9116 |     }
+ 9117 | 
+ 9118 |     if (page === 'onboarding') {
+ 9119 |       const onboardingCampaigns = isAdmin ? campaigns : currentRole === 'creator' ? ownCampaigns : campaigns.filter((campaign) => campaign.status === 'Live');
+ 9120 |       const onboardingSubmissions = isAdmin ? submissions : currentRole === 'creator' ? ownCreatorSubmissions : ownClipperSubmissions;
+ 9121 |       return <OnboardingChecklist role={currentRole} profile={profile} campaigns={onboardingCampaigns} submissions={onboardingSubmissions} setPage={setPage} />;
+
+ 9179 |       return <CreatorSubmissionsPage submissions={ownCreatorSubmissions} campaigns={ownCampaigns} />;
+ 9180 |     }
+ 9181 | 
+ 9182 |     if (page === 'adminAnnouncements') {
+ 9183 |       return isAdmin ? <AdminAnnouncementsPage user={user} /> : home;
+ 9184 |     }
+ 9185 | 
+ 9186 |     if (page === 'adminAudit') {
+ 9187 |       return isAdmin ? <AdminAuditLog campaigns={campaigns} submissions={submissions} user={user} /> : home;
+ 9188 |     }
+ 9189 | 
+ 9190 |     if (page === 'adminCompliance') {
+ 9191 |       return isAdmin ? <AdminComplianceCenter /> : home;
+ 9192 |     }
+ 9193 | 
+
+ 9203 |       return isAdmin ? <AdminReports campaigns={campaigns} submissions={submissions} /> : home;
+ 9204 |     }
+ 9205 | 
+ 9206 |     if (page === 'adminUsers') {
+ 9207 |       return isAdmin ? <AdminUsers /> : home;
+ 9208 |     }
+ 9209 | 
+ 9210 |     if (page === 'adminOverview') {
+ 9211 |       return isAdmin ? <AdminOverview campaigns={campaigns} submissions={submissions} cloudMode={cloudMode} /> : home;
+ 9212 |     }
+ 9213 | 
+ 9214 |     if (page === 'adminRequests') {
+ 9215 |       return isAdmin ? <AdminCampaignRequestsPage setPage={setPage} /> : home;
+ 9216 |     }
+ 9217 | 
+
+ 9216 |     }
+ 9217 | 
+ 9218 |     if (page === 'adminDeposits') {
+ 9219 |       return isAdmin
+ 9220 |         ? <AdminDepositProofsPage campaigns={campaigns} onCampaignFundingUpdate={updateCampaignFunding} onCampaignStatus={campaignStatus} />
+ 9221 |         : home;
+ 9222 |     }
+ 9223 | 
+ 9224 |     if (page === 'adminCampaigns') {
+ 9225 |       return isAdmin ? <AdminCampaigns campaigns={campaigns} onCampaignStatus={campaignStatus} onCampaignFundingUpdate={updateCampaignFunding} /> : home;
+ 9226 |     }
+ 9227 | 
+ 9228 |     if (page === 'adminSubmissions') {
+ 9229 |       return isAdmin ? <AdminSubmissions submissions={submissions} campaigns={campaigns} onReviewSubmission={reviewSubmission} /> : home;
+ 9230 |     }
+
+ 9221 |         : home;
+ 9222 |     }
+ 9223 | 
+ 9224 |     if (page === 'adminCampaigns') {
+ 9225 |       return isAdmin ? <AdminCampaigns campaigns={campaigns} onCampaignStatus={campaignStatus} onCampaignFundingUpdate={updateCampaignFunding} /> : home;
+ 9226 |     }
+ 9227 | 
+ 9228 |     if (page === 'adminSubmissions') {
+ 9229 |       return isAdmin ? <AdminSubmissions submissions={submissions} campaigns={campaigns} onReviewSubmission={reviewSubmission} /> : home;
+ 9230 |     }
+ 9231 | 
+ 9232 |     if (page === 'adminSettings') {
+ 9233 |       return isAdmin ? <AdminPlatformSettings /> : home;
+ 9234 |     }
+ 9235 | 
+
+============================================================
+8. SUPABASE TIMEOUT CALLS
+============================================================
+  175 | withSupabaseTimeout(request, 'Load payment settings')
+
+  211 | withSupabaseTimeout(request, 'Save payment settings')
+
+  311 | withSupabaseTimeout(request, 'Claim referral code')
+
+  549 | withSupabaseTimeout(request, label = 'Supabase request', ms = 15000)
+
+ 1919 | withSupabaseTimeout(request, 'Submit campaign request', 15000)
+
+ 2085 | withSupabaseTimeout(request, 'Load campaign requests', 15000)
+
+ 2135 | withSupabaseTimeout(request, 'Update campaign request', 15000)
+
+ 2165 | withSupabaseTimeout(request, 'Delete campaign request', 15000)
+
+ 3359 | withSupabaseTimeout(request, 'Save profile', 15000)
+
+ 5458 | withSupabaseTimeout(request, 'Load announcements', 15000)
+
+ 6122 | withSupabaseTimeout(request, 'Load admin announcements', 15000)
+
+ 6191 | withSupabaseTimeout(request, 'Create announcement', 15000)
+
+ 6238 | withSupabaseTimeout(request, 'Update announcement', 15000)
+
+ 6269 | withSupabaseTimeout(request, 'Delete announcement', 15000)
+
+ 7358 | withSupabaseTimeout(request, 'Load users', 15000)
+
+ 7404 | withSupabaseTimeout(request, 'Update user role', 20000)
+
+ 7806 | withSupabaseTimeout( supabase .from('affiliates')
+
+ 7917 | withSupabaseTimeout( supabase .from('affiliates')
+
+ 7953 | withSupabaseTimeout( supabase .from('referrals')
+
+ 9032 | withSupabaseTimeout(request, 'Load announcement unread count', 15000)
+
+============================================================
+9. SUPABASE TABLE USAGE
+============================================================
+platform_settings: 3 occurrence(s) | lines: 169, 200, 401
+profiles: 9 occurrence(s) | lines: 381, 3353, 7394, 8254, 8280, 8324, 8352, 8410, 8850
+campaigns: 3 occurrence(s) | lines: 385, 8492, 8556
+submissions: 2 occurrence(s) | lines: 389, 8493
+announcements: 4 occurrence(s) | lines: 393, 6185, 6231, 6264
+campaign_requests: 5 occurrence(s) | lines: 397, 1913, 2080, 2124, 2160
+affiliates: 3 occurrence(s) | lines: 409, 7808, 7919
+referrals: 3 occurrence(s) | lines: 413, 7955, 8004
+campaign-assets: 2 occurrence(s) | lines: 9414, 9426
+
+============================================================
+10. ROUTING AREA CONTEXT
+============================================================
+ 9098 |         );
+ 9099 | 
+ 9100 |     const ownCreatorSubmissions = isAdmin
+ 9101 |       ? submissions
+ 9102 |       : submissions.filter((submission) =>
+ 9103 |           ownCampaignIds.has(submission.campaignId) ||
+ 9104 |           ownCampaignIds.has(submission.campaign_id) ||
+ 9105 |           ownCampaigns.some((campaign) => campaign.title === submission.campaign)
+ 9106 |         );
+ 9107 | 
+ 9108 |     if (page === 'home') return home;
+ 9109 | 
+ 9110 |     if (page === 'announcements') {
+ 9111 |       return <AnnouncementsPage currentRole={currentRole} onUnreadChange={refreshAnnouncementUnreadCount} />;
+ 9112 |     }
+ 9113 | 
+ 9114 |     if (page === 'profile') {
+ 9115 |       return <UserProfilePage user={user} profile={profile} currentRole={currentRole} onProfileSaved={setProfile} />;
+ 9116 |     }
+ 9117 | 
+ 9118 |     if (page === 'onboarding') {
+ 9119 |       const onboardingCampaigns = isAdmin ? campaigns : currentRole === 'creator' ? ownCampaigns : campaigns.filter((campaign) => campaign.status === 'Live');
+ 9120 |       const onboardingSubmissions = isAdmin ? submissions : currentRole === 'creator' ? ownCreatorSubmissions : ownClipperSubmissions;
+ 9121 |       return <OnboardingChecklist role={currentRole} profile={profile} campaigns={onboardingCampaigns} submissions={onboardingSubmissions} setPage={setPage} />;
+ 9122 |     }
+ 9123 | 
+ 9124 |     if (page === 'activity') {
+ 9125 |       const activityCampaigns = isAdmin ? campaigns : currentRole === 'creator' ? ownCampaigns : [];
+ 9126 |       const activitySubmissions = isAdmin ? submissions : currentRole === 'creator' ? ownCreatorSubmissions : ownClipperSubmissions;
+ 9127 |       return <ActivityCenter role={currentRole} campaigns={activityCampaigns} submissions={activitySubmissions} />;
+ 9128 |     }
+ 9129 | 
+ 9130 |     if (page === 'savedCampaigns') {
+ 9131 |       return (
+ 9132 |         <SavedCampaignsPage
+ 9133 |           campaigns={campaigns}
+ 9134 |           savedCampaignIds={savedCampaignIds}
+ 9135 |           onToggleSaved={toggleSavedCampaign}
+ 9136 |           setSelectedCampaign={setSelectedCampaign}
+ 9137 |           setPage={setPage}
+ 9138 |         />
+ 9139 |       );
+ 9140 |     }
+ 9141 | 
+ 9142 |     if (page === 'discover') {
+ 9143 |       return <DiscoverPage campaigns={campaigns} setSelectedCampaign={setSelectedCampaign} setPage={setPage} savedCampaignIds={savedCampaignIds} onToggleSaved={toggleSavedCampaign} />;
+ 9144 |     }
+ 9145 | 
+ 9146 |     if (page === 'submit') {
+ 9147 |       return <SubmitPage selectedCampaign={selectedCampaign} campaigns={campaigns} onSubmitClip={submitClip} />;
+ 9148 |     }
+ 9149 | 
+ 9150 |     if (page === 'submissions') {
+ 9151 |       return <SubmissionsPage submissions={ownClipperSubmissions} />;
+ 9152 |     }
+ 9153 | 
+ 9154 |     if (page === 'earnings') {
+ 9155 |       return <EarningsPage submissions={ownClipperSubmissions} profile={profile} onUpdatePayoutProfile={updatePayoutProfile} />;
+ 9156 |     }
+ 9157 | 
+ 9158 |     if (page === 'academy') return <AcademyPage />;
+ 9159 | 
+ 9160 |     if (page === 'creatorDashboard') {
+ 9161 |       return <CreatorDashboard campaigns={ownCampaigns} submissions={ownCreatorSubmissions} />;
+ 9162 |     }
+ 9163 | 
+ 9164 |     if (page === 'createCampaign') {
+ 9165 |       return <CreateCampaignPage onCreateCampaign={createCampaign} />;
+ 9166 |     }
+ 9167 | 
+ 9168 |     if (page === 'creatorDeposits') {
+ 9169 |       return currentRole === 'creator'
+ 9170 |         ? <CreatorDepositsPage campaigns={ownCampaigns} onCampaignFundingUpdate={updateCampaignFunding} />
+ 9171 |         : home;
+ 9172 |     }
+ 9173 | 
+ 9174 |     if (page === 'creatorCampaigns') {
+ 9175 |       return <CreatorCampaigns campaigns={ownCampaigns} submissions={ownCreatorSubmissions} onCreatorCampaignUpdate={updateCreatorCampaign} />;
+ 9176 |     }
+ 9177 | 
+ 9178 |     if (page === 'creatorSubmissions') {
+ 9179 |       return <CreatorSubmissionsPage submissions={ownCreatorSubmissions} campaigns={ownCampaigns} />;
+ 9180 |     }
+ 9181 | 
+ 9182 |     if (page === 'adminAnnouncements') {
+ 9183 |       return isAdmin ? <AdminAnnouncementsPage user={user} /> : home;
+ 9184 |     }
+ 9185 | 
+ 9186 |     if (page === 'adminAudit') {
+ 9187 |       return isAdmin ? <AdminAuditLog campaigns={campaigns} submissions={submissions} user={user} /> : home;
+ 9188 |     }
+ 9189 | 
+ 9190 |     if (page === 'adminCompliance') {
+ 9191 |       return isAdmin ? <AdminComplianceCenter /> : home;
+ 9192 |     }
+ 9193 | 
+ 9194 |     if (page === 'adminDemo') {
+ 9195 |       return isAdmin ? <AdminDemoScriptPage campaigns={campaigns} submissions={submissions} setPage={setPage} /> : home;
+ 9196 |     }
+ 9197 | 
+ 9198 |     if (page === 'adminReadiness') {
+ 9199 |       return isAdmin ? <AdminMvpReadiness campaigns={campaigns} submissions={submissions} cloudMode={cloudMode} setPage={setPage} /> : home;
+ 9200 |     }
+ 9201 | 
+ 9202 |     if (page === 'adminReports') {
+ 9203 |       return isAdmin ? <AdminReports campaigns={campaigns} submissions={submissions} /> : home;
+ 9204 |     }
+ 9205 | 
+ 9206 |     if (page === 'adminUsers') {
+ 9207 |       return isAdmin ? <AdminUsers /> : home;
+ 9208 |     }
+ 9209 | 
+ 9210 |     if (page === 'adminOverview') {
+ 9211 |       return isAdmin ? <AdminOverview campaigns={campaigns} submissions={submissions} cloudMode={cloudMode} /> : home;
+ 9212 |     }
+ 9213 | 
+ 9214 |     if (page === 'adminRequests') {
+ 9215 |       return isAdmin ? <AdminCampaignRequestsPage setPage={setPage} /> : home;
+ 9216 |     }
+ 9217 | 
+ 9218 |     if (page === 'adminDeposits') {
+ 9219 |       return isAdmin
+ 9220 |         ? <AdminDepositProofsPage campaigns={campaigns} onCampaignFundingUpdate={updateCampaignFunding} onCampaignStatus={campaignStatus} />
+ 9221 |         : home;
+ 9222 |     }
+ 9223 | 
+ 9224 |     if (page === 'adminCampaigns') {
+ 9225 |       return isAdmin ? <AdminCampaigns campaigns={campaigns} onCampaignStatus={campaignStatus} onCampaignFundingUpdate={updateCampaignFunding} /> : home;
+ 9226 |     }
+ 9227 | 
+ 9228 |     if (page === 'adminSubmissions') {
+ 9229 |       return isAdmin ? <AdminSubmissions submissions={submissions} campaigns={campaigns} onReviewSubmission={reviewSubmission} /> : home;
+ 9230 |     }
+ 9231 | 
+ 9232 |     if (page === 'adminSettings') {
+ 9233 |       return isAdmin ? <AdminPlatformSettings /> : home;
+ 9234 |     }
+ 9235 | 
+ 9236 |     if (page === 'adminAffiliates') {
+ 9237 |       return isAdmin ? <AdminAffiliates /> : home;
+ 9238 |     }
+ 9239 | 
+ 9240 |     if (page === 'adminPayouts') {
+ 9241 |       return isAdmin ? <AdminPayouts submissions={submissions} onMarkPaid={markPaid} /> : home;
+ 9242 |     }
+ 9243 | 
+ 9244 |     return home;
+ 9245 |   }, [page, campaigns, submissions, selectedCampaign, cloudMode, user, profile, role]);
+ 9246 | 
+ 9247 |   return (
+ 9248 |     <>
+ 9249 |       <Header role={roleForUser(user, profile, role)} setRole={setRole} setPage={setPage} sidebarOpen={sidebarOpen} setSidebarOpen={setSidebarOpen} cloudMode={cloudMode} user={user} profile={profile} onLogout={logout} activityCount={getActivityCountForRole(roleForUser(user, profile, role), campaigns || [], submissions || [])} />
+ 9250 |       <div className="app-shell">
+ 9251 |         <Sidebar role={roleForUser(user, profile, role)} page={page} setPage={setPage} open={sidebarOpen} setOpen={setSidebarOpen} cloudMode={cloudMode} announcementUnreadCount={announcementUnreadCount} />
+ 9252 |         <main>
+ 9253 |           {notice && <div className="notice"><span>{notice}</span><button onClick={() => setNotice('')}>×</button></div>}
+ 9254 |           {cloudMode && user && <div className="notice subtle"><span>{loading ? 'Syncing Supabase...' : authLoading ? 'Checking login...' : `Logged in as ${profile?.role || role || 'user'}`}</span><button onClick={loadCloudData}>Refresh cloud data</button></div>}
+ 9255 |           {content}
+ 9256 |         </main>
+ 9257 |         <CampaignModal campaign={selectedCampaign && page !== 'submit' ? selectedCampaign : null} onClose={() => setSelectedCampaign(null)} />
+ 9258 |       </div>
+ 9259 |     </>
+ 9260 |   );
+ 9261 | }
+ 9262 | 
+ 9263 | export default App;
+ 9264 | 
+ 9265 | 
+ 9266 | async function updateCampaignDirect(id, patch) {
+ 9267 |   const url = import.meta.env.VITE_SUPABASE_URL;
+ 9268 |   const key = import.meta.env.VITE_SUPABASE_ANON_KEY;
+ 9269 | 
+ 9270 |   const response = await fetch(`${url}/rest/v1/campaigns?id=eq.${encodeURIComponent(id)}&select=*`, {
+ 9271 |     method: "PATCH",
+ 9272 |     headers: {
+ 9273 |       apikey: key,
+ 9274 |       Authorization: `Bearer ${key}`,
+ 9275 |       "Content-Type": "application/json",
+ 9276 |       Prefer: "return=representation"
+ 9277 |     },
+ 9278 |     body: JSON.stringify(patch)
+ 9279 |   });
+ 9280 | 
+ 9281 |   const text = await response.text();
+ 9282 | 
+ 9283 |   if (!response.ok) {
+ 9284 |     throw new Error(text || `Campaign update failed with status ${response.status}`);
+ 9285 |   }
+ 9286 | 
+ 9287 |   const rows = text ? JSON.parse(text) : [];
+ 9288 |   return Array.isArray(rows) ? rows[0] : rows;
+
+============================================================
+11. QUICK DIAGNOSIS
+============================================================
+No obvious static crash issue found. Runtime/browser page test needed next.
