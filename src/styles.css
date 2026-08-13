@@ -5555,6 +5555,7 @@ body.solohub-logged-out main {
 }
 
 .public-legal-mini-links button,
+.public-legal-mini-links .public-project-credit,
 .public-legal-links button {
   border: 1px solid rgba(255,255,255,0.10);
   background: rgba(255,255,255,0.045);
@@ -5565,7 +5566,14 @@ body.solohub-logged-out main {
   cursor: pointer;
 }
 
+.public-project-credit {
+  display: inline-flex;
+  align-items: center;
+  text-decoration: none;
+}
+
 .public-legal-mini-links button:hover,
+.public-legal-mini-links .public-project-credit:hover,
 .public-legal-links button:hover,
 .public-legal-links button.active {
   border-color: rgba(35, 209, 139, 0.34);

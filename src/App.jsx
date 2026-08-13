@@ -2441,6 +2441,14 @@ function PublicLegalLinks({ setPage }) {
       <button type="button" onClick={() => setPage('publicPrivacy')}>Privacy</button>
       <button type="button" onClick={() => setPage('publicPayoutRules')}>Payout Rules</button>
       <button type="button" onClick={() => setPage('publicFraudPolicy')}>Fraud Policy</button>
+      <a
+        className="public-project-credit"
+        href="https://promoaiafrica.co.ke/solohub-mvp-case-study"
+        target="_blank"
+        rel="noopener noreferrer"
+      >
+        SoloHub MVP case study by PromoAI Africa
+      </a>
     </section>
   );
 }
